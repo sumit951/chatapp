@@ -1,13 +1,13 @@
 import React from 'react'
 import {Link, useNavigate } from 'react-router-dom';
 
-import "../assets/vendor/fontawesome/css/font-awesome.css";
-import "../assets/vendor/animate.css/animate.css";
-import "../assets/vendor/bootstrap/dist/css/bootstrap.css";
-import "../assets/fonts/pe-icon-7-stroke/css/pe-icon-7-stroke.css";
-import "../assets/fonts/pe-icon-7-stroke/css/helper.css";
-import "../assets/vendor/datatables.net-bs/css/dataTables.bootstrap.min.css";
-import "../assets/styles/style.css";
+import "@../assets/vendor/fontawesome/css/font-awesome.css";
+import "@../assets/vendor/animate.css/animate.css";
+import "@../assets/vendor/bootstrap/dist/css/bootstrap.css";
+import "@../assets/fonts/pe-icon-7-stroke/css/pe-icon-7-stroke.css";
+import "@../assets/fonts/pe-icon-7-stroke/css/helper.css";
+import "@../assets/vendor/datatables.net-bs/css/dataTables.bootstrap.min.css";
+import "@../assets/styles/style.css";
 
 const Header = (props) => {
     const navigate = useNavigate();
