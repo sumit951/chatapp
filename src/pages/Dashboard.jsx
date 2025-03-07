@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 const Dashboard = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('chat-token-info')
-  const [userdataname, setUserdataname] = useState([]);
+  const [userData, setUserData] = useState([]);
 
     const fetchUserInfo = async () => {
       try {
@@ -18,8 +18,8 @@ const Dashboard = () => {
               {
                   //navigate('/login')
                   window.location.href = "/login";
-              }   
-              setUserdataname(response.data[0].name);
+              }
+              setUserData(response.data[0]);
               
               
           }
@@ -40,7 +40,7 @@ const Dashboard = () => {
   }, [])
   return (
     <div>
-        <Header name={userdataname}/>
+        <Header loggedInUserdata={userData} />
         <div id="wrapper">
         <div className="content animate-panel">
             <div className="row">

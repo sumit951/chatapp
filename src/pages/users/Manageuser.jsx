@@ -16,7 +16,7 @@ import 'datatables.net-responsive-dt';
 const Manageuser = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
-    const [userdataname, setUserdataname] = useState([]);
+    const [userData, setUserData] = useState([]);
     const [alluserdata, setAllUserdata] = useState([]);
     
     const fetchUserInfo = async () => {
@@ -29,7 +29,7 @@ const Manageuser = () => {
                 {
                     navigate('/login')
                 }   
-                setUserdataname(response.data[0].name);
+                setUserData(response.data[0]);
             }
         } catch (error) {
            console.log(error.message);
@@ -94,8 +94,8 @@ const Manageuser = () => {
                 setAllUserdata(alluserdata.filter((row => row.id !== id)));
             }
         } catch (error) {
-           console.log(error.message);
-           toast.success(error.message, {
+           //console.log(error.message);
+           toast.error(error.message, {
                 position: "bottom-right",
                 autoClose: 1000,
             });
@@ -133,7 +133,7 @@ const Manageuser = () => {
   return (
     <div>
         
-        <Header name={userdataname} />
+        <Header  loggedInUserdata={userData} />
         <div id="wrapper">
         <div className="content animate-panel">
             <div className="row">

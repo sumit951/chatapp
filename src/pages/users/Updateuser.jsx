@@ -9,7 +9,7 @@ import Footer from '../../components/Footer';
 const Updateuser = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
-    const [userdataname, setUserdataname] = useState([]);
+    const [userData, setUserData] = useState([]);
     const [userType, setuserType] = useState([]);
 
     const fetchUserInfo = async () => {
@@ -22,7 +22,7 @@ const Updateuser = () => {
                     //navigate('/login')
                     window.location.href = "/login";
                 }   
-                setUserdataname(response.data[0].name);
+                setUserData(response.data[0]);
                 setuserType(response.data[0].userType);
             }
         } catch (error) {
@@ -40,16 +40,17 @@ const Updateuser = () => {
     }, [])
 
     const {id} = useParams()
-    console.log(id);
+    //console.log(id);
     
     const[values, setValues] = useState({
         id:id,
         name:'',
         email:'',
         employeeId:'',
-        password:''
+        password:'',
+        chatDeleteInDays:''
     })
-
+    const selectedChatDeleteInDays = ''
     const fetchAdminInfo = async () => {
         try {
             const response = await axiosConfig.get(`/user/getadmininfo/${id}`)
@@ -61,12 +62,16 @@ const Updateuser = () => {
                     window.location.href = "/login";
                 }   
                 console.log(response);
+                const selectedChatDeleteInDays = response.data[0].chatDeleteInDays;
                 setValues({...values,
                     name:response.data[0].name,
                     email:response.data[0].email,
                     employeeId:response.data[0].employeeId,
-                    password:response.data[0].decryptPassword
+                    password:response.data[0].decryptPassword,
+                    chatDeleteInDays:response.data[0].chatDeleteInDays
                 })
+
+                
             }
         } catch (error) {
             console.log(error.message);
@@ -104,7 +109,7 @@ const Updateuser = () => {
                 });
                 setTimeout(() => {
                         navigate('/manageuser');
-                    }, 
+                }, 
                     2000
                 );
             }
@@ -124,9 +129,32 @@ const Updateuser = () => {
         }
     }
 
+    const options = [
+        {
+            label: "Select Days",
+            value: "",
+        },
+        {
+            label: "30 Days",
+            value: "30",
+        },
+        {
+            label: "60 Days",
+            value: "60",
+        },
+        {
+            label: "90 Days",
+            value: "90",
+        },
+        {
+            label: "120 Days",
+            value: "120",
+        },
+    ];
+
   return (
     <div>
-        <Header name={userdataname}/>
+        <Header loggedInUserdata={userData} />
         <div id="wrapper">
         <div class="content animate-panel">
         <div class="row">
@@ -149,6 +177,18 @@ const Updateuser = () => {
                 <div class="hr-line-dashed"></div>
                 <div class="form-group"><label class="col-sm-2 control-label">Employee Id</label>
                     <div class="col-sm-10"><input type="text" className="form-control" name="employeeId" value={values.employeeId} onChange={handleChanges} placeholder="Employee Id" required /></div>
+                </div>
+
+                <div class="hr-line-dashed"></div>
+                <div class="form-group"><label class="col-sm-2 control-label">Chat Delete In</label>
+                    <div class="col-sm-10">
+                        
+                        <select className="form-control" name="chatDeleteInDays" onChange={handleChanges} required value={values.chatDeleteInDays}>
+                            {options.map((option) => (
+                            <option value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="hr-line-dashed"></div>

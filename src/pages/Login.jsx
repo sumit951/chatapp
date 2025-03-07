@@ -5,9 +5,14 @@ import axiosConfig from '../axiosConfig';
 import {Link, useNavigate } from 'react-router-dom';
 
 
-const Login = () => {
+const Login = ({socket}) => {
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
+    if(token)
+    {
+        //return navigate('/')
+        window.location.href = "/"; 
+    }
     const [values,setValues] =  useState({
         email:'',
         password:''
@@ -31,8 +36,27 @@ const Login = () => {
                     autoClose: 1000,
                 });
                 setTimeout(() => {
-                        window.location.href = "/";
-                        console.log(response.data.token);
+                        localStorage.setItem('loggedInUserName', response.data.name);
+                        const UserName = localStorage.getItem('loggedInUserName')
+                        const UserId = response.data.userId
+                        const arrUserName = response.data.name.split(' ')
+                        
+                        
+                        const userShortName = arrUserName[0].charAt(0).toUpperCase();
+
+                        socket.emit('newUser', { userId:UserId,usershortName:userShortName,userName:UserName, socketID: socket.id });
+                        console.log(userShortName);
+
+                        if(response.data.userType == 'EMPLOYEE')
+                        {
+                            window.location.href = "/chatconsole/spaces";
+                        }
+                        else
+                        {
+                            window.location.href = "/";
+                        }
+
+                        
                     }, 
                     2000
                 );
