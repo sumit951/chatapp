@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo} from 'react'
 import socketIO from 'socket.io-client';
 import axiosConfig from '../../axiosConfig';
-const socket = socketIO.connect('http://localhost:3000');
+//const socket = socketIO.connect('http://localhost:3000');
+const socket = socketIO.connect('https://chatserver-b6go.onrender.com');
 import {Link, useNavigate } from 'react-router-dom';
 
 import "../../assets/vendor/fontawesome/css/font-awesome.css";
@@ -70,10 +71,19 @@ const Chat = ({socket}) => {
     lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
+  /*useEffect(() => {
+    socket.on('savedmessageResponse', (data) => setMessages([chatdataFromChild, data]));
+  }, [socket, messages]);*/
+
   useEffect(() => {
     socket.on('messageResponse', (data) => setMessages([...messages, data]));
   }, [socket, messages]);
 
+  
+  const receiverId = dataFromChild.selectedUserId;
+  const messageResponse = messages.filter(item => (((item.receiverId === userData.id) || (item.senderId === userData.id)) && ((item.receiverId === receiverId) || (item.senderId === receiverId))))
+   
+    
   
   useEffect(() => {
     socket.on('typingResponse', (data) => setTypingStatus(data));
@@ -81,9 +91,45 @@ const Chat = ({socket}) => {
 
   const handleDataFromChild = (data,userChatData) => {
     return setDataFromChild(data) || setChatDataFromChild(userChatData);
+    //return setDataFromChild(data);
   }
-  const receiverId = dataFromChild.selectedUserId;
   
+    let countChatdataFromChild = parseInt(chatdataFromChild.length-1);
+    let countmessageResponse = parseInt(messageResponse.length-1);
+    if(countChatdataFromChild==-1)
+    {
+        countChatdataFromChild = 0
+    }
+    if(countmessageResponse==-1)
+    {
+        countmessageResponse = 0
+    }
+
+    console.log(countChatdataFromChild+' == '+countmessageResponse);
+    if(messageResponse.length>0 && countChatdataFromChild>0)
+    {
+        //console.log(chatdataFromChild[countChatdataFromChild].message+' == '+messageResponse[messageResponse.length].message);
+        
+        if(chatdataFromChild[countChatdataFromChild].message === messageResponse[countmessageResponse].message)
+        {
+            chatdataFromChild.pop()
+        }
+        //console.log(chatdataFromChild[countChatdataFromChild]);
+    }
+    /*if(messageResponse.length=='0' && countChatdataFromChild>0)
+    {
+        const messageResponse = []
+    }*/
+    /*else if(messageResponse.length=='0' && countChatdataFromChild>0)
+    {
+        if((chatdataFromChild[0].message === messageResponse[0].message))
+        {
+            chatdataFromChild.pop()
+        }
+    }*/
+
+
+
   return (
     <div>
       <section className="message-area">
@@ -156,8 +202,8 @@ const Chat = ({socket}) => {
                                             </div>
                                         </div>
                                     </div>
-                                    <Chatbody messages={messages} lastMessageRef={lastMessageRef} typingStatus={typingStatus} chatdataFromChild={chatdataFromChild} />
-                                    <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} />
+                                    {receiverId && <Chatbody messages={messageResponse} lastMessageRef={lastMessageRef} typingStatus={typingStatus} chatdataFromChild={chatdataFromChild} />}
+                                    {receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} />}
                                 </div>
                             </div>
                         </div>

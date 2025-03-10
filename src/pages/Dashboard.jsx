@@ -42,7 +42,7 @@ const Dashboard = () => {
     <div>
         <Header loggedInUserdata={userData} />
         <div id="wrapper">
-        <div className="content animate-panel">
+        <div className="content animate-panel dashboard">
             <div className="row">
                 <div className="col-lg-12">
                     <h1>

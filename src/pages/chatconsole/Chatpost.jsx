@@ -16,6 +16,8 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
     const handleSendMessage = (e) => {
         socket.emit('typing', '');
         e.preventDefault();
+        const d = new Date();
+        const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
         if (message.trim() && localStorage.getItem('loggedInUserName'))
         {
             socket.emit('message', {
@@ -25,7 +27,8 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
                 senderId:senderUserData.id,
                 socketID: socket.id,
                 receiverId: receiverId,
-                messageType:'text'
+                messageType:'text',
+                timestamp: formattedDate
             });
         }
         setMessage('');

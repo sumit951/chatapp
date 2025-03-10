@@ -3,10 +3,7 @@ import React from 'react'
 const Chatbody = ({messages, lastMessageRef,typingStatus,chatdataFromChild }) => {
     
     //console.log(messages);
-    if(!chatdataFromChild)
-    {   console.log(chatdataFromChild);
-        let chatdataFromChild = []
-    }
+    console.log(chatdataFromChild);
     
   return (
     <>
@@ -26,7 +23,7 @@ const Chatbody = ({messages, lastMessageRef,typingStatus,chatdataFromChild }) =>
             )) : ( <b>TEST</b> )
             )}
             {messages.map((chatdata) =>
-            chatdata.name === localStorage.getItem('loggedInUserName') ? (
+            chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
                 <li className="sender"  key={chatdata.id}>
                 <p><strong>You</strong> : {chatdata.message}</p>
                 </li>

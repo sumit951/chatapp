@@ -24,7 +24,7 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                 }   
                 
             }
-            console.log(response.data);
+            //console.log(response.data);
             
             setUserChatData(response.data);
         } catch (error) {
@@ -37,14 +37,14 @@ const Chatnav = ({ socket,sendDataToParent}) => {
     sendDataToParent(selectedUser,userChatData);
     
     useEffect(() => {
-        socket.on('newUserResponse', (data) => setUsers(data));
+        socket.on('newUserResponse', async(data) => setUsers(data));
     }, [socket, usersloggedin]);
     
     const [alluserdata, setAllUserdata] = useState([]);
 
     const fetchAllUser = async () => {
     try {
-            const response = await axiosConfig.get('/user/getalluser')
+            const response = await axiosConfig.get('/user/getactivealluser')
             if(response.status==200)
             {
                 //const token = localStorage.getItem(token)
@@ -53,7 +53,7 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                     //navigate('/login')
                     window.location.href = "/login";
                 }   
-                alluserdata(response.data);
+                setAllUserdata(response.data);
             }
         } catch (error) {
         console.log(error.message);
@@ -72,8 +72,13 @@ const Chatnav = ({ socket,sendDataToParent}) => {
     }, [])
 
 
+    const newUserslisting = alluserdata.filter(item => item.userName !== UserName);
     const newUsersloggedin = usersloggedin.filter(item => item.userName !== UserName);
-    
+    const mergedArray = newUsersloggedin.concat(newUserslisting.filter(
+        item2 => !newUsersloggedin.some(item1 => item1.userId === item2.userId)));
+    //console.log(newUsersloggedin);
+    //console.log(mergedArray);
+    //console.log(mergedArray);
     
   return (
     <>
@@ -88,7 +93,7 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                     </div>
                     <div className="modal-body">
                         <div className="chat-list">
-                        {newUsersloggedin.map((user,i) => (
+                        {mergedArray.map((user,i) => (
                             <a key={user.socketID} 
                             onClick={(e) => handleSelectUser(user.userId,setSelectedUser({
                                 shortName:user.usershortName,
@@ -99,13 +104,30 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                                 <div className="flex-shrink-0">
                                     {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
                                     <span class="shortName">{user.usershortName}</span>
-                                    <span className="active"></span>
+                                    {user.socketID && <span className="active"></span>}
                                 </div>
                                 <div className="flex-grow-1 ms-3">
                                     <h3>{user.userName}</h3>
                                 </div>
                             </a>
                         ))}
+                        {/*newUserslisting.map((user,i) => (
+                            <a key={user.socketID} 
+                            onClick={(e) => handleSelectUser(user.userId,setSelectedUser({
+                                shortName:user.usershortName,
+                                fullName:user.userName,
+                                selectedUserId:user.userId
+                                }))} 
+                                className="d-flex align-items-center pb-2">
+                                <div className="flex-shrink-0">
+                                    <span class="shortName">{user.usershortName}</span>
+                                    <span className="active"></span>
+                                </div>
+                                <div className="flex-grow-1 ms-3">
+                                    <h3>{user.userName}</h3>
+                                </div>
+                            </a>
+                        ))*/}
                                 {/*<a href="#" className="d-flex align-items-center pb-2">
                                     <div className="flex-shrink-0">
                                         <img className="img-fluid chat_img" src={userProfile} alt="user img" />

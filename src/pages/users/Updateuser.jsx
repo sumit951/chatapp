@@ -157,31 +157,28 @@ const Updateuser = () => {
         <Header loggedInUserdata={userData} />
         <div id="wrapper">
         <div class="content animate-panel">
-        <div class="row">
-        <div class="col-lg-7">
+        <div class="row d-flex justify-content-center">
+        <div class="col-lg-6">
             <div class="hpanel">
-                <div class="panel-heading">
+                <div class="panel-heading text-center">
                     <h3>Update User</h3>
                 </div>
                 <div class="panel-body">
-                <form onSubmit={handleSubmit} class="form-horizontal">
+                <form onSubmit={handleSubmit} class="form-horizontal pt-4 p-3 border rounded">
 
-                <div class="form-group"><label class="col-sm-2 control-label">Name</label>
-                    <div class="col-sm-10"><input type="text" className="form-control" name="name" onChange={handleChanges} placeholder="Enter name" value={values.name} required /></div>
+                <div class="form-group"><label class="col-sm-3 control-label">Name</label>
+                    <div class="col-sm-9"><input type="text" className="form-control" name="name" onChange={handleChanges} placeholder="Enter name" value={values.name} required /></div>
                 </div>
-                <div class="hr-line-dashed"></div>
-                <div class="form-group"><label class="col-sm-2 control-label">Email</label>
-                    <div class="col-sm-10"><input type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" className="form-control" name="email" value={values.email} onChange={handleChanges} placeholder="Enter Email" required />
+                <div class="form-group"><label class="col-sm-3 control-label">Email</label>
+                    <div class="col-sm-9"><input type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" className="form-control" name="email" value={values.email} onChange={handleChanges} placeholder="Enter Email" required />
                     </div>
                 </div>
-                <div class="hr-line-dashed"></div>
-                <div class="form-group"><label class="col-sm-2 control-label">Employee Id</label>
-                    <div class="col-sm-10"><input type="text" className="form-control" name="employeeId" value={values.employeeId} onChange={handleChanges} placeholder="Employee Id" required /></div>
+                <div class="form-group"><label class="col-sm-3 control-label">Employee Id</label>
+                    <div class="col-sm-9"><input type="text" className="form-control" name="employeeId" value={values.employeeId} onChange={handleChanges} placeholder="Employee Id" required /></div>
                 </div>
 
-                <div class="hr-line-dashed"></div>
-                <div class="form-group"><label class="col-sm-2 control-label">Chat Delete In</label>
-                    <div class="col-sm-10">
+                <div class="form-group"><label class="col-sm-3 control-label">Chat Delete In</label>
+                    <div class="col-sm-9">
                         
                         <select className="form-control" name="chatDeleteInDays" onChange={handleChanges} required value={values.chatDeleteInDays}>
                             {options.map((option) => (
@@ -191,15 +188,13 @@ const Updateuser = () => {
                     </div>
                 </div>
 
-                <div class="hr-line-dashed"></div>
-                <div class="form-group"><label class="col-sm-2 control-label">Password</label>
-                    <div class="col-sm-10"><input type="text" className="form-control" name="password" value={values.password} onChange={handleChanges} placeholder="Enter Password" /></div>
+                <div class="form-group"><label class="col-sm-3 control-label">Password</label>
+                    <div class="col-sm-9"><input type="text" className="form-control" name="password" value={values.password} onChange={handleChanges} placeholder="Enter Password" /></div>
                 </div>
                 
-                <div class="hr-line-dashed"></div>
-                <div class="form-group">
-                    <div class="col-sm-8 col-sm-offset-2">
-                        <button class="btn btn-success btn-block" type="submit">Save changes</button>
+                <div class="form-group mb-1">
+                    <div class="col-sm-12 d-flex justify-content-end mt-1">
+                        <button class="btn btn-success btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
                     </div>
                 </div>
                 </form>

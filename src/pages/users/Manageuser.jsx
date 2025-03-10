@@ -146,13 +146,13 @@ const Manageuser = () => {
                             <div className="col-md-6">
                             <Link to="/adduser" className="btn btn-success float-end mt-10"> 
                             <span>
-                                Add User
+                                Add User <i class="fa fa-chevron-right"></i>
                             </span>
                             </Link>
                             </div>
                         </div>
                         <div className="panel-body">
-                        <table id="example2" className="table table-striped table-bordered table-hover" width="100%">
+                        <table id="example2" className="table table-bordered " width="100%">
                         <thead>
                         <tr>
                             <th>Employee Id</th>
@@ -161,8 +161,8 @@ const Manageuser = () => {
                             <th>Type</th>
                             <th>Password</th>
                             <th>Added On</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th style={{ width: '50px' }}>Status</th>
+                            <th style={{ width: '59px' }}>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -175,17 +175,17 @@ const Manageuser = () => {
                                     <td>{data.userType}</td>
                                     <td>{data.decryptPassword}</td>
                                     <td>{data.addedon}</td>
-                                    <td>
+                                    <td className='text-center'>
                                     {data.status == 'Active' ? (
-                                        <button class="btn btn-success" onClick={e=>handleStatus(data.id,'Inactive')}  title="Active"><i class="fa fa-check"></i></button>
+                                        <button class="btn btn-successi" onClick={e=>handleStatus(data.id,'Inactive')}  title="Active"><i class="fa fa-check"></i></button>
                                     ):(
-                                        <button class="btn btn-danger" onClick={e=>handleStatus(data.id,'Active')} title="Inactive"><i class="fa fa-times"></i></button>
+                                        <button class="btn btn-dangerri" onClick={e=>handleStatus(data.id,'Active')} title="Inactive"><i class="fa fa-times"></i></button>
                                     )}
                                         
                                     </td>
                                     <td>
-                                        <Link to={`/updateuser/${data.id}`} className="btn btn-warning"><i className='fa fa-pencil'></i></Link>
-                                        <a onClick={e=>handleDelete(data.id)} className="btn btn-danger ms-2"><i className='fa fa-trash'></i></a>
+                                        <Link to={`/updateuser/${data.id}`} className="btn-warningi"><i className='fa fa-pencil'></i></Link>
+                                        <a onClick={e=>handleDelete(data.id)} className="btn-dangeri ms-2"><i className='fa fa-trash'></i></a>
                                     </td>
                                 </tr>
                             ))
