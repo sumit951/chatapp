@@ -13,6 +13,13 @@ const Adduser = () => {
     const [userData, setUserData] = useState([]);
     const [userType, setuserType] = useState([]);
 
+    const logout = async () => {
+    await localStorage.removeItem("chat-token-info");
+    await localStorage.removeItem("loggedInUserName");
+        //navigate('/login')
+        window.location.href = "/login";
+    };
+
     const fetchUserInfo = async () => {
         try {
             const response = await axiosConfig.get('/auth/authenticate')
@@ -28,6 +35,7 @@ const Adduser = () => {
             }
         } catch (error) {
             console.log(error.message);
+            logout()
         }    
     }
 
@@ -62,6 +70,7 @@ const Adduser = () => {
                 toast.success(response.data.message, {
                     position: "bottom-right",
                     autoClose: 1000,
+                    hideProgressBar: true
                 });
                 setTimeout(() => {
                         navigate('/manageuser');
@@ -74,6 +83,7 @@ const Adduser = () => {
                 toast.error(response.data.message, {
                     position: "bottom-right",
                     autoClose: 1000,
+                    hideProgressBar: true
                 });
             }
         } catch (error) {
@@ -81,6 +91,7 @@ const Adduser = () => {
             toast.error(error.message, {
                 position: "bottom-right",
                 autoClose: 1000,
+                hideProgressBar: true
             });
         }
     }

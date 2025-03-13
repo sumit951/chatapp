@@ -11,7 +11,13 @@ const Updateuser = () => {
     const token = localStorage.getItem('chat-token-info')
     const [userData, setUserData] = useState([]);
     const [userType, setuserType] = useState([]);
-
+    const logout = async () => {
+    await localStorage.removeItem("chat-token-info");
+    await localStorage.removeItem("loggedInUserName");
+        //navigate('/login')
+        window.location.href = "/login";
+    };
+    
     const fetchUserInfo = async () => {
         try {
             const response = await axiosConfig.get('/auth/authenticate')
@@ -27,6 +33,7 @@ const Updateuser = () => {
             }
         } catch (error) {
             console.log(error.message);
+            logout()
         }    
     }
 
@@ -106,6 +113,7 @@ const Updateuser = () => {
                 toast.success(response.data.message, {
                     position: "bottom-right",
                     autoClose: 1000,
+                    hideProgressBar: true
                 });
                 setTimeout(() => {
                         navigate('/manageuser');
@@ -118,6 +126,7 @@ const Updateuser = () => {
                 toast.error(response.data.message, {
                     position: "bottom-right",
                     autoClose: 1000,
+                    hideProgressBar: true
                 });
             }
         } catch (error) {
@@ -125,6 +134,7 @@ const Updateuser = () => {
             toast.error(error.message, {
                 position: "bottom-right",
                 autoClose: 1000,
+                hideProgressBar: true
             });
         }
     }

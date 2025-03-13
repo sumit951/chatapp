@@ -20,6 +20,7 @@ const Header = (props) => {
     //console.log(props.loggedInUserdata.id);
     const logout = async () => {
         await localStorage.removeItem("chat-token-info");
+        await localStorage.removeItem("loggedInUserName");
         //navigate('/login')
         window.location.href = "/login";
     };

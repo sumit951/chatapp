@@ -8,6 +8,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('chat-token-info')
   const [userData, setUserData] = useState([]);
+  const logout = async () => {
+    await localStorage.removeItem("chat-token-info");
+    await localStorage.removeItem("loggedInUserName");
+      //navigate('/login')
+      window.location.href = "/login";
+  };
 
     const fetchUserInfo = async () => {
       try {
@@ -25,6 +31,7 @@ const Dashboard = () => {
           }
       } catch (error) {
           console.log(error.message);
+          logout()
           //navigate('/login')
       }    
   }

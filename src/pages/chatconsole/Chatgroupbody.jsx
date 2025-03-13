@@ -1,17 +1,17 @@
 import React from 'react'
 import moment from 'moment'
 
-const Chatbody = ({messages, lastMessageRef,typingStatus,chatdataFromChild }) => {
+const Chatgroupbody = ({messages, lastMessageRef,typingStatus,groupchatdataFromChild }) => {
     
     //console.log(messages);
-    //console.log(chatdataFromChild);
+    //console.log(groupchatdataFromChild);
     
   return (
     <>
         <div className="modal-body">
             <div className="msg-body">
             <ul>
-            {chatdataFromChild.map((chatdata) =>
+            {groupchatdataFromChild.map((chatdata) =>
             (chatdata.messageId!=null) ? (
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
                 <li className="sender"  key={chatdata.messageId}>
@@ -90,4 +90,4 @@ const Chatbody = ({messages, lastMessageRef,typingStatus,chatdataFromChild }) =>
   )
 }
 
-export default Chatbody
+export default Chatgroupbody

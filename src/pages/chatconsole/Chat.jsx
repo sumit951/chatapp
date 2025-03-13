@@ -7,19 +7,26 @@ import {Link, useNavigate } from 'react-router-dom';
 
 import "../../assets/vendor/fontawesome/css/font-awesome.css";
 import "../../assets/chat/style.css";
+import logo from '../../assets/rc.png';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff} from '@fortawesome/free-solid-svg-icons';
 
 
 import userProfile from "../../assets/chat/user-profile.png";
 import Chatnav from './Chatnav';
+import Chatgroupcreate from './Chatgroupcreate';
 import Chatbody from './Chatbody';
 import Chatpost from './Chatpost';
-
+import Chatgroupbody from './Chatgroupbody';
+import Chatgrouppost from './Chatgrouppost';
 
 const Chat = ({socket}) => {
   const navigate = useNavigate();
   const token = localStorage.getItem('chat-token-info')
   const logout = async () => {
-      await localStorage.removeItem("chat-token-info");
+    await localStorage.removeItem("chat-token-info");
+    await localStorage.removeItem("loggedInUserName");
       //navigate('/login')
       window.location.href = "/login";
   };
@@ -47,6 +54,7 @@ const Chat = ({socket}) => {
           }
       } catch (error) {
           console.log(error.message);
+          logout()
           //navigate('/login')
       }    
   }
@@ -62,10 +70,15 @@ const Chat = ({socket}) => {
   }, [])
 
   const [messages, setMessages] = useState([]);
+  const [messagesgroup, setMessagesgroup] = useState([]);
   const [typingStatus, setTypingStatus] = useState('');
   const lastMessageRef = useRef(null);
+  
   const [dataFromChild, setDataFromChild] = useState("");
   const [chatdataFromChild, setChatDataFromChild] = useState([]);
+
+  const [groupdataFromChild, setgroupDataFromChild] = useState("");
+  const [groupchatdataFromChild, setGroupChatDataFromChild] = useState([]);
   
   useEffect(() => {
     lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -79,20 +92,59 @@ const Chat = ({socket}) => {
     socket.on('messageResponse', (data) => setMessages([...messages, data]));
   }, [socket, messages]);
 
+  useEffect(() => {
+    socket.on('messagegroupResponse', (data) => setMessagesgroup([...messagesgroup, data]));
+  }, [socket, messagesgroup]);
+
   
   const receiverId = dataFromChild.selectedUserId;
+  const groupId = groupdataFromChild.selectedUserId;
+    let userboard = false;
+    let groupboard = false;
+    if(dataFromChild.userboard)
+    {
+        groupdataFromChild.groupboard = false;
+        userboard = dataFromChild.userboard;
+    } 
+    
+    if(groupdataFromChild.groupboard)
+    {
+        dataFromChild.userboard = false;
+        groupboard = groupdataFromChild.groupboard;
+    } 
+   
+    //console.log(userboard+' '+groupboard);
+
   const messageResponse = messages.filter(item => (((item.receiverId === userData.id) || (item.senderId === userData.id)) && ((item.receiverId === receiverId) || (item.senderId === receiverId))))
    
-    
+  
+  
+  const messagegroupResponse = messagesgroup.filter(item => (item.groupId === groupId)) 
   
   useEffect(() => {
     socket.on('typingResponse', (data) => setTypingStatus(data));
   }, [socket]);
+  
 
-  const handleDataFromChild = (data,userChatData) => {
-    return setDataFromChild(data) || setChatDataFromChild(userChatData);
-    //return setDataFromChild(data);
-  }
+    /*Group Component */
+    const [groupComponenet,SetGroupcomponent] = useState(false)
+    
+    const handleCreateGroup = async() => {
+        SetGroupcomponent(true)
+    }
+    const handleDirectGroup = async() => {
+        SetGroupcomponent(false)
+    }
+    //console.log(groupComponenet);
+    /*Group Component */
+    const handleDataFromChild = (data,userChatData,groupdata,groupChatData) => {
+        setDataFromChild(data)
+        setChatDataFromChild(userChatData)
+
+        setgroupDataFromChild(groupdata)
+        setGroupChatDataFromChild(groupChatData)
+        //return setDataFromChild(data);
+    }
   
     let countChatdataFromChild = parseInt(chatdataFromChild.length-1);
     let countmessageResponse = parseInt(messageResponse.length-1);
@@ -105,7 +157,7 @@ const Chat = ({socket}) => {
         countmessageResponse = 0
     }
 
-    console.log(countChatdataFromChild+' == '+countmessageResponse);
+    //console.log(countChatdataFromChild+' == '+countmessageResponse);
     if(messageResponse.length>0 && countChatdataFromChild>0)
     {
         //console.log(chatdataFromChild[countChatdataFromChild].message+' == '+messageResponse[messageResponse.length].message);
@@ -129,35 +181,48 @@ const Chat = ({socket}) => {
     }*/
 
 
-
   return (
     <div>
       <section className="message-area">
         <div className="container">
             <div className="row">
             <div className="col-12">
+                
                 <div id="header">
-                  <div className="color-line">
-                  </div>
+                <div className="color-line">
+                </div>
+                <div className="row">
+                <div className="col-2">
+                  
                   <div id="logo" className="light-version">
                   {usertypeData=='EMPLOYEE'? (
-                    <h3>
-                        Chat APP <i className='fa fa-comments'></i>
-                    </h3>
+                    <div className='logoimg'><img src={logo} alt="Logo" /> </div>
                   ): (
                     <Link to="/"> 
-                        <h3>
-                        Chat APP <i className='fa fa-comments'></i>
-                        </h3>
+                        <div className='logoimg'><img src={logo} alt="Logo" /> </div>
                     </Link>
                   )
                   }
-                  
+                    
                   </div>
+                  </div>
+                  <div className="col-7">
+
+                  <ul className="moreoption">
+                        <li className="navbar nav-item dropdown">
+                            <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i className="fa fa-plus"></i></a>
+                            <ul className="dropdown-menu">
+                                <li><a className="dropdown-item" onClick={handleDirectGroup}>Direct Chat</a></li>
+                                <li><a className="dropdown-item" onClick={handleCreateGroup}>Create Group</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                  </div>
+                  <div className="col-3">
                   <div className='float-end'>
                   <ul className="moreoption">
                       <li className="navbar nav-item dropdown">
-                          <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Welcome | {userdataname}, </span> <i className="fa fa-ellipsis-v" aria-hidden="true"></i></a>
+                          <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span> <FontAwesomeIcon icon={faUser} size="1x" /> Welcome | {userdataname}, </span> <i className="fa fa-ellipsis-v" aria-hidden="true"></i></a>
                           <ul className="dropdown-menu">
                               {usertypeData!='EMPLOYEE'? (
                                 <li><Link to="/"></Link></li>
@@ -165,11 +230,13 @@ const Chat = ({socket}) => {
                                 null
                               )
                               }
-                              <li><a className="btn btn-danger dropdown-item" onClick={logout}>LEAVE CHAT</a></li>
+                              <li> <a className="dropdown-item" onClick={logout}><FontAwesomeIcon icon={faPowerOff} size="1x" /> LEAVE CHAT</a></li>
                           </ul>
                       </li>
                   </ul>
                   </div>
+                  </div>
+              </div>
               </div>
             </div>
                 <div className="col-12">
@@ -179,7 +246,8 @@ const Chat = ({socket}) => {
                         <div className="chatbox">
                             <div className="modal-dialog-scrollable">
                                 <div className="modal-content">
-                                    <div className="msg-head">
+                                    {groupComponenet && <Chatgroupcreate loggedInuserdata={userData} />}
+                                    {!groupComponenet && userboard && <div className="msg-head">
                                         <div className="row">
                                             <div className="col-12">
                                                 <div className="d-flex align-items-center">
@@ -201,9 +269,36 @@ const Chat = ({socket}) => {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    {receiverId && <Chatbody messages={messageResponse} lastMessageRef={lastMessageRef} typingStatus={typingStatus} chatdataFromChild={chatdataFromChild} />}
-                                    {receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} />}
+                                    </div>}
+                                    {!groupComponenet && groupboard && <div className="msg-head">
+                                        <div className="row">
+                                            <div className="col-12">
+                                                <div className="d-flex align-items-center">
+                                                    <div className="chat-list">
+                                                    {groupdataFromChild.shortName !=null ? (
+                                                        <div className="d-flex align-items-center pb-2">
+                                                            <div className="flex-shrink-0">
+                                                                {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
+                                                                <span class="shortName">{groupdataFromChild.shortName}</span>
+                                                            </div>
+                                                            <div className="flex-grow-1 ms-3 mt-3">
+                                                                <h3>{groupdataFromChild.fullName}</h3>
+                                                                <p>&nbsp;</p>
+                                                            </div>
+                                                        </div>
+                                                    ) : null
+                                                    }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>}
+                                    
+                                    {!groupComponenet && userboard && receiverId && <Chatbody messages={messageResponse} lastMessageRef={lastMessageRef} typingStatus={typingStatus} chatdataFromChild={chatdataFromChild} />}
+                                    {!groupComponenet && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} />}
+
+                                    {!groupComponenet && groupboard && groupId && <Chatgroupbody messages={messagegroupResponse} lastMessageRef={lastMessageRef} typingStatus={typingStatus} groupchatdataFromChild={groupchatdataFromChild} />}
+                                    {!groupComponenet && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} />}
                                 </div>
                             </div>
                         </div>

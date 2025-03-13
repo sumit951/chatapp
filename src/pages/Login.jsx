@@ -35,6 +35,7 @@ const Login = ({ socket }) => {
                 toast.success('Login Successfully', {
                     position: "bottom-right",
                     autoClose: 1000,
+                    hideProgressBar: true
                 });
                 setTimeout(() => {
                     localStorage.setItem('loggedInUserName', response.data.name);
@@ -67,6 +68,7 @@ const Login = ({ socket }) => {
             toast.error('Invalid Login Credentials', {
                 position: "bottom-right",
                 autoClose: 2000,
+                hideProgressBar: true
             });
         }
     }

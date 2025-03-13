@@ -1,5 +1,6 @@
 import React, { useState, useEffect} from 'react'
 import { ToastContainer, toast } from 'react-toastify';
+import moment from 'moment'
 import axiosConfig from '../../axiosConfig';
 import {Link, useNavigate } from 'react-router-dom';
 import Header from "../../components/Header";
@@ -18,7 +19,12 @@ const Manageuser = () => {
     const token = localStorage.getItem('chat-token-info')
     const [userData, setUserData] = useState([]);
     const [alluserdata, setAllUserdata] = useState([]);
-    
+    const logout = async () => {
+    await localStorage.removeItem("chat-token-info");
+    await localStorage.removeItem("loggedInUserName");
+        //navigate('/login')
+        window.location.href = "/login";
+    };
     const fetchUserInfo = async () => {
         try {
             const response = await axiosConfig.get('/auth/authenticate')
@@ -33,6 +39,7 @@ const Manageuser = () => {
             }
         } catch (error) {
            console.log(error.message);
+           logout()
            
         }    
     }
@@ -90,6 +97,7 @@ const Manageuser = () => {
                 toast.success(response.data.message, {
                     position: "bottom-right",
                     autoClose: 1000,
+                    hideProgressBar: true
                 });
                 setAllUserdata(alluserdata.filter((row => row.id !== id)));
             }
@@ -98,6 +106,7 @@ const Manageuser = () => {
            toast.error(error.message, {
                 position: "bottom-right",
                 autoClose: 1000,
+                hideProgressBar: true
             });
            
         }  
@@ -117,6 +126,7 @@ const Manageuser = () => {
                 toast.success(response.data.message, {
                     position: "bottom-right",
                     autoClose: 1000,
+                    hideProgressBar: true
                 });
                 fetchAllUser()
             }
@@ -125,6 +135,7 @@ const Manageuser = () => {
             toast.success(response.data.message, {
                 position: "bottom-right",
                 autoClose: 1000,
+                hideProgressBar: true
             });
            
         }  
@@ -174,7 +185,7 @@ const Manageuser = () => {
                                     <td>{data.email}</td>
                                     <td>{data.userType}</td>
                                     <td>{data.decryptPassword}</td>
-                                    <td>{data.addedon}</td>
+                                    <td>{moment(data.addedon).format('llll')}</td>
                                     <td className='text-center'>
                                     {data.status == 'Active' ? (
                                         <button class="btn btn-successi" onClick={e=>handleStatus(data.id,'Inactive')}  title="Active"><i class="fa fa-check"></i></button>
