@@ -125,7 +125,7 @@ const Adduser = () => {
         <div id="wrapper">
         <div class="content animate-panel">
         <div class="row d-flex justify-content-center">
-        <div class="col-lg-6">
+        <div class="col-lg-11">
             <div class="hpanel">
                 <div class="panel-heading text-center">
                     <h3>Add User</h3>
@@ -133,7 +133,7 @@ const Adduser = () => {
                 <div class="panel-body">
                 <form onSubmit={handleSubmit} class="form-horizontal p-3 border rounded">
                 {userType=='ADMIN' ? (
-                        <div class="form-group"><label class="col-sm-3 control-label">User Type</label>
+                        <div class="form-group"><label class="col-sm-2 control-label">User Type</label>
                         <div class="col-sm-3 d-flex align-items-center inr"  style={{fontSize: '11px'}}>
                             <input type="radio" name="userType" value="SUBADMIN" onChange={handleChanges} /><span className='mt-1'> SUBADMIN</span>
                         </div>
@@ -150,21 +150,23 @@ const Adduser = () => {
                     </div>
                 ) : null}
 
-                <div class="form-group"><label class="col-sm-3 control-label">Name</label>
+<div className='row'>
+                <div class="form-group col-md-6"><label class="col-sm-3 control-label">Name</label>
                     <div class="col-sm-9"><input type="text" className="form-control" name="name" onChange={handleChanges} placeholder="Enter name" required /></div>
                 </div>
                 {/* <div class="hr-line-dashed"></div> */}
-                <div class="form-group"><label class="col-sm-3 control-label">Email</label>
+                <div class="form-group col-md-6"><label class="col-sm-3 control-label">Email</label>
                     <div class="col-sm-9"><input type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" className="form-control" name="email" onChange={handleChanges} placeholder="Enter Email" required />
                     </div>
-                </div>
+                </div></div>
                 {/* <div class="hr-line-dashed"></div> */}
-                <div class="form-group"><label class="col-sm-3 control-label">Employee Id</label>
+                <div className='row'>
+                <div class="form-group col-md-6"><label class="col-sm-3 control-label">Employee Id</label>
                     <div class="col-sm-9"><input type="text" className="form-control" name="employeeId" onChange={handleChanges} placeholder="Employee Id" required /></div>
                 </div>
 
                 {/* <div class="hr-line-dashed"></div> */}
-                <div class="form-group"><label class="col-sm-3 control-label">Chat Delete In</label>
+                <div class="form-group col-md-6"><label class="col-sm-3 control-label">Chat Delete In</label>
                     <div class="col-sm-9">
                         <select className="form-control" name="chatDeleteInDays" value={values.chatDelete} onChange={handleChanges} required>
                             {options.map((option) => (
@@ -173,7 +175,7 @@ const Adduser = () => {
                         </select>
                     </div>
                 </div>
-                
+                </div>
                 {/* <div class="hr-line-dashed"></div> */}
                 <div class="form-group mb-1">
                     <div class="col-sm-12 d-flex justify-content-end mt-1">

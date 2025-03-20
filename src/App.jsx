@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+//import '@fortawesome/fontawesome-free/css/all.css';
 
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import Login from "./pages/Login";
@@ -10,7 +11,9 @@ import Manageuser from "./pages/users/Manageuser";
 import Updateuser from "./pages/users/Updateuser";
 import Chat from "./pages/chatconsole/Chat";
 import socketIO from 'socket.io-client';
-//const socket = socketIO.connect('http://localhost:3000');
+
+
+// const socket = socketIO.connect('http://localhost:3000');
 const socket = socketIO.connect('https://chatserver-b6go.onrender.com');
 function App() {
   

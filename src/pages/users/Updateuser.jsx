@@ -168,7 +168,7 @@ const Updateuser = () => {
         <div id="wrapper">
         <div class="content animate-panel">
         <div class="row d-flex justify-content-center">
-        <div class="col-lg-6">
+        <div class="col-lg-5">
             <div class="hpanel">
                 <div class="panel-heading text-center">
                     <h3>Update User</h3>

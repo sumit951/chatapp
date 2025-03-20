@@ -1,4 +1,5 @@
 import React, { useState, useEffect} from 'react'
+import InputEmoji from 'react-input-emoji'
 
 const Chatpost = ({ socket,receiverId,senderUserData}) => {
     const [message, setMessage] = useState('');
@@ -15,7 +16,7 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
 
     const handleSendMessage = (e) => {
         socket.emit('typing', '');
-        e.preventDefault();
+        //e.preventDefault();
         const d = new Date();
         const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
         if (message.trim() && localStorage.getItem('loggedInUserName'))
@@ -38,16 +39,26 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
   return (
     <>
         <div className="send-box">
-            <form onSubmit={handleSendMessage}>
-                <input 
+            <form>
+            <InputEmoji
+            value={message}
+            onChange={setMessage}
+            cleanOnEnter
+            onEnter={handleSendMessage}
+            onKeyDown={handleTyping}
+            onKeyUp={handleRemoveTyping}
+            placeholder="Type a message"
+            shouldReturn
+            />
+                {/*<input 
                     type="text"
                     className="form-control message" aria-label="message…" placeholder="Write message…"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)} 
                     onKeyDown={handleTyping}
                     onKeyUp={handleRemoveTyping}
-                />
-                <button ><i className="fa fa-paper-plane" aria-hidden="true"></i> Send</button>
+                />*/}
+                <button type="button" className="send-box-button" onClick={handleSendMessage}><i className="fa fa-paper-plane" aria-hidden="true"></i>   </button>
             </form>
 
             {/* <div className="send-btns">

@@ -7,12 +7,14 @@ import { ToastContainer, toast } from 'react-toastify';
 
 
 const Chatgroupcreate = ({loggedInuserdata}) => {
-  const token = localStorage.getItem('chat-token-info')
-  const [alluserdata, setAllUserdata] = useState([]);
-
+    const token = localStorage.getItem('chat-token-info')
+    const [alluserdata, setAllUserdata] = useState([]);
+    const [searchParam, setSearchuser] = useState();
+    //console.log(searchParam);
+    
     const fetchAllUser = async () => {
     try {
-            const response = await axiosConfig.get('/user/getactivealluser')
+            const response = await axiosConfig.get(`/user/getactiveallusergroup/${searchParam}`)
             if(response.status==200)
             {
                 //const token = localStorage.getItem(token)
@@ -30,18 +32,18 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
         
     }
     //console.log(alluserdata);
-    useEffect(() => {
+    /*useEffect(() => {
         if(!token)
         {
             //return navigate('/login')
             window.location.href = "/login";
         }
         fetchAllUser()
-    }, [])
+    }, [])*/
   const [selOption, setSelOption] = useState(['']);
   const HandelChange = (obj) => {
     setSelOption(obj)    
-    //console.log(selOption);
+    console.log(obj);
   };  
   const[values, setValues] = useState({
       groupName:''
@@ -96,7 +98,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                     window.location.reload()
                 }, 
                 2000
-              ); 
+                ); 
           }
           if(response.data.status=='fail')
           {
@@ -125,7 +127,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
   
   const newUserslisting = alluserdata.filter(item => item.userId !== loggedInuserdata.id);
   const options = newUserslisting.map((datauser) => (
-    { value: datauser.userId, label: datauser.userName }
+    { value: datauser.userId, label: datauser.userName+' - '+datauser.userEmail }
   ))
   
   return (
@@ -134,7 +136,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
             <div className="msg-body">
         <div class="content animate-panel">
         <div class="row d-flex justify-content-center">
-        <div class="col-lg-12">
+        <div class="col-lg-7 mt-5">
             <div class="hpanel">
                 <div class="panel-heading text-center">
                     <h3>Create Group</h3>
@@ -144,13 +146,14 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                 <div class="form-group"><label class="col-sm-3 control-label">Group Name</label>
                     <div class="col-sm-9"><input type="text" className="form-control" name="groupName" onChange={handleChanges} placeholder="Enter Group Name" /></div>
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label class="col-sm-3 control-label">Group Users</label>
                     <div class="col-sm-9">
                         <Select 
                         isClearable
                         isSearchable
                         onChange={(option) => HandelChange({selectUsers:option})}
+                        onKeyDown={(e) => fetchAllUser(setSearchuser(e.target.value))}
                         components={animatedComponents}
                         isMulti
                         options={options} />
@@ -162,7 +165,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                     </div>
                 </div>
                 
-                <div class="form-group mb-1">
+                <div class="form-group mb-1 mt-2">
                     <div class="col-sm-12 d-flex justify-content-end mt-1">
                         <button class="btn btn-success btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
                     </div>

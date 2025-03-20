@@ -24,7 +24,7 @@ const Header = (props) => {
         //navigate('/login')
         window.location.href = "/login";
     };
-    console.log(props);
+    //console.log(props);
 
     if (props.loggedInUserdata.userType == 'EMPLOYEE') {
         //navigate('/chatconsole/spaces')

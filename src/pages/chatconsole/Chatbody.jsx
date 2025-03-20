@@ -15,26 +15,26 @@ const Chatbody = ({messages, lastMessageRef,typingStatus,chatdataFromChild }) =>
             (chatdata.messageId!=null) ? (
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
                 <li className="sender"  key={chatdata.messageId}>
-                <p><strong>You</strong> : {chatdata.message}</p>
-                <span className="time">{moment(chatdata.timestamp).format('llll')}</span>
+                                    <span className="time"><strong>You</strong> : {moment(chatdata.timestamp).format('llll')}</span>
+                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} /></p>
                 </li>
             ) : (
                 <li className="repaly"  key={chatdata.messageId}>
-                <p><strong>{chatdata.senderName}</strong> : {chatdata.message}</p>
-                <span className="time">{moment(chatdata.timestamp).format('llll')}</span>
+                                    <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}</span>
+                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} /></p>
                 </li>
-            )) : ( <b>TEST</b> )
+            )) : ( <b></b> )
             )}
             {messages.map((chatdata) =>
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
-                <li className="sender"  key={chatdata.id}>
-                <p><strong>You</strong> : {chatdata.message}</p>
-                <span className="time">{moment(chatdata.timestamp).format('LT')}</span>
+                <li className="sender"  key={chatdata.messageId}>
+                                    <span className="time"><strong>You</strong> : {moment(chatdata.timestamp).format('llll')}</span>
+                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} /></p>
                 </li>
             ) : (
-                <li className="repaly"  key={chatdata.id}>
-                <p><strong>{chatdata.senderName}</strong> : {chatdata.message}</p>
-                <span className="time">{moment(chatdata.timestamp).format('LT')}</span>
+                <li className="repaly"  key={chatdata.messageId}>
+                                    <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}</span>
+                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} /></p>
                 </li>
             )
             )}

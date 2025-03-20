@@ -40,6 +40,8 @@ const Chatnav = ({ socket,sendDataToParent}) => {
     //console.log(userChatData);
 
     const [groupChatData, setGroupChatData] = useState([]);
+    const [groupMemberData, setGroupMemberData] = useState([]);
+
     const handleSelectGroup = async(groupId) => {
         //console.log('test'+receiverId);
         try {
@@ -60,11 +62,30 @@ const Chatnav = ({ socket,sendDataToParent}) => {
         } catch (error) {
             console.log(error.message);
             
-        }    
+        } 
+        
+        try {
+            const encodeGroupId = btoa(groupId)
+            const response = await axiosConfig.get(`/chat/getgroupmember/${encodeGroupId}`)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                }   
+                
+            }
+            
+            setGroupMemberData(response.data);
+        } catch (error) {
+            console.log(error.message);
+            
+        }
     }
     //console.log(userChatData);
-    
-    sendDataToParent(selectedUser,userChatData,selectedGroup,groupChatData);
+
+    sendDataToParent(selectedUser,userChatData,selectedGroup,groupChatData,groupMemberData);
     
     useEffect(() => {
         socket.on('newUserResponse', async(data) => setUsers(data));
@@ -161,7 +182,7 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                     </div>
                     <div className="modal-body">
                     <div className="chat-lists">
-                        <div className="tab-content" id="myTabContent">
+                        <div className="tab-content">
                             <div className="tab-pane show active" id="Open" role="tabpanel" aria-labelledby="Open-tab">
                                 <div className="chat-list">
                                 {mergedArray.map((user,i) => (
@@ -173,14 +194,15 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                                         selectedUserId:user.userId,
                                         userboard:true
                                         }),
-                                        setSelectedGroup({}))} 
-                                        className="d-flex align-items-center pb-2">
+                                        setSelectedGroup({})
+                                    )} 
+                                        className="d-flex align-items-center p-2">
                                         <div className="flex-shrink-0">
                                             {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
                                             <span className="shortName">{user.usershortName}</span>
                                             {user.socketID && <span className="active"></span>}
                                         </div>
-                                        <div className="flex-grow-1 ms-3">
+                                        <div className="flex-grow-1 ms-2">
                                             <h3>{user.userName}</h3>
                                         </div>
                                     </a>
@@ -214,14 +236,16 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                                             shortName:group.groupshortName,
                                             fullName:group.groupName,
                                             selectedUserId:group.groupId,
+                                            totalMember:group.totalMember,
+                                            createdBy:group.createdBy,
                                             groupboard:true
                                             }),
                                             setSelectedUser({}))} 
-                                            className="d-flex align-items-center pb-2">
+                                            className="d-flex align-items-center p-2">
                                             <div className="flex-shrink-0">
                                                 <span className="shortName">{group.groupshortName}</span>
                                             </div>
-                                            <div className="flex-grow-1 ms-3">
+                                            <div className="flex-grow-1 ms-2">
                                                 <h3>{group.groupName}</h3>
                                             </div>
                                         </a>
