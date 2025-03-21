@@ -5,6 +5,8 @@ import axiosConfig from '../../axiosConfig';
 import {Link, useNavigate } from 'react-router-dom';
 import Header from "../../components/Header";
 import Footer from '../../components/Footer';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
@@ -140,6 +142,7 @@ const Manageuser = () => {
            
         }  
     }
+    //console.log(userData.userType);
     
   return (
     <div>
@@ -172,6 +175,7 @@ const Manageuser = () => {
                             <th>Type</th>
                             <th>Password</th>
                             <th>Added On</th>
+                            {(userData.userType == 'ADMIN') ? (<th>Chatboard</th>) : ""}
                             <th style={{ width: '50px' }}>Status</th>
                             <th style={{ width: '59px' }}>Action</th>
                         </tr>
@@ -186,6 +190,12 @@ const Manageuser = () => {
                                     <td>{data.userType}</td>
                                     <td>{data.decryptPassword}</td>
                                     <td>{moment(data.addedon).format('llll')}</td>
+                                    {(userData.userType == 'ADMIN') ? (
+                                    <td><Link to={`/chatboard/${btoa(data.id)}`} target="_blank" title="View Chatboard">
+                                        <FontAwesomeIcon icon={faComment} size="1x" />
+                                        </Link>
+                                    </td>
+                                    ) : ""}
                                     <td className='text-center'>
                                     {data.status == 'Active' ? (
                                         <button class="btn btn-successi" onClick={e=>handleStatus(data.id,'Inactive')}  title="Active"><i class="fa fa-check"></i></button>

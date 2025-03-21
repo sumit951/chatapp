@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import Adduser from "./pages/users/Adduser";
 import Manageuser from "./pages/users/Manageuser";
 import Updateuser from "./pages/users/Updateuser";
+import Chatboard from "./pages/users/chatconsoleview/Chatboard";
+
 import Chat from "./pages/chatconsole/Chat";
 import socketIO from 'socket.io-client';
 
@@ -28,6 +30,7 @@ function App() {
         <Route path="/manageuser" element={<Manageuser />}></Route>
         <Route path="/adduser" element={<Adduser />}></Route>
         <Route path="/updateuser/:id/" element={<Updateuser />}></Route>
+        <Route path="/Chatboard/:id/" element={<Chatboard />}></Route>
 
         <Route path="/chatconsole/spaces" element={<Chat socket={socket} />}></Route>
       </Routes>
