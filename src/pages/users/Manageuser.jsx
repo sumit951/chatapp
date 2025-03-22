@@ -188,7 +188,7 @@ const Manageuser = () => {
                                     <td>{data.name}</td>
                                     <td>{data.email}</td>
                                     <td>{data.userType}</td>
-                                    <td>{data.decryptPassword}</td>
+                                    <td>{data.decryptPassword}{data.accessView}</td>
                                     <td>{moment(data.addedon).format('llll')}</td>
                                     {(userData.userType == 'ADMIN') ? (
                                     <td><Link to={`/chatboard/${btoa(data.id)}`} target="_blank" title="View Chatboard">
