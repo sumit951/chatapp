@@ -4,7 +4,9 @@ import userProfile from "../../assets/chat/user-profile.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff} from '@fortawesome/free-solid-svg-icons';
 
-const Chatnav = ({ socket,sendDataToParent}) => {
+const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponent,activefrParent,myref,setMessages,setMessagesgroup,isNewmsgReceiver,isNewmsgSender,isNewmsgGroup,isNewmsgGroupSender,setTypingStatus,setTypingStatusgroup,setNotificationShown,setnewChatDataFromChild,setnewgroupChatDataFromChild,SetonetoOnecomponent,Setusersetting}) => {
+    
+    
     const token = localStorage.getItem('chat-token-info')
     const [usersloggedin, setUsers] = useState([]);
 
@@ -12,9 +14,14 @@ const Chatnav = ({ socket,sendDataToParent}) => {
     const [selectedGroup,setSelectedGroup] = useState([])
     
     const UserName = localStorage.getItem('loggedInUserName')
+    const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
 
+    //console.log(activefrParent);
+    
+    const [active, setActive] = useState('');
 
     const [userChatData, setUserChatData] = useState([]);
+    
     const handleSelectUser = async(receiverId) => {
         //console.log('test'+receiverId);
         try {
@@ -32,6 +39,21 @@ const Chatnav = ({ socket,sendDataToParent}) => {
             //console.log(response.data);
             
             setUserChatData(response.data);
+            setMessages([])
+            SetGroupcomponent(false)
+            SetonetoOnecomponent(false)
+            Setusersetting(false)
+            setTypingStatus('')
+            setTypingStatusgroup('')
+            setNotificationShown(false)
+            setnewChatDataFromChild([])
+            if(receiverId)
+            {
+                const index = isNewmsgSender.indexOf(receiverId);
+                if (index > -1) { // only splice array when item is found
+                    isNewmsgSender.splice(index, 1); // 2nd parameter means remove one item only
+                }
+            }
         } catch (error) {
             console.log(error.message);
             
@@ -59,6 +81,21 @@ const Chatnav = ({ socket,sendDataToParent}) => {
             //console.log(response.data);
             
             setGroupChatData(response.data);
+            SetGroupcomponent(false)
+            SetonetoOnecomponent(false)
+            Setusersetting(false)
+            setMessagesgroup([])
+            setTypingStatus('')
+            setTypingStatusgroup('')
+            setNotificationShown(false)
+            setnewgroupChatDataFromChild([])
+            if(groupId)
+            {
+                const index = isNewmsgGroupSender.indexOf(groupId);
+                if (index > -1) { // only splice array when item is found
+                    isNewmsgGroupSender.splice(index, 1); // 2nd parameter means remove one item only
+                }
+            }
         } catch (error) {
             console.log(error.message);
             
@@ -91,36 +128,7 @@ const Chatnav = ({ socket,sendDataToParent}) => {
         socket.on('newUserResponse', async(data) => setUsers(data));
     }, [socket, usersloggedin]);
     
-    const [alluserdata, setAllUserdata] = useState([]);
-
-    const fetchAllUser = async () => {
-    try {
-            const response = await axiosConfig.get('/user/getactivealluser')
-            if(response.status==200)
-            {
-                //const token = localStorage.getItem(token)
-                if(response.status !== 200)
-                {
-                    //navigate('/login')
-                    window.location.href = "/login";
-                }   
-                setAllUserdata(response.data);
-            }
-        } catch (error) {
-        console.log(error.message);
-        
-        }    
-        
-    }
-    //console.log(alluserdata);
-    useEffect(() => {
-        if(!token)
-        {
-            //return navigate('/login')
-            window.location.href = "/login";
-        }
-        fetchAllUser()
-    }, [])
+    
 
 
     const [grouplistdata, setGrouplistdata] = useState([]);
@@ -154,14 +162,39 @@ const Chatnav = ({ socket,sendDataToParent}) => {
     }, [])
 
 
-    const newUserslisting = alluserdata.filter(item => item.userName !== UserName);
+    const newUserslisting = interactwithuserlist.filter(item => item.userName !== UserName);
     const newUsersloggedin = usersloggedin.filter(item => item.userName !== UserName);
-    const mergedArray = newUsersloggedin.concat(newUserslisting.filter(
-        item2 => !newUsersloggedin.some(item1 => item1.userId === item2.userId)));
+    const mergedArray = newUsersloggedin.concat(newUserslisting.filter(item2 => !newUsersloggedin.some(item1 => item1.userId === item2.userId)));
+    //const mergedArray = newUserslisting.filter(item2 => !newUsersloggedin.some(item1 => item1.userId === item2.userId))
     //console.log(newUsersloggedin);
     //console.log(mergedArray);
-    //console.log(mergedArray);
     
+    /* setTimeout(
+        function() {
+            const element = document.getElementsByClassName('selecteduseronetoOne')[0];
+            if (element) {
+            element.click();  // Trigger the click on the element with 'my-class'
+            }
+        }
+        .bind(this),
+        3000
+    );
+    */
+    /* console.log(isNewmsgReceiver);
+    console.log(isNewmsgSender); */
+    /* console.log(isNewmsgGroup);
+    console.log(isNewmsgGroupSender); */
+    const element = document.getElementsByClassName('selecteduseronetoOne')[0];
+    useEffect(() => {
+        setTimeout(
+            function() {
+                if (element) {
+                    element.click();  // Trigger the click on the element with 'my-class'
+                }
+            },1000
+        );
+    }, [element]);
+
   return (
     <>
         <div className="chatlist">
@@ -185,8 +218,8 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                         <div className="tab-content">
                             <div className="tab-pane show active" id="Open" role="tabpanel" aria-labelledby="Open-tab">
                                 <div className="chat-list">
-                                {mergedArray.map((user,i) => (
-                                    <a key={user.socketID} 
+                                {mergedArray.slice().reverse().map((user,i) => (
+                                    <a key={i} 
                                     onClick={(e) => handleSelectUser(user.userId,
                                         setSelectedUser({
                                         shortName:user.usershortName,
@@ -194,9 +227,13 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                                         selectedUserId:user.userId,
                                         userboard:true
                                         }),
-                                        setSelectedGroup({})
+                                        setSelectedGroup({}),
+                                        setActive(user.userName)
                                     )} 
-                                        className="d-flex align-items-center p-2">
+                                        className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
+                                        /*ref={ref}*/
+                                        /*ref={(i===0) ? myref : null}*/
+                                        >
                                         <div className="flex-shrink-0">
                                             {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
                                             <span className="shortName">{user.usershortName}</span>
@@ -205,6 +242,7 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                                         <div className="flex-grow-1 ms-2">
                                             <h3>{user.userName}</h3>
                                         </div>
+                                        {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
                                     </a>
                                 ))}
                                 {/*newUserslisting.map((user,i) => (
@@ -229,7 +267,7 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                             <div className="tab-pane" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
 
                                 <div className="chat-list">
-                                    {grouplistdata.map((group,i) => (
+                                    {grouplistdata.slice().reverse().map((group,i) => (
                                     <a key={i} 
                                         onClick={(e) => handleSelectGroup(group.groupId,
                                             setSelectedGroup({
@@ -240,14 +278,17 @@ const Chatnav = ({ socket,sendDataToParent}) => {
                                             createdBy:group.createdBy,
                                             groupboard:true
                                             }),
-                                            setSelectedUser({}))} 
-                                            className="d-flex align-items-center p-2">
+                                            setSelectedUser({}),
+                                            setActive(group.groupName)
+                                        )} 
+                                            className={`d-flex align-items-center p-2 ${(active===group.groupName) ? "selecteduserbg" : ""}`}>
                                             <div className="flex-shrink-0">
                                                 <span className="shortName">{group.groupshortName}</span>
                                             </div>
                                             <div className="flex-grow-1 ms-2">
                                                 <h3>{group.groupName}</h3>
                                             </div>
+                                            {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
                                         </a>
                                     ))}
                                 </div>

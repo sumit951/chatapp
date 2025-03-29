@@ -1,9 +1,13 @@
 import React, { useState, useEffect} from 'react'
+import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import InputEmoji from 'react-input-emoji'
+import Chatfileupload from './Chatfileupload';
 
 const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}) => {
 
     const [message, setMessage] = useState('');
+    const [files, setFiles] = useState([]);
+    const [filesblank, setfilesblank] = useState(false);
 
     const handleRemoveTyping = () => {
         socket.emit('typing', '');
@@ -11,30 +15,78 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
     }
     //console.log(groupId);
     const handleTyping = () => {
-        socket.emit('typing', `${localStorage.getItem('loggedInUserName')} is typing . . .`);
+        //socket.emit('typing', `${localStorage.getItem('loggedInUserName')} is typing . . .`);
+        socket.emit('typing', {"typingmessge":`${localStorage.getItem('loggedInUserName')} is typing . . .`,"groupId":groupId});
         //console.log(message);
     }
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         //console.log(groupId);
         socket.emit('typing', '');
         //e.preventDefault();
         const d = new Date();
         const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
-        if (message.trim() && localStorage.getItem('loggedInUserName'))
+        if ((message.trim() || files.length) && localStorage.getItem('loggedInUserName'))
         {
             //console.log(message);
-            
-            socket.emit('messagegroup', {
-                message: message,
-                senderName: localStorage.getItem('loggedInUserName'),
-                /*id: `${socket.id}${Math.random()}`,*/
-                senderId:senderUserData.id,
-                groupId:groupId,
-                socketID: socket.id,
-                messageType:'text',
-                timestamp: formattedDate
-            });
+            if(files.length>0)
+            {
+                const formData = new FormData();
+                formData.append("frmmessage", message);
+                
+
+                // Append all files
+                Array.from(files).forEach((file) => {
+                    formData.append('files', file);
+                });
+                
+                try {
+                    const response = await axiosConfig.post(`/upload`,formData,{ headers: {
+                        'Content-Type': 'multipart/form-data', // Set the default header to multipart/form-data
+                      }})
+                    //console.log(response);
+                    //console.log(response.data['files']);
+                    let filesStr = ''
+                    response.data['files'].map((file) => {
+                        //console.log(file);
+                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
+                    });
+                    const messagewithfiles = `${message}</br>${filesStr}`;
+
+                    //console.log(messagewithfiles);
+
+                    await socket.emit('messagegroup', {
+                        message: messagewithfiles,
+                        senderName: localStorage.getItem('loggedInUserName'),
+                       
+                        senderId:senderUserData.id,
+                        groupId:groupId,
+                        socketID: socket.id,
+                        messageType:'text',
+                        timestamp: formattedDate
+                    });
+
+                    setfilesblank(true)
+                    setFiles([]);
+                    
+                } catch (error) {
+                    console.log(error.message);
+                }
+
+            }
+            else
+            {
+                await socket.emit('messagegroup', {
+                    message: message,
+                    senderName: localStorage.getItem('loggedInUserName'),
+                    /*id: `${socket.id}${Math.random()}`,*/
+                    senderId:senderUserData.id,
+                    groupId:groupId,
+                    socketID: socket.id,
+                    messageType:'text',
+                    timestamp: formattedDate
+                });
+            }
         }
         setMessage('');
     };
@@ -100,6 +152,7 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
   return (
     <>
         <div className="send-box">
+            <Chatfileupload onFileSelect={setFiles} parentselectedFiles={filesblank} setfilesblank={setfilesblank} />
             <div className="float-end"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
             <div className="clearfix"></div>
             <form>

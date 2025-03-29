@@ -14,6 +14,7 @@ const Updateuser = () => {
     const logout = async () => {
     await localStorage.removeItem("chat-token-info");
     await localStorage.removeItem("loggedInUserName");
+    await localStorage.removeItem("encryptdatatoken");
         //navigate('/login')
         window.location.href = "/login";
     };

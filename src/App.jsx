@@ -3,6 +3,8 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 //import '@fortawesome/fontawesome-free/css/all.css';
 
 import {BrowserRouter, Routes, Route} from "react-router-dom"
+import axiosConfig,{ BASE_URL } from './axiosConfig';
+
 import Login from "./pages/Login";
 import Createpassword from "./pages/Createpassword";
 import Dashboard from "./pages/Dashboard";
@@ -15,8 +17,8 @@ import Chat from "./pages/chatconsole/Chat";
 import socketIO from 'socket.io-client';
 
 
-// const socket = socketIO.connect('http://localhost:3000');
-const socket = socketIO.connect('https://chatserver-b6go.onrender.com');
+const socket = socketIO.connect(`${BASE_URL}`);
+// const socket = socketIO.connect('https://chatserver-b6go.onrender.com');
 function App() {
   
   return (

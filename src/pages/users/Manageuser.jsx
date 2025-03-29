@@ -24,6 +24,7 @@ const Manageuser = () => {
     const logout = async () => {
     await localStorage.removeItem("chat-token-info");
     await localStorage.removeItem("loggedInUserName");
+    await localStorage.removeItem("encryptdatatoken");
         //navigate('/login')
         window.location.href = "/login";
     };
@@ -118,6 +119,8 @@ const Manageuser = () => {
         try {
             //console.log(id);
             const data = {id:id,status:status}
+            //console.log(data);
+            
             const response = await axiosConfig.put(`/user/updatestatus/`,data)
             if(response.status==200)
             {

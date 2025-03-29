@@ -1346,6 +1346,96 @@ button:focus {
   .tagg--text {
     color: #039be5;
   }
+  .selecteduserbg{
+    background-color: #b7b7b7 !important;
+    border-radius: 100px;
+  }
+  .showmsgnotif{
+    color: #0924f2;
+  }
+
+
+  .message-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .edit-button {
+    background-color: #d7763d;
+    color: white;
+    border: none;
+    padding: 1px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .delete-button {
+    background-color: #fb1515;
+    color: white;
+    border: none;
+    padding: 1px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  
+  .edit-button:hover, .delete-button:hover {
+    background-color: white;
+    color: #fb1515;
+  }
+  .deletedmsg{
+    color: var(--mds-color-theme-text-secondary-normal);
+    display: flex;
+    font-size: .75rem;
+    justify-content: center;
+    margin: 0;
+    padding-bottom: .25rem;
+    padding-top: .25rem;
+    text-align: center;
+    width: 100%;
+    font: inherit;
+  }
+  .editedMsg{
+    font-weight: 800;
+  }
+
+  .file-upload {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .attachment-icon {
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .file-preview {
+    margin-top: 5px;
+  }
+  
+  .file-preview-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    width: 100%;
+    font-size: 11px;
+  }
+  
+  .chip-info {
+    margin: auto 0;
+    overflow: hidden;
+    padding-left: 7px;
+    vertical-align: middle;
+  }
+
+  .file-preview-item button {
+    color: white;
+    border: none;
+    padding: 2px;
+  }
+
+
 @media (max-width: 767px) {
     .chat-icon {
         display: block;
@@ -1405,7 +1495,7 @@ button:focus {
 }
 
 a.d-flex.align-items-center.p-2:hover{
-    background-color: #efefef !important;
+    background-color: #b7b7b7  !important;
     border-radius: 100px;
 }
 

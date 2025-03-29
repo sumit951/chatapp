@@ -39,6 +39,7 @@ const Login = ({ socket }) => {
                 });
                 setTimeout(() => {
                     localStorage.setItem('loggedInUserName', response.data.name);
+                    localStorage.setItem('encryptdatatoken', btoa(response.data.userId));
                     const UserName = localStorage.getItem('loggedInUserName')
                     const UserId = response.data.userId
                     const arrUserName = response.data.name.split(' ')

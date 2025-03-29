@@ -134,21 +134,21 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
     <>
       <div className="modal-body">
             <div className="msg-body">
-        <div class="content animate-panel">
-        <div class="row d-flex justify-content-center">
-        <div class="col-lg-7 mt-5">
-            <div class="hpanel">
-                <div class="panel-heading text-center">
+        <div className="content animate-panel">
+        <div className="row d-flex justify-content-center">
+        <div className="col-lg-7 mt-5">
+            <div className="hpanel">
+                <div className="panel-heading text-center">
                     <h3>Create Group</h3>
                 </div>
-                <div class="panel-body">
-                <form onSubmit={handleSubmit} class="form-horizontal p-3 border rounded">
-                <div class="form-group"><label class="col-sm-3 control-label">Group Name</label>
-                    <div class="col-sm-9"><input type="text" className="form-control" name="groupName" onChange={handleChanges} placeholder="Enter Group Name" /></div>
+                <div className="panel-body">
+                <form onSubmit={handleSubmit} className="form-horizontal p-3 border rounded">
+                <div className="form-group"><label className="col-sm-3 control-label">Group Name</label>
+                    <div className="col-sm-9"><input type="text" className="form-control" name="groupName" onChange={handleChanges} placeholder="Enter Group Name" /></div>
                 </div>
-                <div class="form-group mb-0">
-                    <label class="col-sm-3 control-label">Group Users</label>
-                    <div class="col-sm-9">
+                <div className="form-group mb-0">
+                    <label className="col-sm-3 control-label">Group Users</label>
+                    <div className="col-sm-9">
                         <Select 
                         isClearable
                         isSearchable
@@ -165,9 +165,9 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                     </div>
                 </div>
                 
-                <div class="form-group mb-1 mt-2">
-                    <div class="col-sm-12 d-flex justify-content-end mt-1">
-                        <button class="btn btn-success btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
+                <div className="form-group mb-1 mt-2">
+                    <div className="col-sm-12 d-flex justify-content-end mt-1">
+                        <button className="btn btn-success btn-block" type="submit">Save changes <i className="fa fa-chevron-right"></i></button>
                     </div>
                 </div>
                 </form>
