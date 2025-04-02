@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react'
 import axiosConfig from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 
-const Setting = ({loggedInuserdata}) => {
+const Setting = ({socket,loggedInuserdata}) => {
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
 
     const [status, setStatus] = useState('');
@@ -43,7 +43,7 @@ const Setting = ({loggedInuserdata}) => {
         }
         else
         {
-            console.log(data);
+            //console.log(data);
             //return false;
          
             try {
@@ -61,6 +61,7 @@ const Setting = ({loggedInuserdata}) => {
                     }, 
                     2000
                     ); 
+                    socket.emit('setChatStatus', status);
               }
               if(response.data.status=='fail')
               {

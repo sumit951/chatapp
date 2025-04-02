@@ -4,7 +4,7 @@ import userProfile from "../../assets/chat/user-profile.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff} from '@fortawesome/free-solid-svg-icons';
 
-const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponent,activefrParent,myref,setMessages,setMessagesgroup,isNewmsgReceiver,isNewmsgSender,isNewmsgGroup,isNewmsgGroupSender,setTypingStatus,setTypingStatusgroup,setNotificationShown,setnewChatDataFromChild,setnewgroupChatDataFromChild,SetonetoOnecomponent,Setusersetting}) => {
+const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponent,activefrParent,myref,setMessages,setMessagesgroup,isNewmsgReceiver,isNewmsgSender,isNewmsgGroup,isNewmsgGroupSender,setTypingStatus,setTypingStatusgroup,setNotificationShown,setnewChatDataFromChild,setnewgroupChatDataFromChild,SetonetoOnecomponent,Setusersetting,loggedInuserdata}) => {
     
     
     const token = localStorage.getItem('chat-token-info')
@@ -15,8 +15,6 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     
     const UserName = localStorage.getItem('loggedInUserName')
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
-
-    //console.log(activefrParent);
     
     const [active, setActive] = useState('');
 
@@ -195,6 +193,13 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
         );
     }, [element]);
 
+
+    //console.log(loggedInuserdata.chatStatus);
+    /* let currentTime = new Date();
+    currentTime.setMinutes(currentTime.getMinutes() + 30); */
+
+    const currentTime2 = new Date().getTime();
+
   return (
     <>
         <div className="chatlist">
@@ -218,33 +223,52 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                         <div className="tab-content">
                             <div className="tab-pane show active" id="Open" role="tabpanel" aria-labelledby="Open-tab">
                                 <div className="chat-list">
-                                {mergedArray.slice().reverse().map((user,i) => (
-                                    <a key={i} 
-                                    onClick={(e) => handleSelectUser(user.userId,
-                                        setSelectedUser({
-                                        shortName:user.usershortName,
-                                        fullName:user.userName,
-                                        selectedUserId:user.userId,
-                                        userboard:true
-                                        }),
-                                        setSelectedGroup({}),
-                                        setActive(user.userName)
-                                    )} 
-                                        className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
-                                        /*ref={ref}*/
-                                        /*ref={(i===0) ? myref : null}*/
-                                        >
-                                        <div className="flex-shrink-0">
-                                            {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
-                                            <span className="shortName">{user.usershortName}</span>
-                                            {user.socketID && <span className="active"></span>}
-                                        </div>
-                                        <div className="flex-grow-1 ms-2">
-                                            <h3>{user.userName}</h3>
-                                        </div>
-                                        {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                    </a>
-                                ))}
+                                {mergedArray.slice().reverse().map((user,i) =>
+                                {
+                                    const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
+                                    let dndStatus = false;
+                                    let busyStatus = false;
+                                    if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
+                                    {
+                                        //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                        dndStatus = true;
+                                    }
+                                    if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
+                                    {
+                                        //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                        busyStatus = true;
+                                    }
+                                    return (
+                                        <a key={i} 
+                                        onClick={(e) => handleSelectUser(user.userId,
+                                            setSelectedUser({
+                                            shortName:user.usershortName,
+                                            fullName:user.userName,
+                                            selectedUserId:user.userId,
+                                            userboard:true
+                                            }),
+                                            setSelectedGroup({}),
+                                            setActive(user.userName)
+                                        )} 
+                                            className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
+                                            /*ref={ref}*/
+                                            /*ref={(i===0) ? myref : null}*/
+                                            >
+                                            <div className="flex-shrink-0">
+                                                {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
+                                                <span className="shortName">{user.usershortName}</span>
+                                                {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
+                                                {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
+                                                {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
+                                            </div>
+                                            <div className="flex-grow-1 ms-2">
+                                                <h3>{user.userName}</h3>
+                                            </div>
+                                            {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                        </a>
+                                    )
+                                }
+                                )}
                                 {/*newUserslisting.map((user,i) => (
                                     <a key={user.socketID} 
                                     onClick={(e) => handleSelectUser(user.userId,setSelectedUser({

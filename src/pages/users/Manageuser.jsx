@@ -152,78 +152,77 @@ const Manageuser = () => {
         
         <Header  loggedInUserdata={userData} />
         <div id="wrapper">
-        <div className="content animate-panel">
-            <div className="row">
-                <div className="col-lg-12">
-                    <div className="hpanel">
-                        <div class="panel-heading row">
-                            <div className="col-md-6">
-                            <h3>Manage User</h3>
+            <div className="content animate-panel">
+                <div className="row">
+                    <div className="col-lg-12">
+                        <div className="hpanel">
+                            <div class="panel-heading row">
+                                <div className="col-md-6">
+                                <h3>Manage User</h3>
+                                </div>
+                                <div className="col-md-6">
+                                <Link to="/adduser" className="btn btn-success float-end mt-10"> 
+                                <span>
+                                    Add User <i class="fa fa-chevron-right"></i>
+                                </span>
+                                </Link>
+                                </div>
                             </div>
-                            <div className="col-md-6">
-                            <Link to="/adduser" className="btn btn-success float-end mt-10"> 
-                            <span>
-                                Add User <i class="fa fa-chevron-right"></i>
-                            </span>
-                            </Link>
-                            </div>
-                        </div>
-                        <div className="panel-body">
-                        <table id="example2" className="table table-bordered " width="100%">
-                        <thead>
-                        <tr>
-                            <th>Employee Id</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Type</th>
-                            <th>Password</th>
-                            <th>Added On</th>
-                            {(userData.userType == 'ADMIN') ? (<th>Chatboard</th>) : ""}
-                            <th style={{ width: '50px' }}>Status</th>
-                            <th style={{ width: '59px' }}>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {
-                            alluserdata.map((data,i) => (
-                                <tr key={i}>
-                                    <td>{data.employeeId}</td>
-                                    <td>{data.name}</td>
-                                    <td>{data.email}</td>
-                                    <td>{data.userType}</td>
-                                    <td>{data.decryptPassword}{data.accessView}</td>
-                                    <td>{moment(data.addedon).format('llll')}</td>
-                                    {(userData.userType == 'ADMIN') ? (
-                                    <td><Link to={`/chatboard/${btoa(data.id)}`} target="_blank" title="View Chatboard">
-                                        <FontAwesomeIcon icon={faComment} size="1x" />
-                                        </Link>
-                                    </td>
-                                    ) : ""}
-                                    <td className='text-center'>
-                                    {data.status == 'Active' ? (
-                                        <button class="btn btn-successi" onClick={e=>handleStatus(data.id,'Inactive')}  title="Active"><i class="fa fa-check"></i></button>
-                                    ):(
-                                        <button class="btn btn-dangerri" onClick={e=>handleStatus(data.id,'Active')} title="Inactive"><i class="fa fa-times"></i></button>
-                                    )}
-                                        
-                                    </td>
-                                    <td>
-                                        <Link to={`/updateuser/${data.id}`} className="btn-warningi"><i className='fa fa-pencil'></i></Link>
-                                        <a onClick={e=>handleDelete(data.id)} className="btn-dangeri ms-2"><i className='fa fa-trash'></i></a>
-                                    </td>
-                                </tr>
-                            ))
-                        }
-                        </tbody>
-                        </table>
+                            <div className="panel-body">
+                            <table id="example2" className="table table-bordered " width="100%">
+                            <thead>
+                            <tr>
+                                <th>Employee Id</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Password</th>
+                                <th>Added On</th>
+                                {(userData.userType == 'ADMIN') ? (<th>Chatboard</th>) : ""}
+                                <th style={{ width: '50px' }}>Status</th>
+                                <th style={{ width: '59px' }}>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                                alluserdata.map((data,i) => (
+                                    <tr key={i}>
+                                        <td>{data.employeeId}</td>
+                                        <td>{data.name}</td>
+                                        <td>{data.email}</td>
+                                        <td>{data.userType}</td>
+                                        <td>{data.decryptPassword}{data.accessView}</td>
+                                        <td>{moment(data.addedon).format('llll')}</td>
+                                        {(userData.userType == 'ADMIN') ? (
+                                        <td><Link to={`/chatboard/${btoa(data.id)}`} target="_blank" title="View Chatboard">
+                                            <FontAwesomeIcon icon={faComment} size="1x" />
+                                            </Link>
+                                        </td>
+                                        ) : ""}
+                                        <td className='text-center'>
+                                        {data.status == 'Active' ? (
+                                            <button class="btn btn-successi" onClick={e=>handleStatus(data.id,'Inactive')}  title="Active"><i class="fa fa-check"></i></button>
+                                        ):(
+                                            <button class="btn btn-dangerri" onClick={e=>handleStatus(data.id,'Active')} title="Inactive"><i class="fa fa-times"></i></button>
+                                        )}
+                                            
+                                        </td>
+                                        <td>
+                                            <Link to={`/updateuser/${data.id}`} className="btn-warningi"><i className='fa fa-pencil'></i></Link>
+                                            <a onClick={e=>handleDelete(data.id)} className="btn-dangeri ms-2"><i className='fa fa-trash'></i></a>
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                            </tbody>
+                            </table>
 
+                            </div>
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
-            </div>
-        
         </div>
             
         <Footer/>

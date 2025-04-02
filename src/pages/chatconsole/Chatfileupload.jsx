@@ -44,21 +44,19 @@ const Chatfileupload = ({ onFileSelect,parentselectedFiles,setfilesblank }) => {
         hidden
         id="file-input"
       />
-      {selectedFiles.length>0 && <button type="button" className="btn btn-danger ms-2 float-end" onClick={() => handleRemoveAllFile()} title="Remove All">Remove All <i className="fa fa-close ms-1"></i></button>}
+      {/* {selectedFiles.length>0 && <button type="button" className="btn btn-danger ms-2 float-end" onClick={() => handleRemoveAllFile()} title="Remove All">Remove All <i className="fa fa-close ms-1"></i></button>} */}
       <label htmlFor="file-input">
         <i className="attachment-icon"><i className="fa fa-paperclip "></i></i>
-        
       </label>
+
       <div className="row file-preview">
         {selectedFiles.map((file, index) => (
-          <div key={index} className="col-md-3">
-            <div className="file-preview-item">
-            <div className="col-md-6 chip-info">{file.name}</div>
-            <div className="col-md-3">
-                <button type="button" className="btn btn-danger" onClick={() => handleRemoveFile(index)}><i className="fa fa-trash ms-1"></i></button>
+            <div  key={index} className="file-preview-item">
+            <div className="col-md-11 chip-info">{file.name}</div>
+            <div>
+                <button type="button" className="btn xcross" onClick={() => handleRemoveFile(index)}><i class="fa fa-close ms-1"></i></button>
             </div>
             </div>
-          </div>
         ))}
       </div>
       

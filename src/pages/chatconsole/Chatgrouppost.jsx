@@ -153,7 +153,7 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
     <>
         <div className="send-box">
             <Chatfileupload onFileSelect={setFiles} parentselectedFiles={filesblank} setfilesblank={setfilesblank} />
-            <div className="float-end"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
+            <div className="float-end scutkey"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
             <div className="clearfix"></div>
             <form>
             <InputEmoji

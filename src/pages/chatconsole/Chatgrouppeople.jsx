@@ -155,44 +155,42 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
 
     return (
         <>
-            <div className="row">
-                <div className='col-5 p-4'>
-                    <div className="chat-list border rounded">
-                    <button className="btn btn-default me-3 float-end " onClick={handleAddpeoplebox}> <i className='fa fa-plus'></i> ADD PEOPLE </button>
-                    <br />
-                    <br />
+            <div className="d-flex justify-content-between">
+                <div className='col-6 p-4 hfull'>
+                    <div className="chat-list">
+                    <button className="btn addbtn me-3 " onClick={handleAddpeoplebox}> <i className='fa fa-plus'></i> ADD PEOPLE </button>
                     {groupMemberdataFromChild.map((user,i) => (
                         <div className='row'>
-                        <div className='col-10'>   
+                        <div className='col-11'>   
                         <a key={user.socketID}
-                            className="d-flex align-items-center p-2">
+                            className="d-flex align-items-center p-2 abt">
                             <div className="flex-shrink-0">
                                 <span className="shortName">{user.usershortName}</span>
                                 {user.socketID && <span className="active"></span>}
                             </div>
-                            <div className="flex-grow-1 ms-2 w-90">
+                            <div className="flex-grow-1 ms-2 w-90 textdot">
                                 <h3>{user.userName}</h3>
                                 <h6>{user.userEmail}</h6>
                             </div>
                             
                         </a>
                         </div>
-                        <div className='col-1'>
+                        <div className='col-1 abtdust'>
                         {(user.userId!==loggedInuserId) && <a className="btn-dangeri mt-4" onClick={e=>handleDelete(user.userId,groupId,totalMember)}> <i className='fa fa-trash'></i> </a>}
                         </div>
                         </div>
                     ))}
                     </div>
                 </div>
-                {addpeoplebox && <div className='col-7'>
+                {addpeoplebox && <div className='col-6 p-4 bg-light hfull'>
                     <div class="hpanel">
                     <div class="panel-heading text-center">
                         <h3>Add People</h3>
                     </div>
                     <div class="panel-body">
-                    <form onSubmit={handleSubmit} class="form-horizontal p-3 border rounded">
+                    <form onSubmit={handleSubmit} class="form-horizontal py-3 px-2 bg-light">
                     <div class="form-group">
-                        <div class="col-sm-9">
+                        <div class="col-sm-12">
                         <Select 
                         isClearable
                         isSearchable
@@ -204,8 +202,8 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                         </div>
                     </div>                    
                     <div class="form-group mb-1 mt-2">
-                        <div class="col-sm-9 d-flex justify-content-end mt-1">
-                            <button class="btn btn-success btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
+                        <div class="col-sm-12 d-flex justify-content-end mt-1">
+                            <button class="btn succbtn btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
                         </div>
                     </div>
                     </form>

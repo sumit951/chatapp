@@ -39,8 +39,8 @@ const Header = (props) => {
     return (
         <div>
             <div id="header">
-                <div className="color-line">
-                </div>
+                {/* <div className="color-line">
+                </div> */}
                 <div id="logo" className="light-version">
                     <Link to="/">
                         {/* <h3>
@@ -51,7 +51,7 @@ const Header = (props) => {
                     </Link>
 
                 </div>
-                <div className='justify-content-end col-md-10 pr0 mt-3 d-flex navtop'>
+                <div className='justify-content-end py-3 px-5 d-flex navtop'>
                     <ul class="d-flex">
                         <li><FontAwesomeIcon icon={faUser} size="1x" /> Welcome {props.loggedInUserdata.name}</li>
                         <li><FontAwesomeIcon icon={faPowerOff} size="1x" /> <a onClick={logout}>Logout</a></li>

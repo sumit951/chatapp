@@ -132,17 +132,17 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
   
   return (
     <>
-      <div className="modal-body">
+      <div className="modal-body overflown">
             <div className="msg-body">
         <div className="content animate-panel">
         <div className="row d-flex justify-content-center">
-        <div className="col-lg-7 mt-5">
+        <div className="col-lg-10 mt-5">
             <div className="hpanel">
                 <div className="panel-heading text-center">
                     <h3>Create Group</h3>
                 </div>
                 <div className="panel-body">
-                <form onSubmit={handleSubmit} className="form-horizontal p-3 border rounded">
+                <form onSubmit={handleSubmit} className="form-horizontal p-3">
                 <div className="form-group"><label className="col-sm-3 control-label">Group Name</label>
                     <div className="col-sm-9"><input type="text" className="form-control" name="groupName" onChange={handleChanges} placeholder="Enter Group Name" /></div>
                 </div>
@@ -167,7 +167,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                 
                 <div className="form-group mb-1 mt-2">
                     <div className="col-sm-12 d-flex justify-content-end mt-1">
-                        <button className="btn btn-success btn-block" type="submit">Save changes <i className="fa fa-chevron-right"></i></button>
+                        <button className="btn succbtn" type="submit">Save changes <i className="fa fa-chevron-right"></i></button>
                     </div>
                 </div>
                 </form>

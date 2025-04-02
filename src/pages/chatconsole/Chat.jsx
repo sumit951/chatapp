@@ -10,11 +10,12 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import "../../assets/vendor/fontawesome/css/font-awesome.css";
 import "../../assets/chat/style.css";
+import "../../assets/chat/astyle.css";
 import logo from '../../assets/rc.png';
 import smallLogo from '../../assets/Raipd_logo.png';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff, faGear, faMessage, faPhone, faChevronRight  } from '@fortawesome/free-solid-svg-icons';
 
 
 import userProfile from "../../assets/chat/user-profile.png";
@@ -26,6 +27,8 @@ import Chatgroupbody from './Chatgroupbody';
 import Chatgrouppost from './Chatgrouppost';
 import Chatgrouppeople from './Chatgrouppeople';
 import Setting from './Setting';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Chat = ({ socket }) => { 
 
@@ -128,6 +131,7 @@ const Chat = ({ socket }) => {
     if (userData.status == 'Inactive') {
         logout()
     }
+
     
     const fetchUserInfo = async () => {
         try {
@@ -175,13 +179,41 @@ const Chat = ({ socket }) => {
     const [dataFromChild, setDataFromChild] = useState("");
     const [chatdataFromChild, setChatDataFromChild] = useState([]);
     const [newArrchatdataFromChild, setnewChatDataFromChild] = useState([]);
-    const [newArrgroupchatdataFromChild, setnewgroupChatDataFromChild] = useState([]);
+    
 
     const [groupdataFromChild, setgroupDataFromChild] = useState("");
     const [groupchatdataFromChild, setGroupChatDataFromChild] = useState([]);
+    const [newArrgroupchatdataFromChild, setnewgroupChatDataFromChild] = useState([]);
 
     const [groupMemberdataFromChild, setGroupMemberDataFromChild] = useState([]);
 
+    
+    const currentTime2 = new Date().getTime();
+    const expiryTime = new Date(userData.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
+    
+    let notificationEnbleSts = true;  
+    if ((currentTime2 <= expiryTime) && userData.chatStatus=='DND') {
+        console.log(userData.chatStatus);
+        notificationEnbleSts = false;
+    }
+    else 
+    {
+        if(userData.chatStatus=='Busy' || userData.chatStatus=='DND')
+        {
+            try {
+                //console.log(id);
+    
+                const response = axiosConfig.put(`/user/updatesettingtoactive`)
+                console.log(response);
+                
+                
+            } catch (error) {
+                //console.log(error.message);
+                
+            }
+        }
+    }
+    
     useEffect(() => {
         //lastMessageRef.current?.scrollIntoView({ block: "end"});
     }, [messages]);
@@ -192,15 +224,17 @@ const Chat = ({ socket }) => {
     }, [messages]);
     lastMessageGroupRef.current?.scrollIntoView({ block: "end"});
     
-    
     useEffect(() => {
         socket.on('messageResponse', (data) => { 
             //console.log(data);
             //console.log(isTabActive);
             //console.log(notificationShown);
             if(!isTabActive && !notificationShown && data.receiverId == chatboardUserid)
-            {
-                showNotification(data);
+            { 
+                if(notificationEnbleSts)
+                {
+                    showNotification(data);
+                }
                 setNotificationShown(true); // Ensure notification shows only once
                 setIsTabActive(true);
             }
@@ -232,7 +266,10 @@ const Chat = ({ socket }) => {
 
             if(!isTabActivegroup && !notificationShown  && data.groupId != null)
             {
-                showNotification(data);
+                if(notificationEnbleSts)
+                {
+                    showNotification(data);
+                }
                 setNotificationShown(true); // Ensure notification shows only once
             }
             
@@ -406,6 +443,148 @@ const Chat = ({ socket }) => {
     };
 
 
+    const handleReplyMessage = async (replyMessageData) => {
+        /* console.log(replyMessageData.messageId);
+        return false */
+        const d = new Date();
+        const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+        if ((replyMessageData.newMessage.trim() || files.length) && localStorage.getItem('loggedInUserName'))
+        {
+            /* if(files!=null && files.length>0)
+            {
+                const formData = new FormData();
+                formData.append("frmmessage", replyMessageData.newMessage);
+                // Append files to form data
+                
+
+                // Append all files
+                Array.from(files).forEach((file) => {
+                    formData.append('files', file);
+                });
+                
+                try {
+                    const response = await axiosConfig.post(`/upload`,formData,{ headers: {
+                        'Content-Type': 'multipart/form-data', // Set the default header to multipart/form-data
+                      }})
+                    //console.log(response);
+                    //console.log(response.data['files']);
+                    let filesStr = ''
+                    response.data['files'].map((file) => {
+                        //console.log(file);
+                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
+                    });
+                    const messagewithfiles = `${replyMessageData.newMessage}</br>${filesStr}`;
+
+                    //console.log(messagewithfiles);
+
+                    await socket.emit('replyMessage', {
+                        message: messagewithfiles,
+                        senderName: localStorage.getItem('loggedInUserName'),
+                        senderId:userData.id,
+                        socketID: socket.id,
+                        receiverId: receiverId,
+                        messageType:'text',
+                        timestamp: formattedDate,
+                        replyTo:replyMessageData.messageId
+                    });
+
+                    setfilesblank(true)
+                    setFiles([]);
+                    
+                } catch (error) {
+                    console.log(error.message);
+                }
+
+            }
+            else
+            { */
+                await socket.emit('replyMessage', {
+                    message: replyMessageData.newMessage,
+                    senderName: localStorage.getItem('loggedInUserName'),
+                    senderId:userData.id,
+                    socketID: socket.id,
+                    receiverId: receiverId,
+                    messageType:'text',
+                    timestamp: formattedDate,
+                    replyTo:replyMessageData.messageId
+                });
+            /* } */    
+
+        }
+    };
+
+
+
+    const handleReplyMessageGroup = async (replyMessageData) => {
+        /* console.log(replyMessageData.messageId);
+        return false */
+        const d = new Date();
+        const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+        if ((replyMessageData.newMessage.trim() || files.length) && localStorage.getItem('loggedInUserName'))
+        {
+            /* if(files.length>0)
+            {
+                const formData = new FormData();
+                formData.append("frmmessage", message);
+                
+
+                // Append all files
+                Array.from(files).forEach((file) => {
+                    formData.append('files', file);
+                });
+                
+                try {
+                    const response = await axiosConfig.post(`/upload`,formData,{ headers: {
+                        'Content-Type': 'multipart/form-data', // Set the default header to multipart/form-data
+                      }})
+                    //console.log(response);
+                    //console.log(response.data['files']);
+                    let filesStr = ''
+                    response.data['files'].map((file) => {
+                        //console.log(file);
+                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
+                    });
+                    const messagewithfiles = `${message}</br>${filesStr}`;
+
+                    //console.log(messagewithfiles);
+
+                    await socket.emit('messagegroup', {
+                        message: messagewithfiles,
+                        senderName: localStorage.getItem('loggedInUserName'),
+                       
+                        senderId:senderUserData.id,
+                        groupId:groupId,
+                        socketID: socket.id,
+                        messageType:'text',
+                        timestamp: formattedDate
+                    });
+
+                    setfilesblank(true)
+                    setFiles([]);
+                    
+                } catch (error) {
+                    console.log(error.message);
+                }
+
+            }
+            else
+            { */
+                await socket.emit('replyMessageGroup', {
+                    message: replyMessageData.newMessage,
+                    senderName: localStorage.getItem('loggedInUserName'),
+                    /*id: `${socket.id}${Math.random()}`,*/
+                    senderId:userData.id,
+                    groupId:groupId,
+                    socketID: socket.id,
+                    messageType:'text',
+                    timestamp: formattedDate,
+                    replyTo:replyMessageData.messageId
+                });
+            /* } */    
+
+        }
+    };
+
     const handleEditMessageGroup = async (updatedMessageDate) => {
         //console.log(updatedMessageDate);
         try {
@@ -514,6 +693,13 @@ const Chat = ({ socket }) => {
                 //setTypingStatus('')
             }
         })
+        socket.on('reloadChatStatus', (data) => {
+            console.log(data);
+            if(data!="")
+            {
+                fetchinteractwithuserlist()
+            }
+        })
     }, [socket,receiverId,groupId]);
 
     const [groupComponenet, SetGroupcomponent] = useState(false)
@@ -540,12 +726,26 @@ const Chat = ({ socket }) => {
     
     const [activefrParent, setActivefrParent] = useState(null);
     const handleDataFromChild = (data, userChatData, groupdata, groupChatData,groupMemberData) => {
-        setDataFromChild(data)
-        setChatDataFromChild(userChatData)
-
-        setgroupDataFromChild(groupdata)
-        setGroupChatDataFromChild(groupChatData)
-        setGroupMemberDataFromChild(groupMemberData)        
+        if(data)
+        {
+            setDataFromChild(data)
+        }
+        if(userChatData)
+        {
+            setChatDataFromChild(userChatData)
+        }
+        if(groupdata)
+        {
+            setgroupDataFromChild(groupdata)
+        }
+        if(groupChatData)
+        {
+            setGroupChatDataFromChild(groupChatData)
+        }
+        if(groupMemberData)
+        {
+            setGroupMemberDataFromChild(groupMemberData)
+        }        
     }
     
     
@@ -664,6 +864,8 @@ const Chat = ({ socket }) => {
     
     const fetchAllUser = async () => {
     try {
+        if(searchParam!=null)
+        {
             const response = await axiosConfig.get(`/user/getactiveallusergroup/${searchParam}`)
             if(response.status==200)
             {
@@ -674,7 +876,9 @@ const Chat = ({ socket }) => {
                     window.location.href = "/login";
                 }   
                 setAllUserdata(response.data);
+            
             }
+        }
         } catch (error) {
         console.log(error.message);
         
@@ -721,6 +925,15 @@ const Chat = ({ socket }) => {
         }
     };
     
+
+    const [sidebarClosed, setSidebarClosed] = useState(false);
+
+    // Toggle sidebar function
+    const toggleSidebar = () => {
+      setSidebarClosed(!sidebarClosed);
+    };
+
+        
     return (
         <div>
             <section className="message-area">
@@ -729,8 +942,8 @@ const Chat = ({ socket }) => {
                         <div className="col-12">
 
                             <div id="header">
-                                <div className="color-line">
-                                </div>
+                                {/* <div className="color-line">
+                                </div> */}
                                 <div className="row mx-2">
                                     <div className="col-3">
 
@@ -760,10 +973,10 @@ const Chat = ({ socket }) => {
                                                 
                                         }
                                     </div>
-                                    <div className="col-2 sharparrow">
+                                    <div className="col-1 sharparrow">
                                         <ul className="moreoption">
                                             <li className="navbar nav-item dropdown">
-                                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i className="fa fa-plus"></i></a>
+                                                <a className="nav-link dropdown-toggle plua" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i className="fa fa-plus"></i></a>
                                                 <ul className="dropdown-menu">
                                                     <li><a className="dropdown-item" onClick={handleDirectGroup}>Direct Chat</a></li>
                                                     <li><a className="dropdown-item" onClick={handleCreateGroup}>Create Group</a></li>
@@ -771,11 +984,11 @@ const Chat = ({ socket }) => {
                                             </li>
                                         </ul>
                                     </div>
-                                    <div className="col-3 sharparrow">
+                                    <div className="col-4 sharparrow">
                                         <div className='float-end'>
                                             <ul className="moreoption">
                                                 <li className="navbar nav-item dropdown">
-                                                    <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span> <FontAwesomeIcon icon={faUser} size="1x" /> Welcome | {userdataname}, </span> <i className="fa fa-ellipsis-v" aria-hidden="true"></i></a>
+                                                    <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span> <FontAwesomeIcon icon={faUser} size="1x" /> Welcome | {userdataname} </span> <i className="fa fa-ellipsis-v" aria-hidden="true"></i></a>
                                                     <ul className="dropdown-menu lc">
                                                         {usertypeData != 'EMPLOYEE' ? (
                                                             <li><Link to="/"></Link></li>
@@ -783,7 +996,6 @@ const Chat = ({ socket }) => {
                                                             null
                                                         )
                                                         }
-                                                        <li> <a className="dropdown-item" onClick={handleUsersetting}><FontAwesomeIcon icon={faGear} size="1x" /> Setting</a></li>
                                                         <li> <a className="dropdown-item" onClick={logout}><FontAwesomeIcon icon={faPowerOff} size="1x" /> LEAVE CHAT</a></li>
                                                     </ul>
                                                 </li>
@@ -794,7 +1006,52 @@ const Chat = ({ socket }) => {
                             </div>
                         </div>
                         <div className="col-12">
+
                             <div className="chat-area">
+                            <div className='sidebarr'>
+      {/* Sidebar */}
+      <nav className={`sidebarss ${sidebarClosed ? 'close' : ''}`}>
+        <header>
+          <span className="image">
+            {/* FontAwesome Chevron Icon (for sidebar toggle) */}
+            <FontAwesomeIcon 
+              icon={faChevronRight} 
+              size="sm"
+              className={`toggle ${sidebarClosed ? 'rotate' : ''}`}
+              onClick={toggleSidebar}
+            />
+          </span>
+        </header>
+
+        <div className="menu-bar">
+          <ul className="menu-links">
+            <li className="nav-link">
+              <a href="javascript:void(0);">
+              <FontAwesomeIcon icon={faMessage} />
+                <span className="text nav-text">Message</span>
+              </a>
+            </li>
+            <li className="nav-link">
+              <a href="javascript:void(0);">
+              <FontAwesomeIcon icon={faPhone} />
+                <span className="text nav-text">Calling</span>
+              </a>
+            </li>
+            <li className="nav-link">
+              <a href="javascript:void(0);" className="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <FontAwesomeIcon icon={faGear} />
+                <span className="text nav-text">Setting</span>
+              </a>
+              <ul className="dropdown-menu">
+                <li><a className="dropdown-item" href="javascript:void(0);" onClick={handleUsersetting}>Busy / DND </a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <div className='col-md-3 p-0'>
                                 <Chatnav 
                                 socket={socket} 
                                 sendDataToParent={handleDataFromChild} 
@@ -817,12 +1074,13 @@ const Chat = ({ socket }) => {
                                 setnewgroupChatDataFromChild={setnewgroupChatDataFromChild}
                                 SetonetoOnecomponent={SetonetoOnecomponent}
                                 Setusersetting={Setusersetting}
-                                />
+                                loggedInuserdata={userData} 
+                                /></div>
 
                                 <div className="chatbox">
                                     <div className="modal-dialog-scrollable">
                                         <div className="modal-content">
-                                            {usersetting && <Setting loggedInuserdata={userData} />}
+                                            {usersetting && <Setting socket={socket} loggedInuserdata={userData} />}
                                             {groupComponenet && <Chatgroupcreate loggedInuserdata={userData} />}
                                             {!groupComponenet && !usersetting && userboard && <div className="msg-head">
                                                 <div className="row">
@@ -853,6 +1111,7 @@ const Chat = ({ socket }) => {
                                             
 
                                             {!groupComponenet && !usersetting && userboard && receiverId && <Chatbody 
+                                            socket={socket} 
                                             messages={messageResponse} 
                                             lastMessageRef={lastMessageRef} 
                                             typingStatus={typingStatus} 
@@ -860,12 +1119,13 @@ const Chat = ({ socket }) => {
                                             onDeleteMsg={deleteMessage}
                                             onEditMessage={handleEditMessage}
                                             newArrchatdataFromChild={newArrchatdataFromChild}
+                                            onReplyMessage={handleReplyMessage}
                                             />}
                                             {!groupComponenet && !usersetting && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} />}
 
                                             {!groupComponenet && !usersetting && groupboard && <div className="msg-head">
                                                 <div className="row">
-                                                <div className="col-9">
+                                                <div className="col-7">
                                                     <div className="d-flex align-items-center">
                                                         <div className="chat-list">
                                                         
@@ -883,7 +1143,7 @@ const Chat = ({ socket }) => {
                                                         }
                                                         </div>
                                                         </div>
-                                                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                                        <ul className="nav nav-tabs border-0 p-0 mb-0" id="myTab" role="tablist">
                                                             <li className="nav-item" role="presentation">
                                                                 <button className="nav-link active" id="chatboard-tab" data-bs-toggle="tab" data-bs-target="#chatboard" type="button" role="tab" aria-controls="chatboard" aria-selected="true">
                                                                 Messages
@@ -894,17 +1154,18 @@ const Chat = ({ socket }) => {
                                                             </li>
                                                         </ul>
                                                     </div>
-                                                    <div className="col-3">
-                                                        <button className="btn btn-warning me-3 float-end " onClick={e=>handleLeaveSpace(groupId,loggedInuserId,groupdataFromChild.totalMember)}> Leave Space </button>
+                                                    <div className="col-5 text-end">
+                                                        <button className="btn warnbtn me-3" onClick={e=>handleLeaveSpace(groupId,loggedInuserId,groupdataFromChild.totalMember)}> Leave Space </button>
 
-                                                        {(createdBy===loggedInuserId) && <button className="btn btn-danger me-3" onClick={e=>handleDeleteGroup(groupId)}> Delete Group </button>} 
+                                                        {(createdBy===loggedInuserId) && <button className="btn danbtn me-1 " onClick={e=>handleDeleteGroup(groupId)}> Delete Group </button>} 
                                                     </div>
                                                 </div>
                                             </div>}
                                             {!groupComponenet && !usersetting && groupboard && groupId && <div className="tab-content">
                                             <div className="tab-pane show active" id="chatboard" role="tabpanel" aria-labelledby="chatboard-tab">
-                                            <div className="modal-content">                        
+                                            <div className="modal-content chatarea">                        
                                             {!groupComponenet && !usersetting && groupboard && groupId && <Chatgroupbody 
+                                            socket={socket}
                                             messages={messagegroupResponse} 
                                             lastMessageGroupRef={lastMessageGroupRef} 
                                             typingStatusgroup={typingStatusgroup} 
@@ -912,6 +1173,7 @@ const Chat = ({ socket }) => {
                                             onDeleteMsgGroup={deleteMessageMsgGroup}
                                             onEditMessageGroup={handleEditMessageGroup}
                                             newArrgroupchatdataFromChild={newArrgroupchatdataFromChild}
+                                            onReplyMessageGroup={handleReplyMessageGroup}
                                             />}
                                             {!groupComponenet && !usersetting && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} groupMemberdataFromChild={groupMemberdataFromChild} />}
                                             </div>
@@ -924,8 +1186,6 @@ const Chat = ({ socket }) => {
                                     </div>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
                 {/* </div> */}
