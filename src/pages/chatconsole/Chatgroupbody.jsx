@@ -33,6 +33,11 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
     const handleReplyClick = (messageId) => {
         setSelectedMessageId(messageId);
     };
+
+    const updateStateFromChild = (newState) => {
+        setSelectedMessageId(newState);
+    };
+
     const handleCancelReply = (messageId) => {
         setSelectedMessageId(null);
     };
@@ -141,6 +146,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         <a
                             className="reply-button"
                             onClick={() => handleReplyClick(chatdata.messageId)}
+                            title="Start Thread"
                         >
                             <i className='fa fa-reply'></i>
                         </a>
@@ -159,14 +165,14 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
                     value={replyContent}
                     onChange={setReplyContent}
                     cleanOnEnter
-                    onEnter={handleSaveEdit}
+                    /* onEnter={handleSaveEdit} */
                     placeholder="Type a message"
                     shouldReturn
                     />
@@ -194,20 +200,21 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         <a
                             className="reply-button"
                             onClick={() => handleReplyClick(chatdata.messageId)}
+                            title="Start Thread"
                         >
                             <i className='fa fa-reply'></i>
                         </a>
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
                     value={replyContent}
                     onChange={setReplyContent}
                     cleanOnEnter
-                    onEnter={handleSaveEdit}
+                    /* onEnter={handleSaveEdit} */
                     placeholder="Type a message"
                     shouldReturn
                     />
@@ -223,7 +230,9 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
             
             {messages.map((chatdata) =>
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
-                <li className={`${(editingMessageId !== chatdata.messageId) ? "sender" : "deletedmsg"} message-container`}  
+                <li className={`${(editingMessageId !== chatdata.messageId) ? "sender" : "deletedmsg"} 
+                    ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
+                    message-container`}  
                 key={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
@@ -255,6 +264,13 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                 {hoveredMessageId === chatdata.messageId && (
                     <span className="message-actions float-end ms-3">
                     <a
+                        className="reply-button"
+                        onClick={() => handleReplyClick(chatdata.messageId)}
+                        title="Start Thread"
+                    >
+                        <i className='fa fa-reply'></i>
+                    </a>
+                    <a
                             className="edit-button"
                             onClick={() => handleEditClick(chatdata.message,chatdata.messageId)}
                         >
@@ -269,14 +285,63 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     </span>
                 )}
                 </p>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} />
+                {selectedMessageId === chatdata.messageId && (
+                <span>
+                    <InputEmoji
+                    value={replyContent}
+                    onChange={setReplyContent}
+                    cleanOnEnter
+                    /* onEnter={handleSaveEdit} */
+                    placeholder="Type a message"
+                    shouldReturn
+                    />
+                    <button onClick={() => postReply(chatdata.messageId)}>Post Reply</button>
+                    <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
+                </span>
+                )}
                 </>
                 )}
 
                 </li>
             ) : (
-                <li className="repaly"  key={chatdata.messageId}>
+                <li className={`${(chatdata.deleteSts=='No') ? "repaly" : "deletedmsg"}
+                ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
+                message-container`} 
+                key={chatdata.messageId}
+                onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
+                onClick={() => handleMouseEnter(chatdata.messageId)}
+                onMouseLeave={handleMouseLeave}
+                >
                 <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}</span>
-                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} /></p>
+                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} />
+                {((hoveredMessageId === chatdata.messageId) && chatdata.deleteSts=='No') && (
+                    <span className="message-actions float-end ms-3">
+                    <a
+                        className="reply-button"
+                        onClick={() => handleReplyClick(chatdata.messageId)}
+                        title="Start Thread"
+                    >
+                        <i className='fa fa-reply'></i>
+                    </a>
+                    </span>
+                )}
+                </p>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} />
+                {selectedMessageId === chatdata.messageId && (
+                <span>
+                    <InputEmoji
+                    value={replyContent}
+                    onChange={setReplyContent}
+                    cleanOnEnter
+                    /* onEnter={handleSaveEdit} */
+                    placeholder="Type a message"
+                    shouldReturn
+                    />
+                    <button onClick={() => postReply(chatdata.messageId)}>Post Reply</button>
+                    <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
+                </span>
+                )}
                 </li>
             )
             )}

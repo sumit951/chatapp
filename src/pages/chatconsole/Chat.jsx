@@ -193,7 +193,7 @@ const Chat = ({ socket }) => {
     
     let notificationEnbleSts = true;  
     if ((currentTime2 <= expiryTime) && userData.chatStatus=='DND') {
-        console.log(userData.chatStatus);
+        //console.log(userData.chatStatus);
         notificationEnbleSts = false;
     }
     else 

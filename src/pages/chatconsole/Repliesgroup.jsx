@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Chatbody = ({socket, parentMessageId, boxtype}) => {
+const Chatbody = ({socket, parentMessageId, boxtype, updateStateFromChild}) => {
 
     const lastMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -23,6 +23,10 @@ const Chatbody = ({socket, parentMessageId, boxtype}) => {
     const handleMouseLeave = () => {
     setHoveredMessageId(null);
     };
+
+    const handleReplyClick = async () => {
+        updateStateFromChild(parentMessageId)
+    }
 
     const [editingMessage, setEditingMessage] = useState(null);
     const [newMessageText, setNewMessageText] = useState('');
@@ -67,7 +71,7 @@ const Chatbody = ({socket, parentMessageId, boxtype}) => {
     const [userChatData, setUserChatData] = useState([]);
     
     const fetchrepliedmessages = async(parentMessageId) => {
-        console.log(parentMessageId);
+        //console.log(parentMessageId);
         try {
             const response = await axiosConfig.get(`/chat/getrepliedmessagesgroup/${parentMessageId}`)
             if(response.status==200)
@@ -101,6 +105,16 @@ const Chatbody = ({socket, parentMessageId, boxtype}) => {
         lastMessageRef.current?.scrollIntoView({ block: "end"});
     }, [userChatData]);
     //lastMessageRef.current?.scrollIntoView({ block: "end"});
+
+    useEffect(() => {
+        socket.on('messagegroupResponseReply', (data) => { 
+            if(parentMessageId === data.replyTo)
+            {
+                //console.log(data);
+                setUserChatData([...userChatData, data])
+            }
+        })
+    }, [socket,parentMessageId,userChatData]);
     
   return (
     <>
@@ -174,70 +188,8 @@ const Chatbody = ({socket, parentMessageId, boxtype}) => {
                 </li>
             )) : ( <b></b> )
             )}
-
-
-
-            {/* {messages.map((chatdata) =>
-            chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
-                <li className={`${(editingMessageId !== chatdata.messageId) ? "sender" : "deletedmsg"} message-container`}
-                key={chatdata.messageId}
-                onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
-                onClick={() => handleMouseEnter(chatdata.messageId)}
-                onMouseLeave={handleMouseLeave}
-                >
-
-                {editingMessage && editingMessageId === chatdata.messageId ? (
-                <>
-                <InputEmoji
-                value={newMessageText}
-                onChange={setNewMessageText}
-                cleanOnEnter
-                onEnter={handleSaveEdit}
-                placeholder="Type a message"
-                shouldReturn
-                />
-                    
-                    <button onClick={handleSaveEdit}>Save</button>
-                    <button onClick={handleCancelEdit}>Cancel</button>
-                </>
-                ) : (
-                <>
-
-                <span className="replyBoxtime"><strong>You</strong> : {moment(chatdata.timestamp).format('llll')}</span>
-                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} />
-                {hoveredMessageId === chatdata.messageId && (
-                    <span className="message-actions float-end ms-3">
-                    <a
-                        className="edit-button"
-                        onClick={() => handleEditClick(chatdata.message,chatdata.messageId)}
-                    >
-                        <i className='fa fa-pencil'></i>
-                    </a>
-                    <a
-                        className="delete-button"
-                        onClick={() => onDeleteMsg(chatdata.messageId)}
-                    >
-                        <i className='fa fa-trash'></i>
-                    </a>
-                    </span>
-                )}
-                </p>
-                </>
-                )}
-
-                </li>
-            ) : (
-                <li className="repaly"  key={chatdata.messageId}>
-                                    <span className="replyBoxtime"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}</span>
-                <p><span dangerouslySetInnerHTML={{__html: chatdata.message}} /></p>
-                </li>
-            )
-            )} */}
-
-
-
-
             </ul>
+            <a className="badge badge-waring" onClick={handleReplyClick}><i className='fa fa-reply'></i> Reply to thread</a>
             </div>
             <div ref={lastMessageRef} />
         </div>}

@@ -1426,11 +1426,22 @@ fieldset[disabled] .btn-link.active {
   font-size: 12px;
 }
 
+.quote-button {
+  background-color: #0ffd86;
+  color: white;
+  border: none;
+  padding: 1px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
 .edit-button:hover,
 .delete-button:hover,
-.reply-button:hover {
+.reply-button:hover,
+.quote-button:hover {
   background-color: white;
-  color: #fb1515;
+  color: #facf96;
 }
 
 .deletedmsg {
