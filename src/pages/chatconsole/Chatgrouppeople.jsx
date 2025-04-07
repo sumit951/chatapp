@@ -11,12 +11,15 @@ import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff} from 
 const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,groupMemberdataFromChild}) => {
     const loggedInuserId = senderUserData.id;
     const token = localStorage.getItem('chat-token-info')
+    const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
     //console.log(groupdataFromChild.totalMember);
     const totalMember = groupdataFromChild.totalMember;
+    //const allowedMember = groupdataFromChild.allowedMember;
+    const allowedMember = 4;
     const animatedComponents = makeAnimated();
     const [alluserdata, setAllUserdata] = useState([]);
     const [searchParam, setSearchuser] = useState();
-    //console.log(searchParam);
+    //console.log(groupMemberdataFromChild.length +'=='+ allowedMember);
     
     const fetchAllUser = async () => {
     try {
@@ -92,18 +95,22 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
     }
 
     const[addpeoplebox,SetPeopleBox] = useState(false)
-    
+    const[sendrequesBox,SetSendrequesBox] = useState(false)
+
     const handleAddpeoplebox = () => {
         SetPeopleBox(true)
+        SetSendrequesBox(false)
+    }
 
+    const handleSendRequsetbox = () => {
+        SetSendrequesBox(true)
+        SetPeopleBox(false)
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(selOption);
-        //console.log(values);
-        //console.log(selOption.selectUsers.length);
-        
+       
         if(selOption.selectUsers==null)
         {
           alert('Please Select User')
@@ -112,53 +119,121 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
         }
         else
         {
-          //return false;
-          //console.log(values);
-          const fullData = {
-                groupId,
-                ...selOption
-            };
-          try {
-              const response = await axiosConfig.post('/chat/addmembergroup', fullData)
-              if(response.status==200 && response.data.status=='success')
-              {
-                  toast.success(response.data.message, {
-                      position: "bottom-right",
-                      autoClose: 1000,
-                      hideProgressBar: true
-                  });
-                    setTimeout(() => {
-                          //navigate('/manageuser');
-                        window.location.reload()
-                    }, 
-                    2000
-                    ); 
-              }
-              if(response.data.status=='fail')
-              {
-                  toast.error(response.data.message, {
-                      position: "bottom-right",
-                      autoClose: 1000,
-                      hideProgressBar: true
-                  });
-              }
-          } catch (error) {
-              //console.log(error.message);
-              toast.error(error.message, {
-                  position: "bottom-right",
-                  autoClose: 1000,
-                  hideProgressBar: true
-              });
-          }
+            const fullData = {
+                    groupId,
+                    ...selOption
+                };
+            try {
+                const response = await axiosConfig.post('/chat/addmembergroup', fullData)
+                if(response.status==200 && response.data.status=='success')
+                {
+                    toast.success(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                        setTimeout(() => {
+                            //navigate('/manageuser');
+                            window.location.reload()
+                        }, 
+                        2000
+                        ); 
+                }
+                if(response.data.status=='fail')
+                {
+                    toast.error(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                }
+            } catch (error) {
+                //console.log(error.message);
+                toast.error(error.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                });
+            }
         }
     }
+
+    const[valuesReq, setValuesReq] = useState({
+        groupId:groupId,
+        senderId:chatboardUserid,
+        requestNumber:''
+    })
+
+    const handleChanges = (e) => {
+        setValuesReq({...valuesReq,[e.target.name]:e.target.value})
+        console.log(valuesReq.requestNumber);
+    }
+
+    const handleRequestSubmit = async (e) => {
+        e.preventDefault();
+        //console.log(valuesReq);
+        //return false;
+
+        if(valuesReq.requestNumber)
+        {
+            try {
+                const response = await axiosConfig.post('/chat/sendaddmemberrequest', valuesReq)
+                if(response.status==200 && response.data.status=='success')
+                {
+                    socket.emit('sendaddmemberrequest', valuesReq);
+
+                    toast.success(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                        setTimeout(() => {
+                            //navigate('/manageuser');
+                            //window.location.reload()
+                        }, 
+                        2000
+                        ); 
+                }
+                if(response.data.status=='fail')
+                {
+                    toast.error(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                }
+            } catch (error) {
+                //console.log(error.message);
+                toast.error(error.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                });
+            }
+        }
+    }
+
+    useEffect(() => {
+        if(groupId)
+        {
+            //console.log(groupId);
+            SetSendrequesBox(false)
+            SetPeopleBox(false)
+        }
+    }, [groupId]);
 
     return (
         <>
             <div className="d-flex justify-content-between">
                 <div className='col-6 p-4 hfull'>
                     <div className="chat-list">
+                    {(groupMemberdataFromChild.length < allowedMember) ?
+                    (
                     <button className="btn addbtn me-3 " onClick={handleAddpeoplebox}> <i className='fa fa-plus'></i> ADD PEOPLE </button>
+                    ) : (
+                    <button className="btn addbtn me-3 " onClick={handleSendRequsetbox}> <i className='fa fa-plus'></i> SEND REQUEST </button>
+                    )
+                    }
                     {groupMemberdataFromChild.map((user,i) => (
                         <div className='row'>
                         <div className='col-11'>   
@@ -182,7 +257,7 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                     ))}
                     </div>
                 </div>
-                {addpeoplebox && <div className='col-6 p-4 bg-light hfull'>
+                {!sendrequesBox && addpeoplebox && <div className='col-6 p-4 bg-light hfull'>
                     <div class="hpanel">
                     <div class="panel-heading text-center">
                         <h3>Add People</h3>
@@ -199,6 +274,34 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                         components={animatedComponents}
                         isMulti
                         options={options} />
+                        </div>
+                    </div>                    
+                    <div class="form-group mb-1 mt-2">
+                        <div class="col-sm-12 d-flex justify-content-end mt-1">
+                            <button class="btn succbtn btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    </form>
+                    </div>
+                </div>
+                </div>}
+
+                {!addpeoplebox && sendrequesBox && <div className='col-6 p-4 bg-light hfull'>
+                    <div class="hpanel">
+                    <div class="panel-heading text-center">
+                        <h3>Send Request</h3>
+                    </div>
+                    <div class="panel-body">
+                    <form onSubmit={handleRequestSubmit} class="form-horizontal py-3 px-2 bg-light">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                        <select className="form-control" name="requestNumber" value={valuesReq.requestNumber} onChange={handleChanges} required>
+                        <option value="">Select Number of Members</option>
+                        {
+                            [...Array(10)].map((_, i) => i + 1)
+                                        .map(i => <option key={i} value={i}>{i}</option>)
+                        }
+                        </select>
                         </div>
                     </div>                    
                     <div class="form-group mb-1 mt-2">

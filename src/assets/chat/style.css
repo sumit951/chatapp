@@ -313,12 +313,13 @@ a.add img {
 .chat-area .nav-tabs .nav-item.show .nav-link,
 .chat-area .nav-tabs .nav-link.active {
   color: #444444;
-  background-color: #efefef;
+  background-color: #d7d7d7;
   /* border-color: transparent transparent #000; */
   width: fit-content;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  /* border-top-left-radius: 8px;
+  border-top-right-radius: 8px; */
   font-size: 13px;
+  border-radius: 50px;
 }
 
 .chat-area .nav-tabs .nav-link:focus,
@@ -357,7 +358,7 @@ a.add img {
   clear: both;
   position: absolute;
   bottom: 5px;
-  left: 22px;
+  left: 30px;
   height: 12px;
   width: 12px;
   background: #00DB75;
@@ -471,11 +472,17 @@ a.add img {
   height: 0;
   border-style: solid;
   border-width: 0 12px 15px 12px;
-  border-color: transparent transparent #e7e7e7 transparent;
+  border-color: transparent transparent #efefef transparent; /* Default background (white) */
   -webkit-transform: rotate(-37deg);
   -ms-transform: rotate(-37deg);
   transform: rotate(-37deg);
+  transition: border-color 0.3s ease; /* Smooth transition for the hover effect */
 }
+
+/* .msg-body ul li.sender:hover:before {
+  border-color: transparent transparent #efefef transparent; 
+} */
+
 
 .msg-body ul li.sender p {
   color: #000;
@@ -483,13 +490,21 @@ a.add img {
   line-height: 1.5;
   font-weight: 400;
   padding: 7px 10px;
-  background: #e7e7e7;
+  background: #efefef; /* Default background color */
   display: inline-block;
   border-bottom-left-radius: 10px;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
   margin-bottom: 0;
+  white-space: normal;
+  word-break: break-word;
+  transition: background-color 0.3s ease; /* Smooth transition for the hover effect */
 }
+
+/* .msg-body ul li.sender p:hover {
+  background: #efefef; 
+} */
+
 
 .msg-body ul li.sender p b {
   display: block;
@@ -554,9 +569,13 @@ a.add img {
 .time {
   display: block;
   color: #000;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.5;
   font-weight: 400;
+}
+
+.time strong, .replyBoxtime strong{
+ font-weight: bold;
 }
 
 li.repaly .time {
@@ -920,7 +939,7 @@ fieldset[disabled] .btn-primary2.active {
   border-color: #62cb31;
   color: #FFFFFF;
   width: fit-content;
-  padding: 1px 4px 3px;
+  padding: 3px 4px 2px;
   font-size: 10px;
 }
 
@@ -1391,14 +1410,34 @@ fieldset[disabled] .btn-link.active {
 }
 
 
-.message-actions {
+.sender .message-actions {
   display: flex;
-  gap: 10px;
+  gap: 5px;
+  position: absolute;
+  right: 15px;
+  top: -5px;
+  background-color: #fff;
+  padding: 2px 10px;
+  border-radius: 50px;
+  border: 3px solid #c5c4c4;
+}
+
+
+.repaly .message-actions {
+  display: flex;
+  gap: 5px;
+  position: absolute;
+  left: 15px;
+  top: -5px;
+  background-color: #fff;
+  padding: 2px 10px;
+  border-radius: 50px;
+  border: 3px solid #c5c4c4;
 }
 
 .edit-button {
-  background-color: #d7763d;
-  color: white;
+  background-color: #fff;
+  color: #a1a1a1;
   border: none;
   padding: 1px 4px;
   border-radius: 3px;
@@ -1407,8 +1446,8 @@ fieldset[disabled] .btn-link.active {
 }
 
 .delete-button {
-  background-color: #fb1515;
-  color: white;
+  background-color: #fff;
+  color: #a1a1a1;
   border: none;
   padding: 1px 4px;
   border-radius: 3px;
@@ -1417,8 +1456,8 @@ fieldset[disabled] .btn-link.active {
 }
 
 .reply-button {
-  background-color: #3815fb;
-  color: white;
+  background-color: #fff;
+  color: #a1a1a1;
   border: none;
   padding: 1px 4px;
   border-radius: 3px;
@@ -1427,8 +1466,8 @@ fieldset[disabled] .btn-link.active {
 }
 
 .quote-button {
-  background-color: #0ffd86;
-  color: white;
+  background-color: #fff;
+  color: #a1a1a1;
   border: none;
   padding: 1px 4px;
   border-radius: 3px;
@@ -1440,19 +1479,23 @@ fieldset[disabled] .btn-link.active {
 .delete-button:hover,
 .reply-button:hover,
 .quote-button:hover {
-  background-color: white;
-  color: #facf96;
+  background-color: #a1a1a1;
+  color: #fff;
+}
+
+.deletedmsg p{
+  text-align: center;
 }
 
 .deletedmsg {
   color: var(--mds-color-theme-text-secondary-normal);
-  display: flex;
+  /* display: flex; */
   font-size: .75rem;
   justify-content: center;
   margin: 0;
   padding-bottom: .25rem;
   padding-top: .25rem;
-  text-align: center;
+  /* text-align: center; */
   width: 100%;
   font: inherit;
 }
@@ -1716,20 +1759,21 @@ li.replymsg.message-container button:hover{
 
 .senderReplybox
 {
-  border-left: 7px solid #ccc;
+  border-left: 5px solid #ccc;
   padding-left: 8px;
 }
 
 .receiverReplybox
 {
-  border-right: 7px solid #ccc;
+  border-right: 5px solid #d7763d;
   padding-right: 8px;
 }
 .replyBox{
-  width: 62%;
-  margin-left: 20%;
+  /* width: 62%; */
+  /* margin-left: 20%; */
   
 }
+
 
 .replyBox ul {
   overflow: hidden;
@@ -1843,7 +1887,7 @@ li.replymsg.message-container button:hover{
 .replyBoxtime {
   display: block;
   color: #000;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.5;
   font-weight: 400;
 }
@@ -1854,4 +1898,23 @@ li.repalyRply .replyBoxtime {
 
 li.senderRply .replyBoxtime {
   margin-bottom: 5px;
+}
+
+.bggrey{
+  background-color: #e3e3e3;
+}
+
+.quotedText {
+  border-left: 4px solid #ccc000;
+  padding-left: 7px;
+ }
+
+.badge{
+  font-size:10px;
+  padding: 3px 7px 5px;
+}
+
+.modal-dialog-scrollable .modal-body{
+  scrollbar-width: thin;
+  scrollbar-color: #bbbbbb #fff;
 }

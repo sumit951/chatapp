@@ -142,4 +142,13 @@
 
         .sidebarss .dropdown-menu.show {
             margin-left: -3px !important;
+            padding: 7px;
+            border-radius: 10px;
+            margin-top: 7px;
+        }
+
+        .dropdown-toggle:focus{
+            line-height: 32.5px;
+            align-items: center;
+            display: flex !important;
         }

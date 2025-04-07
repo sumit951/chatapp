@@ -1345,7 +1345,7 @@ fieldset[disabled] .btn-primary2.active {
   border-color: #62cb31;
   color: #FFFFFF;
   width: fit-content;
-  padding: 1px 4px 3px;
+  padding: 2px 4px 1px;
   font-size: 10px;
 }
 
@@ -4778,7 +4778,6 @@ font-size: 12px !important;
   display:none !important;
 }
 
-
 .chat-area .form-control{
   height: 38px;
   border-radius: 50px !important;
@@ -4871,4 +4870,13 @@ font-size: 12px !important;
   border-bottom: 1px solid #efefef;
   background-color: #fff;
   /* width: 83rem; */
+}
+
+.fa-ellipsis-v{
+  margin-left: 5px;
+}
+
+.react-emoji-picker--wrapper{
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.08);
+  border-radius: 5px;
 }

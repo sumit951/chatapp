@@ -27,8 +27,8 @@ function App() {
         <Route path="/login" element={<Login socket={socket} />}></Route>
         <Route path="/createpassword/:id/:verify" element={<Createpassword />}></Route>
         
-        <Route path="/" element={<Dashboard />}></Route>
-        <Route path="/dashboard" element={<Dashboard />}></Route>
+        <Route path="/" element={<Dashboard socket={socket} />}></Route>
+        <Route path="/dashboard" element={<Dashboard socket={socket} />}></Route>
         <Route path="/manageuser" element={<Manageuser />}></Route>
         <Route path="/adduser" element={<Adduser />}></Route>
         <Route path="/updateuser/:id/" element={<Updateuser />}></Route>

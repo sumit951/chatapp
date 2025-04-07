@@ -299,6 +299,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             fullName:group.groupName,
                                             selectedUserId:group.groupId,
                                             totalMember:group.totalMember,
+                                            allowedMember:group.allowedMember,
                                             createdBy:group.createdBy,
                                             groupboard:true
                                             }),

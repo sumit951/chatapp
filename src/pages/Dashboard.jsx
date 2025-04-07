@@ -1,10 +1,11 @@
 import React, { useState, useEffect} from 'react'
-import axiosConfig from '../axiosConfig';
+import socketIO from 'socket.io-client';
+import axiosConfig,{ BASE_URL } from '../axiosConfig';
 import {Link, useNavigate } from 'react-router-dom';
 import Header from "../components/Header";
 import Footer from '../components/Footer';
 
-const Dashboard = () => {
+const Dashboard = ({socket}) => {
   const navigate = useNavigate();
   const token = localStorage.getItem('chat-token-info')
   const [userData, setUserData] = useState([]);
@@ -46,6 +47,16 @@ const Dashboard = () => {
       }
       fetchUserInfo()
   }, [])
+  
+  useEffect(() => {
+    if(socket)
+    {
+      socket.on('reloadaddemberrequest', (data) => { 
+        console.log(data);
+      })
+    }
+  }, [socket])
+
   return (
     <div>
         <Header loggedInUserdata={userData} />

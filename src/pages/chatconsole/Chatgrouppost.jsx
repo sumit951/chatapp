@@ -3,11 +3,27 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import InputEmoji from 'react-input-emoji'
 import Chatfileupload from './Chatfileupload';
 
-const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}) => {
+const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChild, quotedMessageGroup}) => {
 
     const [message, setMessage] = useState('');
     const [files, setFiles] = useState([]);
     const [filesblank, setfilesblank] = useState(false);
+
+    const [quotedMessagePost, setQuotedMessagePost] = useState('');
+    const [strPagequotedMessagePost, setStrPagequotedMessagePost] = useState('');
+    
+    useEffect( () => {
+        setQuotedMessagePost(quotedMessageGroup)
+        if(quotedMessageGroup.quoteMessage)
+        {
+            setStrPagequotedMessagePost(`<div class="quotedText"><p><b>${quotedMessageGroup.sender}</b></p></br><p>${quotedMessageGroup.quoteMessage}</p></div>`)
+        }
+    }, [quotedMessageGroup]);
+
+    const handleRemoveQuote = () => {
+        setStrPagequotedMessagePost('');
+        setQuotedMessagePost('');
+    }
 
     const handleRemoveTyping = () => {
         socket.emit('typing', '');
@@ -21,6 +37,11 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
     }
 
     const handleSendMessage = async (e) => {
+        let strquotedMessagePost = '';
+        if(quotedMessagePost)
+        {
+            strquotedMessagePost = `<div class="quotedText"><p><b>${quotedMessagePost.sender}</b></p></br><p>${quotedMessagePost.quoteMessage}</p></div>`
+        }
         //console.log(groupId);
         socket.emit('typing', '');
         //e.preventDefault();
@@ -32,7 +53,7 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
             if(files.length>0)
             {
                 const formData = new FormData();
-                formData.append("frmmessage", message);
+                formData.append("frmmessage", strquotedMessagePost+message);
                 
 
                 // Append all files
@@ -51,7 +72,7 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
                         //console.log(file);
                         filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
                     });
-                    const messagewithfiles = `${message}</br>${filesStr}`;
+                    const messagewithfiles = `${strquotedMessagePost} ${message}</br>${filesStr}`;
 
                     //console.log(messagewithfiles);
 
@@ -77,7 +98,7 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
             else
             {
                 await socket.emit('messagegroup', {
-                    message: message,
+                    message: strquotedMessagePost+message,
                     senderName: localStorage.getItem('loggedInUserName'),
                     /*id: `${socket.id}${Math.random()}`,*/
                     senderId:senderUserData.id,
@@ -88,6 +109,8 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
                 });
             }
         }
+        setQuotedMessagePost('')
+        setStrPagequotedMessagePost('');
         setMessage('');
     };
     //console.log(senderUserData);
@@ -154,6 +177,9 @@ const Chatgrouppost = ({ socket,groupId,senderUserData,groupMemberdataFromChild}
         <div className="send-box">
             <Chatfileupload onFileSelect={setFiles} parentselectedFiles={filesblank} setfilesblank={setfilesblank} />
             <div className="float-end scutkey"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
+            <div className="clearfix"></div>
+            {quotedMessagePost && <span dangerouslySetInnerHTML={{__html: strPagequotedMessagePost}} />}
+            {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }
             <div className="clearfix"></div>
             <form>
             <InputEmoji

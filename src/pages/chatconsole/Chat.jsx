@@ -4,8 +4,6 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
-const socket = socketIO.connect(`${BASE_URL}`);
-//const socket = socketIO.connect('https://chatserver-b6go.onrender.com');
 import { Link, useNavigate } from 'react-router-dom';
 
 import "../../assets/vendor/fontawesome/css/font-awesome.css";
@@ -513,7 +511,17 @@ const Chat = ({ socket }) => {
         }
     };
 
-
+    const [quotedMessage, setQuotedMessage] = useState('');
+    const handleQuotedMessage = async (quotedMessageData) => {
+        //console.log(quotedMessageData);
+        setQuotedMessage(quotedMessageData)
+    };
+    
+    const [quotedMessageGroup, setQuotedMessageGroup] = useState('');
+    const handleQuotedMessageGroup = async (quotedMessageDataGroup) => {
+        //console.log(quotedMessageDataGroup);
+        setQuotedMessageGroup(quotedMessageDataGroup)
+    };
 
     const handleReplyMessageGroup = async (replyMessageData) => {
         /* console.log(replyMessageData.messageId);
@@ -933,6 +941,10 @@ const Chat = ({ socket }) => {
       setSidebarClosed(!sidebarClosed);
     };
 
+    const handleMessageTab = () => {
+        location.reload()
+    }
+
         
     return (
         <div>
@@ -1026,7 +1038,7 @@ const Chat = ({ socket }) => {
         <div className="menu-bar">
           <ul className="menu-links">
             <li className="nav-link">
-              <a href="javascript:void(0);">
+              <a href="javascript:void(0);" onClick={handleMessageTab}>
               <FontAwesomeIcon icon={faMessage} />
                 <span className="text nav-text">Message</span>
               </a>
@@ -1120,8 +1132,9 @@ const Chat = ({ socket }) => {
                                             onEditMessage={handleEditMessage}
                                             newArrchatdataFromChild={newArrchatdataFromChild}
                                             onReplyMessage={handleReplyMessage}
+                                            onQuotedMessage={handleQuotedMessage}
                                             />}
-                                            {!groupComponenet && !usersetting && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} />}
+                                            {!groupComponenet && !usersetting && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} quotedMessage={quotedMessage} />}
 
                                             {!groupComponenet && !usersetting && groupboard && <div className="msg-head">
                                                 <div className="row">
@@ -1174,8 +1187,9 @@ const Chat = ({ socket }) => {
                                             onEditMessageGroup={handleEditMessageGroup}
                                             newArrgroupchatdataFromChild={newArrgroupchatdataFromChild}
                                             onReplyMessageGroup={handleReplyMessageGroup}
+                                            onQuotedMessageGroup={handleQuotedMessageGroup}
                                             />}
-                                            {!groupComponenet && !usersetting && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} groupMemberdataFromChild={groupMemberdataFromChild} />}
+                                            {!groupComponenet && !usersetting && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} groupMemberdataFromChild={groupMemberdataFromChild} quotedMessageGroup={quotedMessageGroup} />}
                                             </div>
                                             </div>
                                             <div className="tab-pane" id="people" role="tabpanel" aria-labelledby="people-tab">

@@ -3,10 +3,28 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import InputEmoji from 'react-input-emoji'
 import Chatfileupload from './Chatfileupload';
 
-const Chatpost = ({ socket,receiverId,senderUserData}) => {
+const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
+    
+    //console.log(quotedMessage);
+    
     const [message, setMessage] = useState('');
     const [files, setFiles] = useState([]);
     const [filesblank, setfilesblank] = useState(false);
+    const [quotedMessagePost, setQuotedMessagePost] = useState('');
+    const [strPagequotedMessagePost, setStrPagequotedMessagePost] = useState('');
+  
+    useEffect( () => {
+        setQuotedMessagePost(quotedMessage)
+        if(quotedMessage.quoteMessage)
+        {
+            setStrPagequotedMessagePost(`<div class="quotedText"><p><b>${quotedMessage.sender}</b></p></br><p>${quotedMessage.quoteMessage}</p></div>`)
+        }
+    }, [quotedMessage]);
+
+    const handleRemoveQuote = () => {
+        setStrPagequotedMessagePost('');
+        setQuotedMessagePost('');
+    }
 
     const handleRemoveTyping = () => {
         socket.emit('typing', '');
@@ -19,16 +37,22 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
     }
     
     const handleSendMessage = async (e) => {
+        let strquotedMessagePost = '';
+        if(quotedMessagePost)
+        {
+            strquotedMessagePost = `<div class="quotedText"><p><b>${quotedMessagePost.sender}</b></p></br><p>${quotedMessagePost.quoteMessage}</p></div>`
+        }
         socket.emit('typing', '');
         //e.preventDefault();
         const d = new Date();
         const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+        
         if ((message.trim() || files.length) && localStorage.getItem('loggedInUserName'))
         {
             if(files.length>0)
             {
                 const formData = new FormData();
-                formData.append("frmmessage", message);
+                formData.append("frmmessage", strquotedMessagePost+message);
                 /*formData.append("senderName", localStorage.getItem('loggedInUserName'));
                 formData.append("senderId", senderUserData.id);
                 formData.append("receiverId", receiverId);
@@ -55,7 +79,7 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
                         //console.log(file);
                         filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
                     });
-                    const messagewithfiles = `${message}</br>${filesStr}`;
+                    const messagewithfiles = `${strquotedMessagePost} ${message}</br>${filesStr}`;
 
                     //console.log(messagewithfiles);
 
@@ -80,7 +104,7 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
             else
             {
                 await socket.emit('message', {
-                    message: message,
+                    message: strquotedMessagePost+message,
                     senderName: localStorage.getItem('loggedInUserName'),
                     senderId:senderUserData.id,
                     socketID: socket.id,
@@ -91,17 +115,22 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
             }    
 
         }
+        setQuotedMessagePost('')
+        setStrPagequotedMessagePost('');
         setMessage('');
         setFiles([]);
     };
     //console.log(senderUserData);
     //console.log(filesblank);
-    
+    //console.log(strPagequotedMessagePost);
   return (
     <>
         <div className="send-box">
         <Chatfileupload onFileSelect={setFiles} parentselectedFiles={filesblank} setfilesblank={setfilesblank} />
         <div className="float-end scutkey"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
+        <div className="clearfix"></div>
+        {quotedMessagePost && <span dangerouslySetInnerHTML={{__html: strPagequotedMessagePost}} />}
+        {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }
         <div className="clearfix"></div>
             <form>
             <InputEmoji
@@ -127,17 +156,6 @@ const Chatpost = ({ socket,receiverId,senderUserData}) => {
 
                 
             </form>
-            
-            {/* <div className="send-btns">
-                <div className="attach">
-                    <div className="button-wrapper">
-                        <span className="label">
-                            <img className="img-fluid" src="http://mehedihtml.com/chatbox/assets/img/upload.svg" alt="image title" /> attached file 
-                        </span><input type="file" name="upload" id="upload" className="upload-box" placeholder="Upload File" aria-label="Upload File" />
-                    </div>
-                </div>
-            </div> */}
-
         </div>
     </>
   )
