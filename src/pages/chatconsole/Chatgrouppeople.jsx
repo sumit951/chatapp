@@ -14,8 +14,8 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
     //console.log(groupdataFromChild.totalMember);
     const totalMember = groupdataFromChild.totalMember;
-    //const allowedMember = groupdataFromChild.allowedMember;
-    const allowedMember = 4;
+    const allowedMember = groupdataFromChild.allowedMember;
+    //const allowedMember = 4;
     const animatedComponents = makeAnimated();
     const [alluserdata, setAllUserdata] = useState([]);
     const [searchParam, setSearchuser] = useState();
