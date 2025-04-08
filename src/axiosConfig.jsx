@@ -2,8 +2,8 @@
 import axios from 'axios';
 // Next we make an 'instance' of it
 //export const BASE_URL = 'http://localhost:3000';
-export const BASE_URL = 'https://chatserver-b6go.onrender.com';
-//export const BASE_URL = 'https://rapidcollaborate.in/chat-server';
+//export const BASE_URL = 'https://chatserver-b6go.onrender.com';
+export const BASE_URL = 'https://rapidcollaborate.in/chat-server';
 
 export const DefalutGroupMember = 10;
 
