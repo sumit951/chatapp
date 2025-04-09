@@ -28,8 +28,8 @@ const Chat = () => {
         await localStorage.removeItem("chat-token-info");
         await localStorage.removeItem("loggedInUserName");
         await localStorage.removeItem("encryptdatatoken");
-        //navigate('/login')
-        window.location.href = "/login";
+        navigate('/login')
+        //window.location.href = "/login";
     };
 
     const [userlogindataname, setUserlogindataname] = useState([]);
@@ -43,8 +43,8 @@ const Chat = () => {
             const response = await axiosConfig.get('/auth/authenticate')
             if (response.status == 200) {
                 if (response.status !== 200) {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }
                 setUserloginData(response.data[0]);
                 setUserlogindataname(response.data[0].name);
@@ -60,8 +60,8 @@ const Chat = () => {
 
     useEffect(() => {
         if (!token) {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchUserInfo()
     }, [])
@@ -76,8 +76,8 @@ const Chat = () => {
             {
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 //console.log(response);
                 setUserData(response.data[0]);
@@ -94,8 +94,8 @@ const Chat = () => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchAdminInfo()
     }, [])
@@ -168,8 +168,8 @@ const Chat = () => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setAllUserdata(response.data);
             }
@@ -182,8 +182,8 @@ const Chat = () => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchAllUser()
     }, [])

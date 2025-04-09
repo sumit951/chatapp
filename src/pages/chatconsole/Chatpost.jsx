@@ -112,6 +112,17 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
                     messageType:'text',
                     timestamp: formattedDate
                 });
+
+                let toconsole = {
+                    message: strquotedMessagePost+message,
+                    senderName: localStorage.getItem('loggedInUserName'),
+                    senderId:senderUserData.id,
+                    socketID: socket.id,
+                    receiverId: receiverId,
+                    messageType:'text',
+                    timestamp: formattedDate
+                }
+                //console.log(toconsole)
             }    
 
         }
@@ -129,8 +140,9 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
         <Chatfileupload onFileSelect={setFiles} parentselectedFiles={filesblank} setfilesblank={setfilesblank} />
         <div className="float-end scutkey"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
         <div className="clearfix"></div>
+        <div className='qm'>
         {quotedMessagePost && <span dangerouslySetInnerHTML={{__html: strPagequotedMessagePost}} />}
-        {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }
+        {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }</div>
         <div className="clearfix"></div>
             <form>
             <InputEmoji

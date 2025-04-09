@@ -22,14 +22,14 @@ const Header = (props) => {
         await localStorage.removeItem("chat-token-info");
         await localStorage.removeItem("loggedInUserName");
         await localStorage.removeItem("encryptdatatoken");
-        //navigate('/login')
-        window.location.href = "/login";
+        navigate('/login')
+        //window.location.href = "/login";
     };
     //console.log(props);
 
     if (props.loggedInUserdata.userType == 'EMPLOYEE') {
-        //navigate('/chatconsole/spaces')
-        window.location.href = "/chatconsole/spaces";
+        navigate("/chatconsole/spaces")
+        window.location.reload();
     }
 
     if (props.loggedInUserdata.status == 'Inactive') {

@@ -56,7 +56,7 @@ const Setting = ({socket,loggedInuserdata}) => {
                       hideProgressBar: true
                   });
                     setTimeout(() => {
-                          //navigate('/manageuser');
+                        //navigate('/manageuser');
                         //window.location.reload()
                     }, 
                     2000

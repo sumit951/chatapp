@@ -12,8 +12,8 @@ const Login = ({ socket }) => {
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
     if (token) {
-        //return navigate('/')
-        window.location.href = "/";
+        navigate('/')
+        //window.location.href = "/";
     }
     const [values, setValues] = useState({
         email: '',
@@ -37,24 +37,30 @@ const Login = ({ socket }) => {
                     autoClose: 1000,
                     hideProgressBar: true
                 });
+
+                localStorage.setItem('loggedInUserName', response.data.name);
+                localStorage.setItem('encryptdatatoken', btoa(response.data.userId));
+                const UserName = localStorage.getItem('loggedInUserName')
+                const UserId = response.data.userId
+                const arrUserName = response.data.name.split(' ')
+
+
+                const userShortName = arrUserName[0].charAt(0).toUpperCase();
+
+                socket.emit('newUser', { userId: UserId, usershortName: userShortName, userName: UserName, socketID: socket.id });
+                //console.log(userShortName);
                 setTimeout(() => {
-                    localStorage.setItem('loggedInUserName', response.data.name);
-                    localStorage.setItem('encryptdatatoken', btoa(response.data.userId));
-                    const UserName = localStorage.getItem('loggedInUserName')
-                    const UserId = response.data.userId
-                    const arrUserName = response.data.name.split(' ')
-
-
-                    const userShortName = arrUserName[0].charAt(0).toUpperCase();
-
-                    socket.emit('newUser', { userId: UserId, usershortName: userShortName, userName: UserName, socketID: socket.id });
-                    console.log(userShortName);
+                    
 
                     if (response.data.userType == 'EMPLOYEE') {
-                        window.location.href = "/chatconsole/spaces";
+                        navigate("/chatconsole/spaces")
+                        window.location.reload();
+                        //window.location.href = "/chatconsole/spaces";
                     }
                     else {
-                        window.location.href = "/";
+                        navigate('/')
+                        window.location.reload();
+                        //window.location.href = "/";
                     }
 
 
@@ -89,8 +95,8 @@ const Login = ({ socket }) => {
 
     useEffect(() => {
         if (token) {
-            //return navigate('/')
-            window.location.href = "/";
+            navigate('/')
+            //window.location.href = "/";
         }
         fetchUserInfo()
     }, [])

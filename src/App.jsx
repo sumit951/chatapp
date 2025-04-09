@@ -17,14 +17,16 @@ import Chat from "./pages/chatconsole/Chat";
 import socketIO from 'socket.io-client';
 
 
-const socket = socketIO.connect(`${BASE_URL}`, {
-  path: '/chat-server/socket.io', // Adjust the subfolder path accordingly
-});
+const socket = socketIO.connect(`${BASE_URL}`);
+
+/* const socket = socketIO.connect(`${BASE_URL}`, {
+  path: '/chat-server/socket.io', 
+}); */
 
 function App() {
   
   return (
-    <BrowserRouter basename="/chat-app">
+    <BrowserRouter basename="/chat-app/">
       <Routes>
         <Route path="/login" element={<Login socket={socket} />}></Route>
         <Route path="/createpassword/:id/:verify" element={<Createpassword />}></Route>

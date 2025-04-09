@@ -29,8 +29,8 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setAllUserdata(response.data);
             }
@@ -70,8 +70,8 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 toast.success(response.data.message, {
                     position: "bottom-right",
@@ -80,7 +80,7 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                 });
                 setTimeout(() => {
                     //navigate('/manageuser');
-                    window.location.reload()
+                    location.reload()
                     }, 2000
                 );
             }
@@ -134,7 +134,7 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                     });
                         setTimeout(() => {
                             //navigate('/manageuser');
-                            window.location.reload()
+                            location.reload()
                         }, 
                         2000
                         ); 
@@ -227,6 +227,7 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
             <div className="d-flex justify-content-between">
                 <div className='col-6 p-4 hfull'>
                     <div className="chat-list">
+                    {/* {allowedMember} */}
                     {(groupMemberdataFromChild.length < allowedMember) ?
                     (
                     <button className="btn addbtn me-3 " onClick={handleAddpeoplebox}> <i className='fa fa-plus'></i> ADD PEOPLE </button>

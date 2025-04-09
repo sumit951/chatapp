@@ -15,8 +15,8 @@ const Updateuser = () => {
     await localStorage.removeItem("chat-token-info");
     await localStorage.removeItem("loggedInUserName");
     await localStorage.removeItem("encryptdatatoken");
-        //navigate('/login')
-        window.location.href = "/login";
+        navigate('/login')
+        //window.location.href = "/login";
     };
     
     const fetchUserInfo = async () => {
@@ -26,8 +26,8 @@ const Updateuser = () => {
             {
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setUserData(response.data[0]);
                 setuserType(response.data[0].userType);
@@ -41,8 +41,8 @@ const Updateuser = () => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchUserInfo()
     }, [])
@@ -55,6 +55,8 @@ const Updateuser = () => {
         name:'',
         email:'',
         employeeId:'',
+        officeName:'',
+        cityName:'',
         password:'',
         chatDeleteInDays:''
     })
@@ -66,8 +68,8 @@ const Updateuser = () => {
             {
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 console.log(response);
                 const selectedChatDeleteInDays = response.data[0].chatDeleteInDays;
@@ -75,6 +77,8 @@ const Updateuser = () => {
                     name:response.data[0].name,
                     email:response.data[0].email,
                     employeeId:response.data[0].employeeId,
+                    officeName:response.data[0].officeName,
+                    cityName:response.data[0].cityName,
                     password:response.data[0].decryptPassword,
                     chatDeleteInDays:response.data[0].chatDeleteInDays
                 })
@@ -89,8 +93,8 @@ const Updateuser = () => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchAdminInfo()
     }, [])
@@ -186,6 +190,14 @@ const Updateuser = () => {
                 </div>
                 <div class="form-group"><label class="col-sm-3 control-label">Employee Id</label>
                     <div class="col-sm-9"><input type="text" className="form-control" name="employeeId" value={values.employeeId} onChange={handleChanges} placeholder="Employee Id" required /></div>
+                </div>
+
+                <div class="form-group"><label class="col-sm-3 control-label">Office Name</label>
+                <div class="col-sm-9"><input type="text" className="form-control" name="officeName" value={values.officeName} onChange={handleChanges} placeholder="Office Name" required /></div>
+                </div>
+
+                <div class="form-group"><label class="col-sm-3 control-label">City Name</label>
+                <div class="col-sm-9"><input type="text" className="form-control" name="cityName" value={values.cityName} onChange={handleChanges} placeholder="City Name" required /></div>
                 </div>
 
                 <div class="form-group"><label class="col-sm-3 control-label">Chat Delete In</label>

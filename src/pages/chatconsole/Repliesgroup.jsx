@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Chatbody = ({socket, parentMessageId, boxtype, updateStateFromChild}) => {
+const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild}) => {
 
     const lastMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -95,8 +95,8 @@ const Chatbody = ({socket, parentMessageId, boxtype, updateStateFromChild}) => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchrepliedmessages(parentMessageId)
     }, [parentMessageId])
@@ -197,4 +197,4 @@ const Chatbody = ({socket, parentMessageId, boxtype, updateStateFromChild}) => {
   )
 }
 
-export default Chatbody
+export default Repliesgroup

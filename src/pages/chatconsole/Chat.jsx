@@ -46,13 +46,8 @@ const Chat = ({ socket }) => {
           });
         }
     };
-
+    
     useEffect(() => {
-        if(!token)
-        {
-            //return navigate('/login')
-            window.location.href = "/login";
-        }
         requestNotificationPermission()
     }, [])
 
@@ -113,12 +108,13 @@ const Chat = ({ socket }) => {
     const animatedComponents = makeAnimated();
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
+    
     const logout = async () => {
         await localStorage.removeItem("chat-token-info");
         await localStorage.removeItem("loggedInUserName");
         await localStorage.removeItem("encryptdatatoken");
-        //navigate('/login')
-        window.location.href = "/login";
+        navigate('/login')
+        //window.location.href = "/login";
     };
 
     const [userdataname, setUserdataname] = useState([]);
@@ -126,9 +122,7 @@ const Chat = ({ socket }) => {
     const [userData, setUserData] = useState([]);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
 
-    if (userData.status == 'Inactive') {
-        logout()
-    }
+    
 
     
     const fetchUserInfo = async () => {
@@ -136,8 +130,8 @@ const Chat = ({ socket }) => {
             const response = await axiosConfig.get('/auth/authenticate')
             if (response.status == 200) {
                 if (response.status !== 200) {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }
                 setUserData(response.data[0]);
                 setUserdataname(response.data[0].name);
@@ -145,19 +139,23 @@ const Chat = ({ socket }) => {
             }
         } catch (error) {
             console.log(error.message);
-            logout()
+            //logout()
             //navigate('/login')
         }
     }
     //console.log((userData.status));
-
+    //return false;
+    const userStatus = userData.status;
     useEffect(() => {
         if (!token) {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
+        }
+        if (userStatus == 'Inactive') {
+            //logout()
         }
         fetchUserInfo()
-    }, [])
+    }, [token,userStatus])
 
     const [isNewmsgSender, setNewmsgSender] = useState([]);
     const [isNewmsgReceiver, setNewmsgReceiver] = useState([]);
@@ -360,8 +358,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 /* toast.success(response.data.message, {
                     position: "bottom-right",
@@ -407,8 +405,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 /* toast.success(response.data.message, {
                     position: "bottom-right",
@@ -605,8 +603,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 /* toast.success(response.data.message, {
                     position: "bottom-right",
@@ -652,8 +650,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
 
                 /* toast.success(response.data.message, {
@@ -708,6 +706,29 @@ const Chat = ({ socket }) => {
                 fetchinteractwithuserlist()
             }
         })
+
+        /* socket.on('reloadpinStatusUpdated', async (data) => {
+            console.log(data);
+            try {
+                const encodeGroupId = btoa(data.groupId)
+                const response = await axiosConfig.get(`/chat/getgroupchat/${encodeGroupId}`)
+                if(response.status==200)
+                {
+                    //const token = localStorage.getItem(token)
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                //console.log(response.data);
+                
+                setGroupChatDataFromChild(response.data);
+            } catch (error) {
+                console.log(error.message);
+                
+            }
+        }) */
     }, [socket,receiverId,groupId]);
 
     const [groupComponenet, SetGroupcomponent] = useState(false)
@@ -768,8 +789,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 toast.success(response.data.message, {
                     position: "bottom-right",
@@ -778,7 +799,7 @@ const Chat = ({ socket }) => {
                 });
                 setTimeout(() => {
                     //navigate('/manageuser');
-                    window.location.reload()
+                    location.reload()
                     }, 2000
                 );
             }
@@ -807,8 +828,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 toast.success(response.data.message, {
                     position: "bottom-right",
@@ -817,7 +838,7 @@ const Chat = ({ socket }) => {
                 });
                 setTimeout(() => {
                     //navigate('/manageuser');
-                    window.location.reload()
+                    location.reload()
                     }, 2000
                 );
             }
@@ -845,8 +866,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setInteractwithuserlist(response.data);
             }
@@ -859,8 +880,8 @@ const Chat = ({ socket }) => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchinteractwithuserlist()
     }, [])
@@ -880,8 +901,8 @@ const Chat = ({ socket }) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setAllUserdata(response.data);
             
@@ -897,11 +918,11 @@ const Chat = ({ socket }) => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchAllUser()
-    }, [])
+    }, [token])
 
     const newUserslisting1 = alluserdata.filter(item => item.userId !== chatboardUserid);
     //console.log(alluserdata);
@@ -1176,7 +1197,7 @@ const Chat = ({ socket }) => {
                                             </div>}
                                             {!groupComponenet && !usersetting && groupboard && groupId && <div className="tab-content">
                                             <div className="tab-pane show active" id="chatboard" role="tabpanel" aria-labelledby="chatboard-tab">
-                                            <div className="modal-content chatarea">                        
+                                            <div className="modal-content">                        
                                             {!groupComponenet && !usersetting && groupboard && groupId && <Chatgroupbody 
                                             socket={socket}
                                             messages={messagegroupResponse} 

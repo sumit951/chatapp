@@ -105,8 +105,8 @@ const Chatnav = ({sendDataToParent,senderUserData,alluserdata}) => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setGrouplistdata(response.data);
             }

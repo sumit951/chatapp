@@ -22,8 +22,8 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                     //const token = localStorage.getItem(token)
                     if(response.status !== 200)
                     {
-                        //navigate('/login')
-                        window.location.href = "/login";
+                        navigate('/login')
+                        //window.location.href = "/login";
                     }   
                     setAllUserdata(response.data);
                 }
@@ -108,8 +108,8 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                     hideProgressBar: true
                 });
                     setTimeout(() => {
-                        //navigate('/manageuser');
-                        window.location.reload()
+                        navigate('/manageuser');
+                        //window.location.reload()
                     }, 
                     2000
                     ); 

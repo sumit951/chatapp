@@ -17,8 +17,8 @@ const Adduser = () => {
     await localStorage.removeItem("chat-token-info");
     await localStorage.removeItem("loggedInUserName");
     await localStorage.removeItem("encryptdatatoken");
-        //navigate('/login')
-        window.location.href = "/login";
+        navigate('/login')
+        //window.location.href = "/login";
     };
 
     const fetchUserInfo = async () => {
@@ -28,8 +28,8 @@ const Adduser = () => {
             {
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setUserData(response.data[0]);
                 setuserType(response.data[0].userType);
@@ -43,8 +43,8 @@ const Adduser = () => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchUserInfo()
     }, [])
@@ -53,6 +53,8 @@ const Adduser = () => {
         name:'',
         email:'',
         employeeId:'',
+        officeName:'',
+        cityName:'',
         chatDeleteInDays:''
     })
 
@@ -151,7 +153,7 @@ const Adduser = () => {
                     </div>
                 ) : null}
 
-<div className='row'>
+                <div className='row'>
                 <div class="form-group col-md-6"><label class="col-sm-3 control-label">Name</label>
                     <div class="col-sm-9"><input type="text" className="form-control" name="name" onChange={handleChanges} placeholder="Enter name" required /></div>
                 </div>
@@ -159,7 +161,8 @@ const Adduser = () => {
                 <div class="form-group col-md-6"><label class="col-sm-3 control-label">Email</label>
                     <div class="col-sm-9"><input type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" className="form-control" name="email" onChange={handleChanges} placeholder="Enter Email" required />
                     </div>
-                </div></div>
+                </div>
+                </div>
                 {/* <div class="hr-line-dashed"></div> */}
                 <div className='row'>
                 <div class="form-group col-md-6"><label class="col-sm-3 control-label">Employee Id</label>
@@ -177,6 +180,15 @@ const Adduser = () => {
                     </div>
                 </div>
                 </div>
+                <div className='row'>                
+                <div class="form-group col-md-6"><label class="col-sm-3 control-label">Office Name</label>
+                    <div class="col-sm-9"><input type="text" className="form-control" name="officeName" onChange={handleChanges} placeholder="Office Name" required /></div>
+                </div>
+                <div class="form-group col-md-6"><label class="col-sm-3 control-label">City Name</label>
+                    <div class="col-sm-9"><input type="text" className="form-control" name="cityName" onChange={handleChanges} placeholder="City Name" required /></div>
+                </div>
+                </div>
+
                 {/* <div class="hr-line-dashed"></div> */}
                 <div class="form-group mb-1">
                     <div class="col-sm-12 d-flex justify-content-end mt-1">

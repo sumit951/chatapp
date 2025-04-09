@@ -4860,10 +4860,13 @@ font-size: 12px !important;
 }
 
 .navbar .plua{
-  padding: 5px;
+  padding: 7px 6px 5px 6px;
   border-radius: 50px;
   border: 1px solid #646464 !important;
   color: #646464 !important;
+  /* line-height: 32.5px; */
+  align-items: center;
+  display: flex !important;
 }
 
 .navtop{
@@ -4877,6 +4880,6 @@ font-size: 12px !important;
 }
 
 .react-emoji-picker--wrapper{
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.08) !important;
   border-radius: 5px;
 }

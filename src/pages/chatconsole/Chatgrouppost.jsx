@@ -12,6 +12,16 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
     const [quotedMessagePost, setQuotedMessagePost] = useState('');
     const [strPagequotedMessagePost, setStrPagequotedMessagePost] = useState('');
     
+    const transformMessage = (message) => {
+        // Regular expression to match mentions in the format @name(userId:number)
+        const mentionRegex = /@\[([^\]]+)\](\(userId:(\d+)\))/g;
+        
+        // Replace mentions with <span> tags containing userId as data attribute
+        return message.replace(mentionRegex, (match, userName, userTag, userId) => {
+          return `&nbsp;<span class="tagg--text" data-userid="${userId}">@${userName}</span>&nbsp;`;
+        });
+    };
+
     useEffect( () => {
         setQuotedMessagePost(quotedMessageGroup)
         if(quotedMessageGroup.quoteMessage)
@@ -53,7 +63,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
             if(files.length>0)
             {
                 const formData = new FormData();
-                formData.append("frmmessage", strquotedMessagePost+message);
+                formData.append("frmmessage", strquotedMessagePost+transformMessage(message));
                 
 
                 // Append all files
@@ -98,7 +108,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
             else
             {
                 await socket.emit('messagegroup', {
-                    message: strquotedMessagePost+message,
+                    message: strquotedMessagePost+transformMessage(message),
                     senderName: localStorage.getItem('loggedInUserName'),
                     /*id: `${socket.id}${Math.random()}`,*/
                     senderId:senderUserData.id,

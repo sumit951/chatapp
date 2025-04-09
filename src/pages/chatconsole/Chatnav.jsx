@@ -138,8 +138,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setGrouplistdata(response.data);
             }
@@ -153,11 +153,11 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchGrouplist()
-    }, [])
+    }, [token])
 
 
     const newUserslisting = interactwithuserlist.filter(item => item.userName !== UserName);

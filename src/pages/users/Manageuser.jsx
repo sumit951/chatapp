@@ -25,8 +25,8 @@ const Manageuser = () => {
     await localStorage.removeItem("chat-token-info");
     await localStorage.removeItem("loggedInUserName");
     await localStorage.removeItem("encryptdatatoken");
-        //navigate('/login')
-        window.location.href = "/login";
+        navigate('/login')
+        //window.location.href = "/login";
     };
     const fetchUserInfo = async () => {
         try {
@@ -49,8 +49,8 @@ const Manageuser = () => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchUserInfo()
     }, [])
@@ -63,8 +63,8 @@ const Manageuser = () => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 }   
                 setAllUserdata(response.data);
             }
@@ -78,8 +78,8 @@ const Manageuser = () => {
     useEffect(() => {
         if(!token)
         {
-            //return navigate('/login')
-            window.location.href = "/login";
+            navigate('/login')
+            //window.location.href = "/login";
         }
         fetchAllUser()
     }, [])
@@ -94,8 +94,8 @@ const Manageuser = () => {
                 //const token = localStorage.getItem(token)
                 if(response.status !== 200)
                 {
-                    //navigate('/login')
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 toast.success(response.data.message, {
                     position: "bottom-right",
@@ -126,7 +126,8 @@ const Manageuser = () => {
             {
                 if(response.status !== 200)
                 {
-                    window.location.href = "/login";
+                    navigate('/login')
+                    //window.location.href = "/login";
                 } 
                 toast.success(response.data.message, {
                     position: "bottom-right",
@@ -175,6 +176,7 @@ const Manageuser = () => {
                                 <th>Employee Id</th>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Location</th>
                                 <th>Type</th>
                                 <th>Password</th>
                                 <th>Added On</th>
@@ -190,8 +192,9 @@ const Manageuser = () => {
                                         <td>{data.employeeId}</td>
                                         <td>{data.name}</td>
                                         <td>{data.email}</td>
+                                        <td>Office : {data.officeName}<br />City : {data.cityName}</td>
                                         <td>{data.userType}</td>
-                                        <td>{data.decryptPassword}{data.accessView}</td>
+                                        <td>{data.decryptPassword}{/* {data.accessView} */}</td>
                                         <td>{moment(data.addedon).format('llll')}</td>
                                         {(userData.userType == 'ADMIN') ? (
                                         <td><Link to={`/chatboard/${btoa(data.id)}`} target="_blank" title="View Chatboard">
