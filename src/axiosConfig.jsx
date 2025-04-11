@@ -5,7 +5,7 @@ import axios from 'axios';
 export const BASE_URL = 'https://chatserver-b6go.onrender.com';
 //export const BASE_URL = 'https://rapidcollaborate.in/chat-server';
 
-export const DefalutGroupMember = 10;
+export const DefaultGroupMember = 10;
 
 const instance = axios.create({
 // .. where we make our configurations

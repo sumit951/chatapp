@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react'
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 
-import axiosConfig,{ DefalutGroupMember } from '../../axiosConfig';
+import axiosConfig,{ DefaultGroupMember } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 
 
@@ -50,7 +50,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
         setSelOption(obj)    
         
         //console.log(selectedOptions.length);
-        if(selectedOptions.length>=parseInt(DefalutGroupMember-1))
+        if(selectedOptions.length>=parseInt(DefaultGroupMember-1))
         {
             setShowLimit(true)
         }
@@ -88,6 +88,11 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
         else if(selOption.selectUsers.length<2)
         {
             alert('Please Select atleast 2 user for this group!')
+            return false;
+        }
+        else if(selOption.selectUsers.length>DefaultGroupMember)
+        {
+            alert(`Select only ${DefaultGroupMember} user for this group!`)
             return false;
         }
         else
@@ -141,7 +146,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
     
     const newUserslisting = alluserdata.filter(item => item.userId !== loggedInuserdata.id);
     const options = newUserslisting.map((datauser) => (
-        { value: datauser.userId, label: datauser.userName+' - '+datauser.userEmail }
+        { value: datauser.userId, label: datauser.userName +' - Member in '+ datauser.groupCount+" group(s)", isDisabled: (datauser.userType=='EMPLOYEE' && datauser.groupCount>=3) ? true : false }
     ))
     
     return (
@@ -170,7 +175,7 @@ const Chatgroupcreate = ({loggedInuserdata}) => {
                             onKeyDown={(e) => fetchAllUser(setSearchuser(e.target.value))}
                             components={animatedComponents}
                             isMulti
-                            isOptionDisabled={() => selectedOptions.length >= DefalutGroupMember}
+                            /* isOptionDisabled={() => selectedOptions.length >= DefaultGroupMember} */
                             options={options} />
                             {/*<select className="form-control" multiple name="selectUsers[]" onChange={handleChanges} required>
                                 {alluserdata.map((datauser) => (

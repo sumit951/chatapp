@@ -17,7 +17,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
     useEffect(() => {
         groupchatdata.map(item => {
         // You can perform any logic here before updating
-        item.pinSts == 'Yes' ? pinnedMessages.push(item.messageId) :null
+        item.pinSts == 'Yes' && !pinnedMessages.includes(item.messageId) ? pinnedMessages.push(item.messageId) :null
         });
         setgroupchatdata(groupchatdataFromChild)
         if(newArrgroupchatdataFromChild.length>0)
@@ -47,7 +47,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
 
             groupchatdata.map(item => {
             // You can perform any logic here before updating
-            item.pinSts == 'Yes' ? pinnedMessages.push(item.messageId) :null
+            item.pinSts == 'Yes' && !pinnedMessages.includes(item.messageId) ? pinnedMessages.push(item.messageId) :null
             });
         })
         
@@ -162,7 +162,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
             );
 
             const encodeMessageId = btoa(messageId)
-            const postData = {pinnedbyName:localStorage.getItem('loggedInUserName'),groupId:groupId}
+            const postData = {pinnedbyName:localStorage.getItem('loggedInUserName'),groupId:groupId,receiverId:null}
             const response = await axiosConfig.put(`/chat/updatepinstatus/${encodeMessageId}/${pinSts}`,postData)
             if(response.status==200)
             {
@@ -374,7 +374,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                 ) : (
                 <>
                 
-                <span className="time"><strong>You</strong> : {moment(chatdata.timestamp).format('llll')}</span>
+                <span className="time"><strong>You</strong> : {moment(chatdata.timestamp).format('llll')} {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>} {(pinnedMessages.includes(chatdata.messageId)) ? <span> | <i className='fa fa-thumb-tack'></i></span>: null}</span>
                 <p><span dangerouslySetInnerHTML={{__html: transformMessage(chatdata.message)}} />
                 {hoveredMessageId === chatdata.messageId && (
                     <span className="message-actions float-end ms-3">
@@ -404,6 +404,9 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     >
                         <i className='fa fa-trash'></i>
                     </a>
+                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                    </a>
                     </span>
                 )}
                 </p>
@@ -422,6 +425,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
                 </>
                 )}
 
@@ -435,7 +439,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
                 >
-                <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}</span>
+                <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')} {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>} {(pinnedMessages.includes(chatdata.messageId)) ? <span> | <i className='fa fa-thumb-tack'></i></span>: null}</span>
                 <p><span dangerouslySetInnerHTML={{__html: transformMessage(chatdata.message)}} />
                 {((hoveredMessageId === chatdata.messageId) && chatdata.deleteSts=='No') && (
                     <span className="message-actions float-end ms-3">
@@ -452,6 +456,9 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         title="Start Thread"
                     >
                         <i className='fa fa-reply'></i>
+                    </a>
+                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
                     </a>
                     </span>
                 )}
@@ -471,6 +478,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
                 </li>
             )
             )}

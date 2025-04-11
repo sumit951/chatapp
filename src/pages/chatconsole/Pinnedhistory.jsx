@@ -50,13 +50,14 @@ const Replies = ({socket, parentMessageId}) => {
 
     useEffect(() => {
         socket.on('reloadpinStatusUpdated', (data) => { 
-            console.log(data);
+            /* console.log(data);
             
             if(parentMessageId === data.messageId)
             {
                 console.log(data);
                 setUserPinnedData([...userPinnedData, data])
-            }
+            } */
+            fetchpinnedmessagehistory(parentMessageId)
         })
     }, [socket,parentMessageId,userPinnedData]);
     

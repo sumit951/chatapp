@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import socketIO from 'socket.io-client';
 import axiosConfig,{ BASE_URL } from '../../axiosConfig';
+import moment from 'moment'
 import { ToastContainer, toast } from 'react-toastify';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
@@ -928,7 +929,7 @@ const Chat = ({ socket }) => {
     //console.log(alluserdata);
     
     const options = newUserslisting1.map((datauser) => (
-        { value: datauser.userId, label: datauser.userName+' - '+datauser.userEmail }
+        { value: datauser.userId, label: datauser.userName}
     ))
 
     const [selOption, setSelOption] = useState(['']);
@@ -953,7 +954,86 @@ const Chat = ({ socket }) => {
             }
         }
     };
+
+    const [pinnedMessagesData, setpinnedMessagesData] = useState([]);
+    const handlepinnedMessages = async (senderId,receiverId) => {
+        //console.log(senderId+'---'+receiverId);
+       
+        if (senderId && receiverId && localStorage.getItem('loggedInUserName'))
+        {
+            try {
+                const postData = {senderId:senderId,receiverId:receiverId}
+                //console.log(postData);
+                
+                const response = await axiosConfig.post(`/chat/pinnedmessagesdata`, postData)
+                if(response.status==200)
+                {
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                console.log(response.data);
+                setpinnedMessagesData(response.data);
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+
+        
+                
+
+        }
+    };
     
+    useEffect(() => {
+        setTimeout(() => {
+            socket.on('reloadpinStatusUpdated', (data) => { 
+                handlepinnedMessages(chatboardUserid,receiverId)
+                //alert('hi');
+            })
+        }, 1000);
+        
+    }, [socket,chatboardUserid,receiverId]);
+
+
+    const [pinnedMessagesDataGroup, setpinnedMessagesDataGroup] = useState([]);
+    const handlepinnedMessagesGroup = async (senderId,groupId) => {
+        //console.log(senderId+'---'+receiverId);
+       
+        if (senderId && groupId && localStorage.getItem('loggedInUserName'))
+        {
+            try {
+                const postData = {senderId:senderId,groupId:groupId}
+                //console.log(postData);
+                
+                const response = await axiosConfig.post(`/chat/pinnedmessagesgroupdata`, postData)
+                if(response.status==200)
+                {
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                console.log(response.data);
+                setpinnedMessagesDataGroup(response.data);
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+    };
+    
+    useEffect(() => {
+        setTimeout(() => {
+            socket.on('reloadpinStatusUpdated', (data) => { 
+                handlepinnedMessagesGroup(chatboardUserid,groupId)
+            })
+        }, 1000);
+        
+    }, [socket,chatboardUserid,groupId]);
 
     const [sidebarClosed, setSidebarClosed] = useState(false);
 
@@ -1117,7 +1197,7 @@ const Chat = ({ socket }) => {
                                             {groupComponenet && <Chatgroupcreate loggedInuserdata={userData} />}
                                             {!groupComponenet && !usersetting && userboard && <div className="msg-head">
                                                 <div className="row">
-                                                    <div className="col-12">
+                                                    <div className="col-8">
                                                         <div className="d-flex align-items-center">
                                                             <div className="chat-list">
                                                                 {dataFromChild.shortName != null ? (
@@ -1136,8 +1216,28 @@ const Chat = ({ socket }) => {
                                                                     </div>
                                                                 ) : null
                                                                 }
+                                                                
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    <div className='col-4'>
+                                                        <ul className="moreoption float-end">
+                                                            <li className="navbar nav-item dropdown">
+                                                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessages(chatboardUserid,receiverId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
+                                                                <ul className="dropdown-menu pinnedmessagesbox">
+                                                                {pinnedMessagesData.map((chatdata) =>
+                                                                 (chatdata.messageId!=null) ? (
+                                                                    <li className='pinnedmessagesRow'>
+                                                                        {(chatdata.deleteSts=='No') ? <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}   {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
+                                                                        <p>
+                                                                        {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : null  }
+                                                                        </p>
+                                                                    </li>
+                                                                    ) : ( <b></b> )
+                                                                )}
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>}
@@ -1192,6 +1292,24 @@ const Chat = ({ socket }) => {
                                                         <button className="btn warnbtn me-3" onClick={e=>handleLeaveSpace(groupId,loggedInuserId,groupdataFromChild.totalMember)}> Leave Space </button>
 
                                                         {(createdBy===loggedInuserId) && <button className="btn danbtn me-1 " onClick={e=>handleDeleteGroup(groupId)}> Delete Group </button>} 
+
+                                                        <ul className="moreoption float-end">
+                                                            <li className="navbar nav-item dropdown">
+                                                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessagesGroup(chatboardUserid,groupId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
+                                                                <ul className="dropdown-menu pinnedmessagesbox">
+                                                                {pinnedMessagesDataGroup.map((chatdata) =>
+                                                                (chatdata.messageId!=null) ? (
+                                                                    <li className='pinnedmessagesRow'>
+                                                                        {(chatdata.deleteSts=='No') ? <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}   {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
+                                                                        <p>
+                                                                        {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : null  }
+                                                                        </p>
+                                                                    </li>
+                                                                    ) : ( <b>Not tagged any message!</b> )
+                                                                )}
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>}

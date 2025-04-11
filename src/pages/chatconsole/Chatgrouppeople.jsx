@@ -53,7 +53,8 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
     //console.log(mergedArray);
     
     const options = mergedArray.map((datauser) => (
-        { value: datauser.userId, label: datauser.userName+' - '+datauser.userEmail }
+        /* { value: datauser.userId, label: datauser.userName+' - '+datauser.userEmail } */
+        { value: datauser.userId, label: datauser.userName +' - Member in '+ datauser.groupCount+" group(s)", isDisabled: (datauser.userType=='EMPLOYEE' && datauser.groupCount>=3) ? true : false }
     ))
     
     const handleDelete = async(userId,groupId,totalMember) =>{
@@ -109,8 +110,8 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(selOption);
-       
+        console.log(selOption.selectUsers.length);
+        return false;
         if(selOption.selectUsers==null)
         {
           alert('Please Select User')
@@ -239,7 +240,9 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                         <div className='row'>
                         <div className='col-11'>   
                         <a key={user.socketID}
-                            className="d-flex align-items-center p-2 abt">
+                            className="d-flex align-items-center p-2 abt"
+                            title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
+                            >
                             <div className="flex-shrink-0">
                                 <span className="shortName">{user.usershortName}</span>
                                 {user.socketID && <span className="active"></span>}

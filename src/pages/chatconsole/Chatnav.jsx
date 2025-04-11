@@ -35,7 +35,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                 
             }
             //console.log(response.data);
-            
+            //const reversed = [...response.data].reverse(); // reverse here
             setUserChatData(response.data);
             setMessages([])
             SetGroupcomponent(false)
@@ -211,7 +211,10 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                         </div>
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             <li className="nav-item" role="presentation">
-                                <button className="nav-link active" id="Open-tab" data-bs-toggle="tab" data-bs-target="#Open" type="button" role="tab" aria-controls="Open" aria-selected="true"> <FontAwesomeIcon icon={faUser} size="1x" />  Direct</button>
+                                <button className="nav-link active" id="Alldata-tab" data-bs-toggle="tab" data-bs-target="#Alldata" type="button" role="tab" aria-controls="Alldata" aria-selected="true"> All</button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <button className="nav-link" id="Open-tab" data-bs-toggle="tab" data-bs-target="#Open" type="button" role="tab" aria-controls="Open" aria-selected="true"> <FontAwesomeIcon icon={faUser} size="1x" />  Direct</button>
                             </li>
                             <li className="nav-item" role="presentation">
                                 <button className="nav-link" id="Closed-tab" data-bs-toggle="tab" data-bs-target="#Closed" type="button" role="tab" aria-controls="Closed" aria-selected="false"><FontAwesomeIcon icon={faUsers} size="1x" />  Group </button>
@@ -221,7 +224,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                     <div className="modal-body">
                     <div className="chat-lists">
                         <div className="tab-content">
-                            <div className="tab-pane show active" id="Open" role="tabpanel" aria-labelledby="Open-tab">
+                            <div className="tab-pane" id="Open" role="tabpanel" aria-labelledby="Open-tab">
                                 <div className="chat-list">
                                 {mergedArray.slice().reverse().map((user,i) =>
                                 {
@@ -253,6 +256,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
                                             /*ref={ref}*/
                                             /*ref={(i===0) ? myref : null}*/
+                                            title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
                                             >
                                             <div className="flex-shrink-0">
                                                 {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
@@ -291,6 +295,83 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                             <div className="tab-pane" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
 
                                 <div className="chat-list">
+                                    {grouplistdata.slice().reverse().map((group,i) => (
+                                    <a key={i} 
+                                        onClick={(e) => handleSelectGroup(group.groupId,
+                                            setSelectedGroup({
+                                            shortName:group.groupshortName,
+                                            fullName:group.groupName,
+                                            selectedUserId:group.groupId,
+                                            totalMember:group.totalMember,
+                                            allowedMember:group.allowedMember,
+                                            createdBy:group.createdBy,
+                                            groupboard:true
+                                            }),
+                                            setSelectedUser({}),
+                                            setActive(group.groupName)
+                                        )} 
+                                            className={`d-flex align-items-center p-2 ${(active===group.groupName) ? "selecteduserbg" : ""}`}>
+                                            <div className="flex-shrink-0">
+                                                <span className="shortName">{group.groupshortName}</span>
+                                            </div>
+                                            <div className="flex-grow-1 ms-2">
+                                                <h3>{group.groupName}</h3>
+                                            </div>
+                                            {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="tab-pane show active" id="Alldata" role="tabpanel" aria-labelledby="Alldata-tab">
+
+                                <div className="chat-list">
+                                    {mergedArray.slice().reverse().map((user,i) =>
+                                    {
+                                        const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
+                                        let dndStatus = false;
+                                        let busyStatus = false;
+                                        if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
+                                        {
+                                            //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                            dndStatus = true;
+                                        }
+                                        if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
+                                        {
+                                            //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                            busyStatus = true;
+                                        }
+                                        return (
+                                            <a key={i} 
+                                            onClick={(e) => handleSelectUser(user.userId,
+                                                setSelectedUser({
+                                                shortName:user.usershortName,
+                                                fullName:user.userName,
+                                                selectedUserId:user.userId,
+                                                userboard:true
+                                                }),
+                                                setSelectedGroup({}),
+                                                setActive(user.userName)
+                                            )} 
+                                                className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
+                                                /*ref={ref}*/
+                                                /*ref={(i===0) ? myref : null}*/
+                                                title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
+                                                >
+                                                <div className="flex-shrink-0">
+                                                    {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
+                                                    <span className="shortName">{user.usershortName}</span>
+                                                    {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
+                                                    {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
+                                                    {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
+                                                </div>
+                                                <div className="flex-grow-1 ms-2">
+                                                    <h3>{user.userName}</h3>
+                                                </div>
+                                                {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                            </a>
+                                        )
+                                    }
+                                    )}
                                     {grouplistdata.slice().reverse().map((group,i) => (
                                     <a key={i} 
                                         onClick={(e) => handleSelectGroup(group.groupId,

@@ -1918,3 +1918,14 @@ li.senderRply .replyBoxtime {
   scrollbar-width: thin;
   scrollbar-color: #bbbbbb #fff;
 }
+
+.pinnedmessagesbox{
+  right: 0 !important;
+  width: 50% !important;
+  height: 350px !important;
+  overflow-y: scroll;
+}
+
+.pinnedmessagesRow{
+  border-bottom:1px solid #c0c0c0 ;
+}
