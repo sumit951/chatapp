@@ -1929,3 +1929,6 @@ li.senderRply .replyBoxtime {
 .pinnedmessagesRow{
   border-bottom:1px solid #c0c0c0 ;
 }
+.printscreen{
+  width: 130px;
+}

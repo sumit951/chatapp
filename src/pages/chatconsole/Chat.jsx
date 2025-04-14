@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import socketIO from 'socket.io-client';
 import axiosConfig,{ BASE_URL } from '../../axiosConfig';
+
 import moment from 'moment'
 import { ToastContainer, toast } from 'react-toastify';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import { Link, useNavigate } from 'react-router-dom';
+
+
 
 import "../../assets/vendor/fontawesome/css/font-awesome.css";
 import "../../assets/chat/style.css";
@@ -28,12 +30,13 @@ import Chatgrouppeople from './Chatgrouppeople';
 import Setting from './Setting';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Chatsearch from './Chatsearch';
 
 const Chat = ({ socket }) => { 
-
     const [notificationShown, setNotificationShown] = useState(false); // Track notification state
     const [isTabActive, setIsTabActive] = useState(true);
     const [isTabActivegroup, setIsTabActivegroup] = useState(true);
+    /* 
     //console.log(notificationShown);
     
     const requestNotificationPermission = () => {
@@ -50,9 +53,9 @@ const Chat = ({ socket }) => {
     
     useEffect(() => {
         requestNotificationPermission()
-    }, [])
+    }, []) */
 
-    const showNotification = (message) => {
+    /* const showNotification = (message) => {
         
         // Display browser notification
         if (Notification.permission === 'granted') {
@@ -71,28 +74,20 @@ const Chat = ({ socket }) => {
             setNotificationShown(false);
             };
 
-            /* // Mark the notification as sent for this receiver ID
-            setReceivedNotifications((prev) => ({
-            ...prev,
-            [message.receiverId]: true,
-            })); */
+            
         } else if (Notification.permission !== 'denied') {
             // Ask for notification permission if it's not granted
             Notification.requestPermission().then((permission) => {
             if (permission === 'granted') {
                 const notification = new Notification('New Message!', {
-                body: message.message,
+                body: <span dangerouslySetInnerHTML={{__html: message.message}} />,
                 icon: favicon,
                 });
-                /* setReceivedNotifications((prev) => ({
-                ...prev,
-                [message.receiverId]: true,
-                })); */
             }
             });
         }
-        
-        /*if (Notification.permission === "granted") {
+
+        if (Notification.permission === "granted") {
           const notification = new Notification("New Message Received", {
             body: message, // Assuming message contains a text field
             icon: favicon, // Optional: add an icon
@@ -103,18 +98,20 @@ const Chat = ({ socket }) => {
             window.focus(); // Bring the window into focus
             notification.close(); // Close the notification
           };
-        }*/
-    };
+        }
+    };*/
 
     const animatedComponents = makeAnimated();
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
+    const loggedInUserName = localStorage.getItem('loggedInUserName')
     
     const logout = async () => {
         await localStorage.removeItem("chat-token-info");
         await localStorage.removeItem("loggedInUserName");
         await localStorage.removeItem("encryptdatatoken");
         navigate('/login')
+        window.location.reload();
         //window.location.href = "/login";
     };
 
@@ -132,6 +129,7 @@ const Chat = ({ socket }) => {
             if (response.status == 200) {
                 if (response.status !== 200) {
                     navigate('/login')
+                    window.location.reload();
                     //window.location.href = "/login";
                 }
                 setUserData(response.data[0]);
@@ -140,8 +138,8 @@ const Chat = ({ socket }) => {
             }
         } catch (error) {
             console.log(error.message);
-            //logout()
-            //navigate('/login')
+            logout()
+            navigate('/login')
         }
     }
     //console.log((userData.status));
@@ -221,12 +219,18 @@ const Chat = ({ socket }) => {
     }, [messages]);
     lastMessageGroupRef.current?.scrollIntoView({ block: "end"});
     
+    const [foundTaggedUser, setFoundTaggedUser] = useState(false);
+
+
+    
+
     useEffect(() => {
         socket.on('messageResponse', (data) => { 
             //console.log(data);
             //console.log(isTabActive);
-            //console.log(notificationShown);
-            if(!isTabActive && !notificationShown && data.receiverId == chatboardUserid)
+            //console.log(notificationShown);            
+
+            /* if(!isTabActive && !notificationShown && data.receiverId == chatboardUserid)
             { 
                 if(notificationEnbleSts)
                 {
@@ -234,11 +238,11 @@ const Chat = ({ socket }) => {
                 }
                 setNotificationShown(true); // Ensure notification shows only once
                 setIsTabActive(true);
-            }
+            } */
             
             //console.log(document.visibilityState);
             
-            const handleVisibilityChange = () => {
+            /* const handleVisibilityChange = () => {
                 if (document.visibilityState === 'visible') {
                     setIsTabActive(true);
                 } else {
@@ -246,13 +250,13 @@ const Chat = ({ socket }) => {
                 }
             };
 
-            document.addEventListener('visibilitychange', handleVisibilityChange);
+            document.addEventListener('visibilitychange', handleVisibilityChange); */
             setMessages([...messages, data])
             setNewmsgSender([...isNewmsgSender,data.senderId])
             setNewmsgReceiver(data.receiverId)
             fetchinteractwithuserlist()
         })
-    }, [socket, messages,isTabActive]);
+    }, [socket, messages,loggedInUserName]);
 
     useEffect(() => {
         socket.on('messagegroupResponse', (data) => {
@@ -261,18 +265,25 @@ const Chat = ({ socket }) => {
             setNewmsgGroup(data.senderId)
             //console.log(data.groupId+"---"+data.senderId);
 
-            if(!isTabActivegroup && !notificationShown  && data.groupId != null)
+            
+            const isFound = data.message.includes(`@${loggedInUserName}`);
+            /* console.log(data.message);
+            console.log(isFound);
+            console.log(`@${loggedInUserName}`); */
+            setFoundTaggedUser(isFound);
+        
+            /* if(!isTabActivegroup && !notificationShown  && data.groupId != null)
             {
                 if(notificationEnbleSts)
                 {
-                    showNotification(data);
+                    //showNotification(data);
                 }
                 setNotificationShown(true); // Ensure notification shows only once
-            }
+            } */
             
             //console.log(document.visibilityState);
             
-            const handleVisibilityChange = () => {
+            /* const handleVisibilityChange = () => {
                 if (document.visibilityState === 'visible') {
                     setIsTabActivegroup(true);
                 } else {
@@ -280,10 +291,10 @@ const Chat = ({ socket }) => {
                 }
             };
 
-            document.addEventListener('visibilitychange', handleVisibilityChange);
+            document.addEventListener('visibilitychange', handleVisibilityChange); */
             
         })
-    }, [socket, messagesgroup,isTabActivegroup]);
+    }, [socket, messagesgroup]);
 
     socket.on('updatedMessage', (updatedMsg) => {
         const newMessages = messages.map((item) =>
@@ -879,13 +890,12 @@ const Chat = ({ socket }) => {
     }
    
     useEffect(() => {
-        if(!token)
-        {
-            navigate('/login')
-            //window.location.href = "/login";
-        }
         fetchinteractwithuserlist()
-    }, [])
+        /* socket.on('messageResponse', (data) => { 
+            fetchinteractwithuserlist()
+        }) */
+        
+    }, [socket])
 
     const [alluserdata, setAllUserdata] = useState([]);
 
@@ -1045,7 +1055,75 @@ const Chat = ({ socket }) => {
     const handleMessageTab = () => {
         location.reload()
     }
+    
+    /*One to one Message Search*/
+    const [searchbox, setsearchbox] = useState(false)
+    const [searchTerm, setSearchTerm] = useState(null);
 
+    const handlesearchbox = (e) => {
+        setsearchbox(true);
+    }
+    
+    const cancelsearchbox = (e) => {
+        setsearchbox(false);
+        setSearchTerm('')
+    }
+
+    const handleInputChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const messageRefs = useRef({}); // store refs in an object keyed by message id or index
+    const [highlightId, setHighlightId] = useState(null); // id or index of the message to focus
+
+    const handleFocusMessage = (id) => {
+        setHighlightId(id);
+
+        const nodemsg = messageRefs.current[id];        
+        if (nodemsg) {
+            nodemsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            nodemsg.classList.add('highlight'); // for styling
+            setTimeout(() => {
+                nodemsg.classList.remove('highlight');
+            }, 10000);
+        }
+    };
+
+    /*One to one Message Search*/
+
+    /*Group Message Search*/
+    const [searchboxGroup, setsearchboxGroup] = useState(false)
+    const [searchTermGroup, setSearchTermGroup] = useState(null);
+
+    const handlesearchboxGroup = (e) => {
+        setsearchboxGroup(true);
+    }
+    
+    const cancelsearchboxGroup = (e) => {
+        setsearchboxGroup(false);
+        setSearchTermGroup('')
+    }
+
+    const handleInputChangeGroup = (e) => {
+        setSearchTermGroup(e.target.value);
+    };
+
+    const messageRefsGroup = useRef({}); // store refs in an object keyed by message id or index
+    const [highlightIdGroup, setHighlightIdGroup] = useState(null); // id or index of the message to focus
+
+    const handleFocusMessageGroup = (id) => {
+        setHighlightIdGroup(id);
+
+        const nodemsgGroup = messageRefsGroup.current[id];        
+        if (nodemsgGroup) {
+            nodemsgGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            nodemsgGroup.classList.add('highlight'); // for styling
+            setTimeout(() => {
+                nodemsgGroup.classList.remove('highlight');
+            }, 10000);
+        }
+    };
+    /*Group Message Search*/
         
     return (
         <div>
@@ -1165,7 +1243,7 @@ const Chat = ({ socket }) => {
     </div>
 
     <div className='col-md-3 p-0'>
-                                <Chatnav 
+                                {!searchbox && !searchboxGroup && <Chatnav 
                                 socket={socket} 
                                 sendDataToParent={handleDataFromChild} 
                                 interactwithuserlist={interactwithuserlist} 
@@ -1188,7 +1266,14 @@ const Chat = ({ socket }) => {
                                 SetonetoOnecomponent={SetonetoOnecomponent}
                                 Setusersetting={Setusersetting}
                                 loggedInuserdata={userData} 
-                                /></div>
+                                setsearchbox={setsearchbox}
+                                setSearchTerm={setSearchTerm}
+                                setsearchboxGroup={setsearchboxGroup}
+                                setSearchTermGroup={setSearchTermGroup}
+                                foundTaggedUser={foundTaggedUser}
+                                />}
+                                {(searchbox || searchboxGroup) && <Chatsearch socket={socket} searchTerm={searchTerm} receiverId={receiverId} onFocus={handleFocusMessage} searchTermGroup={searchTermGroup} groupId={groupId} onFocusGroup={handleFocusMessageGroup} />}
+                                </div>
 
                                 <div className="chatbox">
                                     <div className="modal-dialog-scrollable">
@@ -1197,7 +1282,7 @@ const Chat = ({ socket }) => {
                                             {groupComponenet && <Chatgroupcreate loggedInuserdata={userData} />}
                                             {!groupComponenet && !usersetting && userboard && <div className="msg-head">
                                                 <div className="row">
-                                                    <div className="col-8">
+                                                    <div className="col-7">
                                                         <div className="d-flex align-items-center">
                                                             <div className="chat-list">
                                                                 {dataFromChild.shortName != null ? (
@@ -1220,7 +1305,20 @@ const Chat = ({ socket }) => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className='col-4'>
+                                                    <div className='col-3'>
+                                                        {!searchbox && <a href="#" role="button" title="Search Messages" onClick={handlesearchbox}> <i className="fa fa-search" aria-hidden="true"></i></a>}
+                                                        {searchbox && <div><input
+                                                            type="text"
+                                                            placeholder="Search messages..."
+                                                            value={searchTerm}
+                                                            onChange={handleInputChange}
+                                                            onKeyUp={handleInputChange}
+                                                            className='form-control'
+                                                        />
+                                                        <a href="#" role="button" title="Cancel Search" onClick={cancelsearchbox}> <i className="fa fa-close" aria-hidden="true"></i></a></div>
+                                                        }
+                                                    </div>
+                                                    <div className='col-2'>
                                                         <ul className="moreoption float-end">
                                                             <li className="navbar nav-item dropdown">
                                                                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessages(chatboardUserid,receiverId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
@@ -1254,6 +1352,7 @@ const Chat = ({ socket }) => {
                                             newArrchatdataFromChild={newArrchatdataFromChild}
                                             onReplyMessage={handleReplyMessage}
                                             onQuotedMessage={handleQuotedMessage}
+                                            messageRefs={messageRefs}
                                             />}
                                             {!groupComponenet && !usersetting && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} quotedMessage={quotedMessage} />}
 
@@ -1288,7 +1387,20 @@ const Chat = ({ socket }) => {
                                                             </li>
                                                         </ul>
                                                     </div>
-                                                    <div className="col-5 text-end">
+                                                    <div className='col-3'>
+                                                        {!searchboxGroup && <a href="#" role="button" title="Search Messages" onClick={handlesearchboxGroup}> <i className="fa fa-search" aria-hidden="true"></i></a>}
+                                                        {searchboxGroup && <div><input
+                                                            type="text"
+                                                            placeholder="Search messages..."
+                                                            value={searchTermGroup}
+                                                            onChange={handleInputChangeGroup}
+                                                            onKeyUp={handleInputChangeGroup}
+                                                            className='form-control'
+                                                        />
+                                                        <a href="#" role="button" title="Cancel Search" onClick={cancelsearchboxGroup}> <i className="fa fa-close" aria-hidden="true"></i></a></div>
+                                                        }
+                                                    </div>
+                                                    <div className="col-2 text-end">
                                                         <button className="btn warnbtn me-3" onClick={e=>handleLeaveSpace(groupId,loggedInuserId,groupdataFromChild.totalMember)}> Leave Space </button>
 
                                                         {(createdBy===loggedInuserId) && <button className="btn danbtn me-1 " onClick={e=>handleDeleteGroup(groupId)}> Delete Group </button>} 
@@ -1327,6 +1439,7 @@ const Chat = ({ socket }) => {
                                             newArrgroupchatdataFromChild={newArrgroupchatdataFromChild}
                                             onReplyMessageGroup={handleReplyMessageGroup}
                                             onQuotedMessageGroup={handleQuotedMessageGroup}
+                                            messageRefsGroup={messageRefsGroup}
                                             />}
                                             {!groupComponenet && !usersetting && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} groupMemberdataFromChild={groupMemberdataFromChild} quotedMessageGroup={quotedMessageGroup} />}
                                             </div>

@@ -5,7 +5,7 @@ import InputEmoji from 'react-input-emoji'
 import Replies from './Replies';
 import Pinnedhistory from './Pinnedhistory';
 
-const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChild, onEditMessage, onDeleteMsg,newArrchatdataFromChild,onReplyMessage,onQuotedMessage}) => {
+const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChild, onEditMessage, onDeleteMsg,newArrchatdataFromChild,onReplyMessage,onQuotedMessage,messageRefs}) => {
 
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
     const [hoveredMessageId, setHoveredMessageId] = useState(null);
@@ -191,6 +191,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
             console.log(error.message);
         }
     };
+    //console.log(messageRefs);
     
   return (
     <>
@@ -200,11 +201,17 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
             {chatdata.map((chatdata) =>
             (chatdata.messageId!=null) ? (
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
-                <li className={`
+                <li 
+                key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefs.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
+                className={`
                     ${(chatdata.deleteSts=='No' && editingMessageId !== chatdata.messageId) ? "sender" : "deletedmsg"}
                     ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""} 
                     message-container`}
-                key={chatdata.messageId}
+               
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -269,7 +276,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -290,10 +297,16 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
 
                 </li>
             ) : (
-                <li className={`${(chatdata.deleteSts=='No') ? "repaly" : "deletedmsg"}
+                <li 
+                key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefs.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
+                className={`${(chatdata.deleteSts=='No') ? "repaly" : "deletedmsg"}
                 ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
                 message-container`}
-                key={chatdata.messageId}
+                
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -324,7 +337,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -351,7 +364,11 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                 <li className={`${(editingMessageId !== chatdata.messageId) ? "sender" : "deletedmsg"} 
                     ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
                     message-container`}
-                key={chatdata.messageId}
+                    key={chatdata.messageId}
+                    ref={(el) => {
+                    if (el) messageRefs.current[chatdata.messageId] = el;
+                    }}
+                    id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -414,7 +431,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -437,6 +454,10 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
             ) : (
                 <li className={`repaly ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}`}  
                 key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefs.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -465,7 +486,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -493,7 +514,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
             <p>{typingStatus}</p>
             </div>
             </div>
-            <div ref={lastMessageRef} />
+            {!messageRefs &&<div ref={lastMessageRef} />}
         </div>
     </>
   )

@@ -43,7 +43,7 @@ const Manageuser = () => {
         } catch (error) {
            console.log(error.message);
            logout()
-           
+           window.location.reload();
         }    
     }
     useEffect(() => {

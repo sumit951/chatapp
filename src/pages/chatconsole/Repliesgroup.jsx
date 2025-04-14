@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild}) => {
+const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, messageRefsGroup}) => {
 
     const lastMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -127,6 +127,9 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild}) 
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
                 <li className={`${(chatdata.deleteSts=='No' && editingMessageId !== chatdata.messageId) ? "senderRply" : "deletedmsg"}`}
                 key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefsGroup.current[chatdata.messageId] = el;
+                }}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -179,7 +182,10 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild}) 
 
                 </li>
             ) : (
-                <li className={`${(chatdata.deleteSts=='No') ? "repalyRply" : "deletedmsg"}`}  key={chatdata.messageId}>
+                <li className={`${(chatdata.deleteSts=='No') ? "repalyRply" : "deletedmsg"}`} key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefsGroup.current[chatdata.messageId] = el;
+                }}>
                 
                 {(chatdata.deleteSts=='No') ? <span className="replyBoxtime"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')} {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
                 <p>

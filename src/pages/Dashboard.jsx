@@ -38,7 +38,7 @@ const Dashboard = ({socket}) => {
       } catch (error) {
           console.log(error.message);
           logout()
-          //navigate('/login')
+          navigate('/login')
       }    
   }
   //console.log((userdataname));

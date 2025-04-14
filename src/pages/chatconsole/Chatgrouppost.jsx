@@ -199,14 +199,12 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
             onEnter={handleSendMessage}
             onKeyDown={handleTyping}
             onKeyUp={handleRemoveTyping}
+            onBlur={handleRemoveTyping}
             placeholder="Type a message"
             keepOpened
             disableRecent
             maxLength={1200}
             searchMention={searchMention}
-            onBlur={() => {
-                console.log('on blur')
-            }}
             onFocus={() => {
                 console.log('on focus')
             }}

@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild}) => {
+const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageRefs}) => {
 
     const lastMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -130,6 +130,10 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild}) => {
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
                 <li className={`${(chatdata.deleteSts=='No' && editingMessageId !== chatdata.messageId) ? "senderRply" : "deletedmsg"}`}
                 key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefs.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -182,7 +186,13 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild}) => {
 
                 </li>
             ) : (
-                <li className={`${(chatdata.deleteSts=='No') ? "repalyRply" : "deletedmsg"}`}  key={chatdata.messageId}>
+                <li className={`${(chatdata.deleteSts=='No') ? "repalyRply" : "deletedmsg"}`}  
+                key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefs.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
+                >
                 
                 {(chatdata.deleteSts=='No') ? <span className="replyBoxtime"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')} {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
                 <p>

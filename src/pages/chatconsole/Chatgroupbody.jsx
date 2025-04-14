@@ -5,7 +5,7 @@ import InputEmoji from 'react-input-emoji'
 import Replies from './Repliesgroup';
 import Pinnedhistory from './Pinnedhistory';
 
-const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,groupchatdataFromChild, onEditMessageGroup, onDeleteMsgGroup,newArrgroupchatdataFromChild,onReplyMessageGroup,onQuotedMessageGroup}) => {
+const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,groupchatdataFromChild, onEditMessageGroup, onDeleteMsgGroup,newArrgroupchatdataFromChild,onReplyMessageGroup,onQuotedMessageGroup,messageRefsGroup}) => {
     
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
     const [hoveredMessageId, setHoveredMessageId] = useState(null);
@@ -191,9 +191,9 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
         });
     };
     /* Convert Tag message */
-    //console.log(groupchatdata);
-    
-  return (
+    //console.log(messageRefsGroup);
+
+    return (
     <>
         <div className="modal-body chatarea">
             <div className="msg-body">
@@ -206,6 +206,10 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                 ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""} 
                 message-container`} 
                 key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefsGroup.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -268,7 +272,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -292,6 +296,10 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                 ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
                 message-container`} 
                 key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefsGroup.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -321,7 +329,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -348,7 +356,11 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                 <li className={`${(editingMessageId !== chatdata.messageId) ? "sender" : "deletedmsg"} 
                     ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
                     message-container`}  
-                key={chatdata.messageId}
+                    key={chatdata.messageId}
+                    ref={(el) => {
+                    if (el) messageRefsGroup.current[chatdata.messageId] = el;
+                    }}
+                    id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -410,7 +422,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -435,6 +447,10 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                 ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
                 message-container`} 
                 key={chatdata.messageId}
+                ref={(el) => {
+                if (el) messageRefsGroup.current[chatdata.messageId] = el;
+                }}
+                id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
                 onMouseLeave={handleMouseLeave}
@@ -463,7 +479,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -486,7 +502,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
             <div className="message__status">
             <p>{typingStatusgroup}</p>
             </div>
-             <div ref={lastMessageGroupRef} />
+            {!messageRefsGroup && <div ref={lastMessageGroupRef} />}
             </div>
             
         </div>

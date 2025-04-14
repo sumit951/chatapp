@@ -4,7 +4,7 @@ import userProfile from "../../assets/chat/user-profile.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff} from '@fortawesome/free-solid-svg-icons';
 
-const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponent,activefrParent,myref,setMessages,setMessagesgroup,isNewmsgReceiver,isNewmsgSender,isNewmsgGroup,isNewmsgGroupSender,setTypingStatus,setTypingStatusgroup,setNotificationShown,setnewChatDataFromChild,setnewgroupChatDataFromChild,SetonetoOnecomponent,Setusersetting,loggedInuserdata}) => {
+const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponent,activefrParent,myref,setMessages,setMessagesgroup,isNewmsgReceiver,isNewmsgSender,isNewmsgGroup,isNewmsgGroupSender,setTypingStatus,setTypingStatusgroup,setNotificationShown,setnewChatDataFromChild,setnewgroupChatDataFromChild,SetonetoOnecomponent,Setusersetting,loggedInuserdata,setsearchbox,setSearchTerm,setsearchboxGroup,setSearchTermGroup,foundTaggedUser}) => {
     
     
     const token = localStorage.getItem('chat-token-info')
@@ -35,7 +35,6 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                 
             }
             //console.log(response.data);
-            //const reversed = [...response.data].reverse(); // reverse here
             setUserChatData(response.data);
             setMessages([])
             SetGroupcomponent(false)
@@ -45,6 +44,10 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
             setTypingStatusgroup('')
             setNotificationShown(false)
             setnewChatDataFromChild([])
+            setsearchbox('')
+            setSearchTerm('')
+            setsearchboxGroup('')
+            setSearchTermGroup('')
             if(receiverId)
             {
                 const index = isNewmsgSender.indexOf(receiverId);
@@ -87,6 +90,10 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
             setTypingStatusgroup('')
             setNotificationShown(false)
             setnewgroupChatDataFromChild([])
+            setsearchbox('')
+            setSearchTerm('')
+            setsearchboxGroup('')
+            setSearchTermGroup('')
             if(groupId)
             {
                 const index = isNewmsgGroupSender.indexOf(groupId);
@@ -132,7 +139,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     const [grouplistdata, setGrouplistdata] = useState([]);
     const fetchGrouplist = async () => {
     try {
-            const response = await axiosConfig.get('/chat/getgrouplist')
+            const response = await axiosConfig.get('/chat/getgroupinteract')
             if(response.status==200)
             {
                 //const token = localStorage.getItem(token)
@@ -151,21 +158,29 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     }
     //console.log(alluserdata);
     useEffect(() => {
-        if(!token)
-        {
-            navigate('/login')
-            //window.location.href = "/login";
-        }
         fetchGrouplist()
-    }, [token])
+        socket.on('messagegroupResponse', (data) => {
+            fetchGrouplist()
+        })
+    }, [socket])
 
 
     const newUserslisting = interactwithuserlist.filter(item => item.userName !== UserName);
     const newUsersloggedin = usersloggedin.filter(item => item.userName !== UserName);
-    const mergedArray = newUsersloggedin.concat(newUserslisting.filter(item2 => !newUsersloggedin.some(item1 => item1.userId === item2.userId)));
+    //const mergedArray = newUsersloggedin.concat(newUserslisting.filter(item2 => !newUsersloggedin.some(item1 => item1.userId === item2.userId)));
     //const mergedArray = newUserslisting.filter(item2 => !newUsersloggedin.some(item1 => item1.userId === item2.userId))
     //console.log(newUsersloggedin);
-    //console.log(mergedArray);
+    
+
+    
+    newUserslisting.forEach(user => {
+        const matchingUser = newUsersloggedin.find(item => item.userId === user.userId);
+        if (matchingUser) {
+            user.socketID = matchingUser.socketID;
+        }
+    });
+   
+    //console.log(newUserslisting);
     
     /* setTimeout(
         function() {
@@ -226,7 +241,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                         <div className="tab-content">
                             <div className="tab-pane" id="Open" role="tabpanel" aria-labelledby="Open-tab">
                                 <div className="chat-list">
-                                {mergedArray.slice().reverse().map((user,i) =>
+                                {newUserslisting.map((user,i) =>
                                 {
                                     const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
                                     let dndStatus = false;
@@ -295,7 +310,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                             <div className="tab-pane" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
 
                                 <div className="chat-list">
-                                    {grouplistdata.slice().reverse().map((group,i) => (
+                                    {grouplistdata.map((group,i) => (
                                     <a key={i} 
                                         onClick={(e) => handleSelectGroup(group.groupId,
                                             setSelectedGroup({
@@ -317,7 +332,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             <div className="flex-grow-1 ms-2">
                                                 <h3>{group.groupName}</h3>
                                             </div>
-                                            {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                            {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                            {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
                                         </a>
                                     ))}
                                 </div>
@@ -325,7 +341,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                             <div className="tab-pane show active" id="Alldata" role="tabpanel" aria-labelledby="Alldata-tab">
 
                                 <div className="chat-list">
-                                    {mergedArray.slice().reverse().map((user,i) =>
+                                    {newUserslisting.map((user,i) =>
                                     {
                                         const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
                                         let dndStatus = false;
@@ -372,7 +388,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                         )
                                     }
                                     )}
-                                    {grouplistdata.slice().reverse().map((group,i) => (
+                                    {grouplistdata.map((group,i) => (
                                     <a key={i} 
                                         onClick={(e) => handleSelectGroup(group.groupId,
                                             setSelectedGroup({
@@ -394,7 +410,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             <div className="flex-grow-1 ms-2">
                                                 <h3>{group.groupName}</h3>
                                             </div>
-                                            {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                            {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                            {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
                                         </a>
                                     ))}
                                 </div>

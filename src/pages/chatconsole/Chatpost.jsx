@@ -10,9 +10,11 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
     const [message, setMessage] = useState('');
     const [files, setFiles] = useState([]);
     const [filesblank, setfilesblank] = useState(false);
+    const [image, setImage] = useState(null);
     const [quotedMessagePost, setQuotedMessagePost] = useState('');
     const [strPagequotedMessagePost, setStrPagequotedMessagePost] = useState('');
-  
+    
+    
     useEffect( () => {
         setQuotedMessagePost(quotedMessage)
         if(quotedMessage.quoteMessage)
@@ -42,11 +44,15 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
         {
             strquotedMessagePost = `<div class="quotedText"><p><b>${quotedMessagePost.sender}</b></p></br><p>${quotedMessagePost.quoteMessage}</p></div>`
         }
+       
         socket.emit('typing', '');
         //e.preventDefault();
         const d = new Date();
         const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
-        
+        /* console.log(image);
+        console.log(files);
+        return false; */
+
         if ((message.trim() || files.length) && localStorage.getItem('loggedInUserName'))
         {
             if(files.length>0)
@@ -77,7 +83,12 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
                     let filesStr = ''
                     response.data['files'].map((file) => {
                         //console.log(file);
-                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
+                        let originalnameFilename = file.originalname;
+                        if(originalnameFilename == 'image.png')
+                        {
+                            originalnameFilename = `Screenshot_${file.filename}`;
+                        }
+                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${originalnameFilename}</a></br>`
                     });
                     const messagewithfiles = `${strquotedMessagePost} ${message}</br>${filesStr}`;
 
@@ -95,7 +106,7 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
 
                     setfilesblank(true)
                     setFiles([]);
-                    
+                    setImage(null)
                 } catch (error) {
                     console.log(error.message);
                 }
@@ -130,7 +141,26 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
         setStrPagequotedMessagePost('');
         setMessage('');
         setFiles([]);
+        setImage(null)
     };
+
+    const handlePaste = async (event) => {
+        const items = event.clipboardData.items;
+        /* add code... */
+
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
+            const imageUrl = URL.createObjectURL(blob);
+            setImage(imageUrl);
+            
+            // Optionally, upload the image to the server here
+            //await uploadImage(blob);
+          }
+        }
+      };
+    
     //console.log(senderUserData);
     //console.log(filesblank);
     //console.log(strPagequotedMessagePost);
@@ -144,7 +174,20 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
         {quotedMessagePost && <span dangerouslySetInnerHTML={{__html: strPagequotedMessagePost}} />}
         {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }</div>
         <div className="clearfix"></div>
+            {/*image && <img src={image} className="printscreen" alt="Pasted content" />*/}
+            <div className="clearfix"></div>
+
             <form>
+            <div
+            style={{
+            border: '1px solid #ccc',
+            padding: '10px',
+            width: '100%',
+            overflow: 'auto',
+            position: 'relative',
+            }}
+            onPaste={handlePaste}
+            >
             <InputEmoji
             value={message}
             onChange={setMessage}
@@ -152,10 +195,11 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
             onEnter={handleSendMessage}
             onKeyDown={handleTyping}
             onKeyUp={handleRemoveTyping}
+            onBlur={handleRemoveTyping}
             placeholder="Type a message"
             shouldReturn
             />
-            
+            </div>
                 {/*<input 
                     type="text"
                     className="form-control message" aria-label="message…" placeholder="Write message…"
