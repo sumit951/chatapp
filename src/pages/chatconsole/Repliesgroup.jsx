@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, messageRefsGroup}) => {
+const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, messageRefsGroup,onDeleteMsgGroup,onEditMessageGroup,groupMemberdataFromChild}) => {
 
     const lastMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -16,6 +16,16 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
     //console.log(messages);
     //console.log(newArrchatdataFromChild);
     
+    const transformMessage = (message) => {
+        // Regular expression to match mentions in the format @name(userId:number)
+        const mentionRegex = /@\[([^\]]+)\](\(userId:(\d+)\))/g;
+        
+        // Replace mentions with <span> tags containing userId as data attribute
+        return message.replace(mentionRegex, (match, userName, userTag, userId) => {
+            return `&nbsp;<span class="tagg--text" data-userid="${userId}">@${userName}</span>&nbsp;`;
+        });
+    };
+
     const handleMouseEnter = (messageId) => {
     setHoveredMessageId(messageId);
     };
@@ -49,10 +59,10 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
     if (newMessageText) {
         if(newMessageText.trim())
         {
-        const updatedMessageDate = { messageId:editingMessageId,oldMessage:editingMessage, newMessage: newMessageText };
+        const updatedMessageDate = { messageId:editingMessageId,oldMessage:editingMessage, newMessage: transformMessage(newMessageText) };
         //console.log(updatedMessageDate);
         
-        onEditMessage(updatedMessageDate);
+        onEditMessageGroup(updatedMessageDate);
         setEditingMessage(null);
         setNewMessageText('');
         setEditingMessageId('');
@@ -114,8 +124,52 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
                 setUserChatData([...userChatData, data])
             }
         })
+        socket.on('reloaddeleteMessage', async (data) => {
+            //console.log(data);
+            if(parentMessageId)
+            {
+                fetchrepliedmessages(parentMessageId)
+            }
+        })
+        socket.on('updatedMessageGroup', (updatedMsg) => {
+            //console.log(data);
+            if(parentMessageId)
+            {
+                fetchrepliedmessages(parentMessageId)
+            }
+        })
     }, [socket,parentMessageId,userChatData]);
     
+    const userforTag = groupMemberdataFromChild.filter(item => item.userId !== chatboardUserid);
+    const mockUsers = 
+        userforTag.map((user,i) => (
+        {
+        id: user.userId,
+        name: user.userName,
+        shortName: user.usershortName
+        }
+    ));
+
+    const searchMention = (message) => {
+        if (!message) {
+        return [];
+        }
+
+        const filteredText = message.substring(1).toLocaleLowerCase();
+
+        return mockUsers.filter(user => {
+        if (user.name.toLocaleLowerCase().startsWith(filteredText)) {
+        return true;
+        }
+
+        const names = user.name.split(" ");
+
+        return names.some(name =>
+        name.toLocaleLowerCase().startsWith(filteredText)
+        );
+        });
+    }
+
   return (
     <>
         
@@ -142,6 +196,13 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
                 cleanOnEnter
                 onEnter={handleSaveEdit}
                 placeholder="Type a message"
+                keepOpened
+                disableRecent
+                maxLength={1200}
+                searchMention={searchMention}
+                onFocus={() => {
+                    console.log('on focus')
+                }}
                 shouldReturn
                 />
                 {/*<input
@@ -162,7 +223,7 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
                     
                 {((hoveredMessageId === chatdata.messageId) && chatdata.deleteSts=='No') && (
                     <span className="message-actions float-end ms-3">
-                    {/* <a
+                    <a
                         className="edit-button"
                         onClick={() => handleEditClick(chatdata.message,chatdata.messageId)}
                     >
@@ -170,10 +231,10 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
                     </a>
                     <a
                         className="delete-button"
-                        onClick={() => onDeleteMsg(chatdata.messageId)}
+                        onClick={() => onDeleteMsgGroup(chatdata.messageId)}
                     >
                         <i className='fa fa-trash'></i>
-                    </a> */}
+                    </a>
                     </span>
                 )}
                 </p>

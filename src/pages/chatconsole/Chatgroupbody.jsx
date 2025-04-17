@@ -5,7 +5,7 @@ import InputEmoji from 'react-input-emoji'
 import Replies from './Repliesgroup';
 import Pinnedhistory from './Pinnedhistory';
 
-const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,groupchatdataFromChild, onEditMessageGroup, onDeleteMsgGroup,newArrgroupchatdataFromChild,onReplyMessageGroup,onQuotedMessageGroup,messageRefsGroup}) => {
+const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,groupchatdataFromChild, onEditMessageGroup, onDeleteMsgGroup,newArrgroupchatdataFromChild,onReplyMessageGroup,onQuotedMessageGroup,messageRefsGroup,groupMemberdataFromChild}) => {
     
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
     const [hoveredMessageId, setHoveredMessageId] = useState(null);
@@ -272,7 +272,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -329,7 +329,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -422,7 +422,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -479,7 +479,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -500,7 +500,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
             )}
             </ul>
             <div className="message__status">
-            <p>{typingStatusgroup}</p>
+            {/* <p>{typingStatusgroup}</p> */}
             </div>
             {!messageRefsGroup && <div ref={lastMessageGroupRef} />}
             </div>

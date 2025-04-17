@@ -58,7 +58,8 @@ const Updateuser = () => {
         officeName:'',
         cityName:'',
         password:'',
-        chatDeleteInDays:''
+        chatDeleteInDays:'',
+        allowedInGroups:''
     })
     const selectedChatDeleteInDays = ''
     const fetchAdminInfo = async () => {
@@ -80,7 +81,8 @@ const Updateuser = () => {
                     officeName:response.data[0].officeName,
                     cityName:response.data[0].cityName,
                     password:response.data[0].decryptPassword,
-                    chatDeleteInDays:response.data[0].chatDeleteInDays
+                    chatDeleteInDays:response.data[0].chatDeleteInDays,
+                    allowedInGroups:response.data[0].allowedInGroups
                 })
 
                 
@@ -207,6 +209,18 @@ const Updateuser = () => {
                             {options.map((option) => (
                             <option value={option.value}>{option.label}</option>
                             ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group"><label class="col-sm-3 control-label">No. of Groups Allowed </label>
+                    <div class="col-sm-9">
+                        
+                        <select className="form-control" name="allowedInGroups" onChange={handleChanges} required value={values.allowedInGroups}>
+                        {
+                            [...Array(10)].map((_, i) => i + 1)
+                                        .map(i => <option key={i} value={i}>{i}</option>)
+                        }
                         </select>
                     </div>
                 </div>

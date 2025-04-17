@@ -8,7 +8,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
     const [message, setMessage] = useState('');
     const [files, setFiles] = useState([]);
     const [filesblank, setfilesblank] = useState(false);
-
+    const [image, setImage] = useState(null);
     const [quotedMessagePost, setQuotedMessagePost] = useState('');
     const [strPagequotedMessagePost, setStrPagequotedMessagePost] = useState('');
     
@@ -80,7 +80,12 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
                     let filesStr = ''
                     response.data['files'].map((file) => {
                         //console.log(file);
-                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
+                        let originalnameFilename = file.originalname;
+                        if(originalnameFilename == 'image.png')
+                        {
+                            originalnameFilename = `Screenshot_${file.filename}`;
+                        }
+                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${originalnameFilename}</a></br>`
                     });
                     const messagewithfiles = `${strquotedMessagePost} ${message}</br>${filesStr}`;
 
@@ -99,6 +104,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
 
                     setfilesblank(true)
                     setFiles([]);
+                    setImage(null)
                     
                 } catch (error) {
                     console.log(error.message);
@@ -127,14 +133,13 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
     
     const userforTag = groupMemberdataFromChild.filter(item => item.userId !== senderUserData.id);
     const mockUsers = 
-            userforTag.map((user,i) => (
-            {
-            id: user.userId,
-            name: user.userName,
-            shortName: user.usershortName
-            }
-        ))
-    ;
+        userforTag.map((user,i) => (
+        {
+        id: user.userId,
+        name: user.userName,
+        shortName: user.usershortName
+        }
+    ));
     
     
     /*const mockUsers = [
@@ -181,6 +186,37 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
         );
         });
     }  
+
+    const handlePaste = async (event) => {
+        const items = event.clipboardData.items;
+        const files = [];
+
+        for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+
+        // Check if the item is an image
+        if (item.kind === "file" && item.type.startsWith("image")) {
+            const file = item.getAsFile();
+            files.push(file);
+        }
+        }
+
+        if (files.length > 0) {
+            setFiles((prevFiles) => [...prevFiles, ...files]); // Append pasted images to state
+        }
+
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
+            const imageUrl = URL.createObjectURL(blob);
+            setImage(imageUrl);
+            
+            // Optionally, upload the image to the server here
+            //await uploadImage(blob);
+          }
+        }
+    };
     
   return (
     <>
@@ -188,10 +224,22 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
             <Chatfileupload onFileSelect={setFiles} parentselectedFiles={filesblank} setfilesblank={setfilesblank} />
             <div className="float-end scutkey"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
             <div className="clearfix"></div>
+            {image && <img src={image} className="printscreen" alt="Pasted content" />}
+            <div className="clearfix"></div>
             {quotedMessagePost && <span dangerouslySetInnerHTML={{__html: strPagequotedMessagePost}} />}
             {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }
             <div className="clearfix"></div>
             <form>
+            <div
+            style={{
+            border: '1px solid #ccc',
+            padding: '10px',
+            width: '100%',
+            overflow: 'auto',
+            position: 'relative',
+            }}
+            onPaste={handlePaste}
+            >
             <InputEmoji
             value={message}
             onChange={setMessage}
@@ -210,6 +258,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
             }}
             shouldReturn
             />
+            </div>
                 {/*<input 
                     type="text"
                     className="form-control message" aria-label="message…" placeholder="Write message…"

@@ -17,28 +17,3 @@ const app = initializeApp(firebaseConfig);
 //const messaging = getMessaging(app);
 
 export const messaging = getMessaging(app);
-/* export const generateToken = async() => {
-  const permission =  await Notification.requestPermission();
-  //console.log(permission);
-  if(permission === "granted")
-  {
-    const fcmToken =  await getToken(messaging, 
-      {vapidKey: "BNowVgygmaSSo_MLpMbYZDTapAU-lf70k7Df7KBoWMESkXHBxPotU6-eExTusH4Xdf7yKvUWKHy9PJYeNfvHHZ8"}
-    );
-    return fcmToken;
-  }
-}; */
-
-onMessage(messaging, (payload) => {
-    console.log('Message received. ', payload.notification.body);  // Check this log to see the incoming message
-    /* if (payload && payload.notification) {
-    // Handle the notification payload data as needed
-    //toast(payload.notification.body);
-    toast.success(payload.notification.body, {
-        position: "bottom-right",
-        autoClose: 1000,
-        hideProgressBar: true
-    });
-    //alert(payload.data.google.c.a.c_l)
-    } */
-});

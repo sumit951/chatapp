@@ -5,7 +5,7 @@ import moment from 'moment'
 import { ToastContainer, toast } from 'react-toastify';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 
 
@@ -118,11 +118,26 @@ const Chat = ({ socket }) => {
     const [userdataname, setUserdataname] = useState([]);
     const [usertypeData, setUserType] = useState([]);
     const [userData, setUserData] = useState([]);
+    const [UserGroupInfo, setUserGroupInfo] = useState([]);
+    const [selectedFrmUrl, setselectedFrmUrl] = useState();
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
-
     
-
+    /* const {boardid} = useParams()
+    const {boardtype} = useParams()
     
+    if(boardid!=null && boardtype!=null)
+    {
+        const boardIdDecode = atob(boardid)
+        const boardTypeDecode = atob(boardtype)
+        if(boardTypeDecode=='u')
+        {
+            //console.log(boardIdDecode+' '+boardTypeDecode);
+        }
+        
+        useEffect(() => {
+            setselectedFrmUrl(boardTypeDecode+boardIdDecode);
+        }, [boardTypeDecode,boardIdDecode])
+    } */
     const fetchUserInfo = async () => {
         try {
             const response = await axiosConfig.get('/auth/authenticate')
@@ -155,6 +170,32 @@ const Chat = ({ socket }) => {
         }
         fetchUserInfo()
     }, [token,userStatus])
+
+    const fetchusergroupinfo = async () => {
+        try {
+            const response = await axiosConfig.get('/user/getusergroupinfo')
+            if (response.status == 200) {
+                if (response.status !== 200) {
+                    navigate('/login')
+                    window.location.reload();
+                    //window.location.href = "/login";
+                }
+                setUserGroupInfo(response.data[0]);
+            }
+        } catch (error) {
+            console.log(error.message);
+            logout()
+            navigate('/login')
+        }
+    }
+    
+    //return false;
+    useEffect(() => {
+        if (userStatus == 'Active') {
+        fetchusergroupinfo()
+        }
+    }, [userStatus])
+    const groupCount = UserGroupInfo.groupCount;
 
     const [isNewmsgSender, setNewmsgSender] = useState([]);
     const [isNewmsgReceiver, setNewmsgReceiver] = useState([]);
@@ -425,7 +466,8 @@ const Chat = ({ socket }) => {
                     autoClose: 1000,
                     hideProgressBar: true
                 }); */
-                
+                const postData = {messageId:id}
+                socket.emit('deleteMessage', postData);
                 setTimeout(() => {
                     //const newchatdataFromChild = chatdataFromChild.filter((items) => items.messageId !== id)
                     const newchatdataFromChild = chatdataFromChild.map((item) =>
@@ -672,6 +714,9 @@ const Chat = ({ socket }) => {
                     hideProgressBar: true
                 }); */
 
+                const postData = {messageId:groupmsgid}
+                socket.emit('deleteMessage', postData);
+
                 setTimeout(() => {
                     //const newgroupchatdataFromChild = groupchatdataFromChild.filter((items) => items.messageId !== groupmsgid)
                     const newgroupchatdataFromChild = groupchatdataFromChild.map((item) =>
@@ -701,13 +746,13 @@ const Chat = ({ socket }) => {
             
             if(receiverId === data.receiverId)
             {
-                setTypingStatus(data.typingmessge)
+                //setTypingStatus(data.typingmessge)
                 //setTypingStatusgroup('')
             }
             
             if(groupId === data.groupId)
             {
-                setTypingStatusgroup(data.typingmessge)
+                //setTypingStatusgroup(data.typingmessge)
                 //setTypingStatus('')
             }
         })
@@ -954,13 +999,19 @@ const Chat = ({ socket }) => {
             const containsObject = interactwithuserlist.some((item) => item.userId === selectedUserFrchatId);
             
             if (!containsObject && (selectedUserFrchatId != chatboardUserid)) {
-                interactwithuserlist.push(selectedUserFrchat);
+                //interactwithuserlist.push(selectedUserFrchat);
+                interactwithuserlist.unshift(selectedUserFrchat);
+
+                //let newselectedFrmUrl = btoa('A-tab')+'/'+btoa(selectedUserFrchat.userId);
+                let newselectedFrmUrl = 'A-tab'+selectedUserFrchat.userId;
+                setselectedFrmUrl(newselectedFrmUrl);
                 setActivefrParent(selectedUserFrchatName[0].trim())
                 if (childLinkRef.current) {
                 childLinkRef.current.click(); // Trigger click on the child <a> tag
                 //alert()
                 }
                 SetonetoOnecomponent(false)
+                //navigate(`/chatconsole/spaces/${newselectedFrmUrl}`)
             }
         }
     };
@@ -1053,6 +1104,7 @@ const Chat = ({ socket }) => {
     };
 
     const handleMessageTab = () => {
+        navigate('/chatconsole/spaces')
         location.reload()
     }
     
@@ -1124,7 +1176,49 @@ const Chat = ({ socket }) => {
         }
     };
     /*Group Message Search*/
-        
+    
+    const [reloadGrouplist, setreloadGrouplist] = useState(false); // id or index of the message to focus
+    const handleCreatedGroupData = (groupid) => {
+        console.log(groupid);
+        setreloadGrouplist(true)
+        let groupkeyId = 'AG-tab'+groupid;
+        setselectedFrmUrl(groupkeyId);
+    };
+
+    const handleSendRequestCreateGRP = async () => {
+        //console.log(senderId+'---'+receiverId);
+       
+        if (confirm('Please Confirm !'))
+        {
+            try {
+                const response = await axiosConfig.post(`/user/sendaddSingleuserreq`)
+                if(response.status==200)
+                {
+                    if(response.status==200 && response.data.status=='success')
+                    {
+                    socket.emit('sendaddmemberrequest', response.data);
+                    toast.success(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                }  
+                if(response.data.status=='fail')
+                {
+                    toast.error(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                }   
+                }
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+    };
+
     return (
         <div>
             <section className="message-area">
@@ -1170,7 +1264,8 @@ const Chat = ({ socket }) => {
                                                 <a className="nav-link dropdown-toggle plua" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i className="fa fa-plus"></i></a>
                                                 <ul className="dropdown-menu">
                                                     <li><a className="dropdown-item" onClick={handleDirectGroup}>Direct Chat</a></li>
-                                                    <li><a className="dropdown-item" onClick={handleCreateGroup}>Create Group</a></li>
+                                                    {((groupCount<userData.allowedInGroups) || usertypeData != 'EMPLOYEE') && <li><a className="dropdown-item" onClick={handleCreateGroup}>Create Group</a></li>}
+                                                    {(groupCount>=userData.allowedInGroups) && usertypeData == 'EMPLOYEE' && <li><a className="dropdown-item" onClick={handleSendRequestCreateGRP}>Send Request to Create Group</a></li>}
                                                 </ul>
                                             </li>
                                         </ul>
@@ -1217,7 +1312,7 @@ const Chat = ({ socket }) => {
         <div className="menu-bar">
           <ul className="menu-links">
             <li className="nav-link">
-              <a href="javascript:void(0);" onClick={handleMessageTab}>
+            <a href="javascript:void(0);" onClick={handleMessageTab}>
               <FontAwesomeIcon icon={faMessage} />
                 <span className="text nav-text">Message</span>
               </a>
@@ -1271,6 +1366,10 @@ const Chat = ({ socket }) => {
                                 setsearchboxGroup={setsearchboxGroup}
                                 setSearchTermGroup={setSearchTermGroup}
                                 foundTaggedUser={foundTaggedUser}
+                                selectedFrmUrl={selectedFrmUrl}
+                                setselectedFrmUrl={setselectedFrmUrl}
+                                reloadGrouplist={reloadGrouplist}
+                                setreloadGrouplist={setreloadGrouplist}
                                 />}
                                 {(searchbox || searchboxGroup) && <Chatsearch socket={socket} searchTerm={searchTerm} receiverId={receiverId} onFocus={handleFocusMessage} searchTermGroup={searchTermGroup} groupId={groupId} onFocusGroup={handleFocusMessageGroup} />}
                                 </div>
@@ -1279,7 +1378,7 @@ const Chat = ({ socket }) => {
                                     <div className="modal-dialog-scrollable">
                                         <div className="modal-content">
                                             {usersetting && <Setting socket={socket} loggedInuserdata={userData} />}
-                                            {groupComponenet && <Chatgroupcreate loggedInuserdata={userData} />}
+                                            {groupComponenet && <Chatgroupcreate socket={socket} loggedInuserdata={userData} handleCreatedGroupData={handleCreatedGroupData} />}
                                             {!groupComponenet && !usersetting && userboard && <div className="msg-head">
                                                 <div className="row">
                                                     <div className="col-7">
@@ -1296,7 +1395,7 @@ const Chat = ({ socket }) => {
                                                                             {/* <p>&nbsp;</p> */}
                                                                         </div>
                                                                         <div className='ms-2'>
-                                                                        <i class="fa fa-star"></i>
+                                                                        {/* <i class="fa fa-star"></i> */}
                                                                             </div>
                                                                     </div>
                                                                 ) : null
@@ -1440,6 +1539,7 @@ const Chat = ({ socket }) => {
                                             onReplyMessageGroup={handleReplyMessageGroup}
                                             onQuotedMessageGroup={handleQuotedMessageGroup}
                                             messageRefsGroup={messageRefsGroup}
+                                            groupMemberdataFromChild={groupMemberdataFromChild}
                                             />}
                                             {!groupComponenet && !usersetting && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} groupMemberdataFromChild={groupMemberdataFromChild} quotedMessageGroup={quotedMessageGroup} />}
                                             </div>

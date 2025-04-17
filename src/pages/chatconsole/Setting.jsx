@@ -10,6 +10,7 @@ const Setting = ({socket,loggedInuserdata}) => {
     
     const handleStatusChange = (event) => {
         setStatus(event.target.value);
+        setTime('');
         // Reset time when status changes
     };
 
@@ -35,7 +36,7 @@ const Setting = ({socket,loggedInuserdata}) => {
           return false;
           
         }
-        else if(time=='')
+        else if(time=='' && status!='ACTIVE')
         {
             alert('Select Duration!')
             return false;
@@ -111,6 +112,20 @@ const Setting = ({socket,loggedInuserdata}) => {
                 </div>
                 <div class="panel-body">
                 <form onSubmit={handleSubmit} class="form-horizontal p-3 border rounded">
+                <div class="form-group">
+                    <div class="col-sm-9">
+                    <label>
+                    <input
+                        type="radio"
+                        name="status"
+                        value="ACTIVE"
+                        checked={status === 'ACTIVE'}
+                        onChange={handleStatusChange}
+                        
+                    /> <span style={{ marginLeft: '10px' }}>Active</span>
+                    </label>
+                    </div>
+                </div>
                 <div class="form-group">
                     <div class="col-sm-9">
                     <label>

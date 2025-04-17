@@ -146,7 +146,21 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
 
     const handlePaste = async (event) => {
         const items = event.clipboardData.items;
-        /* add code... */
+        const files = [];
+
+        for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+
+        // Check if the item is an image
+        if (item.kind === "file" && item.type.startsWith("image")) {
+            const file = item.getAsFile();
+            files.push(file);
+        }
+        }
+
+        if (files.length > 0) {
+            setFiles((prevFiles) => [...prevFiles, ...files]); // Append pasted images to state
+        }
 
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
@@ -159,7 +173,7 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
             //await uploadImage(blob);
           }
         }
-      };
+    };
     
     //console.log(senderUserData);
     //console.log(filesblank);
@@ -174,7 +188,7 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
         {quotedMessagePost && <span dangerouslySetInnerHTML={{__html: strPagequotedMessagePost}} />}
         {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }</div>
         <div className="clearfix"></div>
-            {/*image && <img src={image} className="printscreen" alt="Pasted content" />*/}
+            {image && <img src={image} className="printscreen" alt="Pasted content" />}
             <div className="clearfix"></div>
 
             <form>

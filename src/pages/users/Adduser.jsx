@@ -55,7 +55,8 @@ const Adduser = () => {
         employeeId:'',
         officeName:'',
         cityName:'',
-        chatDeleteInDays:''
+        chatDeleteInDays:'',
+        allowedInGroups:''
     })
 
     const handleChanges = (e) => {
@@ -188,7 +189,22 @@ const Adduser = () => {
                     <div class="col-sm-9"><input type="text" className="form-control" name="cityName" onChange={handleChanges} placeholder="City Name" required /></div>
                 </div>
                 </div>
-
+                <div className='row'>              
+                    <div class="form-group col-md-6">
+                        <label class="col-sm-3 control-label">No. of Groups Allowed </label>
+                        <div class="col-sm-9">
+                            <select className="form-control" name="allowedInGroups" onChange={handleChanges} required value={3}>
+                            <option key={''} value={''}>Select Number</option>
+                            {
+                                [...Array(10)].map((_, i) => i + 1)
+                                            .map(i => <option key={i} value={i}>{i}</option>)
+                            }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-6">&nbsp;</div>
+                </div>        
+                
                 {/* <div class="hr-line-dashed"></div> */}
                 <div class="form-group mb-1">
                     <div class="col-sm-12 d-flex justify-content-end mt-1">

@@ -276,7 +276,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -337,7 +337,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -431,7 +431,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage}  />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -486,7 +486,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -511,7 +511,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
 
             </ul>
             <div className="message__status">
-            <p>{typingStatus}</p>
+            {/* <p>{typingStatus}</p> */}
             </div>
             </div>
             {!messageRefs &&<div ref={lastMessageRef} />}

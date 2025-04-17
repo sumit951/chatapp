@@ -54,7 +54,7 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
     
     const options = mergedArray.map((datauser) => (
         /* { value: datauser.userId, label: datauser.userName+' - '+datauser.userEmail } */
-        { value: datauser.userId, label: datauser.userName +' - Member in '+ datauser.groupCount+" group(s)", isDisabled: (datauser.userType=='EMPLOYEE' && datauser.groupCount>=3) ? true : false }
+        { value: datauser.userId, label: datauser.userName +' - Member in '+ datauser.groupCount+" group(s)", isDisabled: (datauser.userType=='EMPLOYEE' && datauser.groupCount>=datauser.allowedInGroups) ? true : false }
     ))
     
     const handleDelete = async(userId,groupId,totalMember) =>{
@@ -110,8 +110,8 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(selOption.selectUsers.length);
-        return false;
+        //console.log(selOption.selectUsers.length);
+        //return false;
         if(selOption.selectUsers==null)
         {
           alert('Please Select User')

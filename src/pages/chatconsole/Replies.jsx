@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageRefs}) => {
+const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageRefs,onDeleteMsg, onEditMessage}) => {
 
     const lastMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -114,6 +114,20 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
                 setUserChatData([...userChatData, data])
             }
         })
+        socket.on('reloaddeleteMessage', async (data) => {
+            //console.log(data);
+            if(parentMessageId)
+            {
+                fetchrepliedmessages(parentMessageId)
+            }
+        })
+        socket.on('updatedMessage', (updatedMsg) => {
+            //console.log(data);
+            if(parentMessageId)
+            {
+                fetchrepliedmessages(parentMessageId)
+            }
+        })
     }, [socket,parentMessageId,userChatData]);
 
     
@@ -166,18 +180,18 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
                     
                 {((hoveredMessageId === chatdata.messageId) && chatdata.deleteSts=='No') && (
                     <span className="message-actions float-end ms-3">
-                    {/* <a
+                    <a
                         className="edit-button"
                         onClick={() => handleEditClick(chatdata.message,chatdata.messageId)}
                     >
                         <i className='fa fa-pencil'></i>
-                    </a>
+                    </a>  
                     <a
                         className="delete-button"
                         onClick={() => onDeleteMsg(chatdata.messageId)}
                     >
                         <i className='fa fa-trash'></i>
-                    </a> */}
+                    </a>
                     </span>
                 )}
                 </p>
