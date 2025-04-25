@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef} from 'react'
 import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import moment from 'moment'
 import InputEmoji from 'react-input-emoji'
 import Replies from './Replies';
 import Pinnedhistory from './Pinnedhistory';
 
-const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChild, onEditMessage, onDeleteMsg,newArrchatdataFromChild,onReplyMessage,onQuotedMessage,messageRefs}) => {
+const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChild, onEditMessage, onDeleteMsg,newArrchatdataFromChild,onReplyMessage,onQuotedMessage,messageRefs,highlightId,receiverId}) => {
 
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
+
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const topRef = useRef(null);
+
     const [hoveredMessageId, setHoveredMessageId] = useState(null);
-    //console.log(messages);
+    //console.log(chatdataFromChild);
 
     //console.log(messages);
     //console.log(newArrchatdataFromChild);
@@ -191,13 +196,54 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
             console.log(error.message);
         }
     };
-    //console.log(messageRefs);
+    
+    
+    /* const loadMessages = async(receiverId) => {
+        
+        try {
+            const encodeReceiverId = btoa(receiverId)
+            console.log(offset);
+            const response = await axiosConfig.get(`/chat/getuserchat/${encodeReceiverId}?offset=${offset}`)
+            if(response.data.length > 0)
+            {   
+                console.log(response.data.length);
+            
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                }   
+                setchatdata(prev => [...response.data.slice().reverse(), ...prev]);
+                setOffset(prev => prev + 2);
+            }
+            else
+            {
+            setHasMore(false);
+            }
+            //console.log(response.data);
+        } catch (error) {
+            console.log(error.message);
+        }    
+    }
+    useEffect(() => {
+    loadMessages(receiverId);
+    }, [receiverId]); */
+    const handleScroll = async() => {
+        console.log(topRef.current.scrollTop);
+        
+    /* if (topRef.current.scrollTop === 0) {
+        await loadMessages(receiverId);
+        slice().reverse().
+    } */
+    };
     
   return (
     <>
-        <div className="modal-body">
+        <div className="modal-body" ref={topRef}
+            onScroll={handleScroll}>
             <div className="msg-body">
-            <ul>
+            
+            <ul>  
             {chatdata.map((chatdata) =>
             (chatdata.messageId!=null) ? (
             chatdata.senderName === localStorage.getItem('loggedInUserName') ? (
@@ -276,7 +322,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -337,7 +383,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -431,7 +477,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage}  />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId}  />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -486,7 +532,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} />
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -505,16 +551,12 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                 </li>
             )
             )}
-
-
-
-
             </ul>
             <div className="message__status">
             {/* <p>{typingStatus}</p> */}
             </div>
             </div>
-            {!messageRefs &&<div ref={lastMessageRef} />}
+            {highlightId===null && <div ref={lastMessageRef} />}
         </div>
     </>
   )

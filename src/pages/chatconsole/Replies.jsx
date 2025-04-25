@@ -4,9 +4,10 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageRefs,onDeleteMsg, onEditMessage}) => {
-
-    const lastMessageRef = useRef(null);
+const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageRefs,onDeleteMsg, onEditMessage, highlightId}) => {
+    //console.log(highlightId);
+    
+    const lastReplyMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
     const token = localStorage.getItem('chat-token-info')
     
@@ -88,7 +89,7 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
             
         } catch (error) {
             console.log(error.message);
-            
+            setUserChatData([]);
         }  
     }
 
@@ -102,9 +103,11 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
     }, [parentMessageId])
 
     useEffect(() => {
-        lastMessageRef.current?.scrollIntoView({ block: "end"});
-    }, [userChatData]);
-    //lastMessageRef.current?.scrollIntoView({ block: "end"});
+        socket.on('messageResponseReply', (data) => { 
+        lastReplyMessageRef.current?.scrollIntoView({ block: "end"});
+        });
+    }, [socket]);
+    //lastReplyMessageRef.current?.scrollIntoView({ block: "end"});
 
     useEffect(() => {
         socket.on('messageResponseReply', (data) => { 
@@ -219,7 +222,7 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
             <a className="badge badge-waring" onClick={handleReplyClick}><i className='fa fa-reply'></i> Reply to thread</a>
             </div>
             
-            <div ref={lastMessageRef} />
+            {highlightId===null && <div ref={lastReplyMessageRef} />}
         </div>
         }
     </>

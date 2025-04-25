@@ -30,7 +30,7 @@ const Replies = ({socket, parentMessageId}) => {
             
         } catch (error) {
             console.log(error.message);
-            
+            setUserPinnedData([]);
         }  
     }
 
@@ -103,8 +103,7 @@ const Replies = ({socket, parentMessageId}) => {
                 </li>
             )) : ( <b></b> )
             )}
-            </ul>          
-            <div ref={lastMessageRef} />
+            </ul>
         </div>
         }
     </>

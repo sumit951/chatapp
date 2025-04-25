@@ -14,6 +14,7 @@ import "../../assets/chat/style.css";
 import "../../assets/chat/astyle.css";
 import logo from '../../assets/rc.png';
 import smallLogo from '../../assets/Raipd_logo.png';
+import loaderImage from "../../assets/loader.gif";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff, faGear, faMessage, faPhone, faChevronRight  } from '@fortawesome/free-solid-svg-icons';
@@ -33,74 +34,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Chatsearch from './Chatsearch';
 
 const Chat = ({ socket }) => { 
-    const [notificationShown, setNotificationShown] = useState(false); // Track notification state
-    const [isTabActive, setIsTabActive] = useState(true);
-    const [isTabActivegroup, setIsTabActivegroup] = useState(true);
-    /* 
-    //console.log(notificationShown);
     
-    const requestNotificationPermission = () => {
-        if (Notification.permission === "default") {
-          Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-              console.log("Notification permission granted");
-            } else {
-              console.log("Notification permission denied");
-            }
-          });
-        }
-    };
-    
-    useEffect(() => {
-        requestNotificationPermission()
-    }, []) */
-
-    /* const showNotification = (message) => {
-        
-        // Display browser notification
-        if (Notification.permission === 'granted') {
-            const notification = new Notification('New Message!', {
-            body: message.message, // Content of the message
-            icon: smallLogo,
-            });
-
-            notification.onclick = () => {
-            console.log('Notification clicked');
-            setNotificationShown(false);
-            };
-    
-            notification.onclose = () => {
-            console.log('Notification closed');
-            setNotificationShown(false);
-            };
-
-            
-        } else if (Notification.permission !== 'denied') {
-            // Ask for notification permission if it's not granted
-            Notification.requestPermission().then((permission) => {
-            if (permission === 'granted') {
-                const notification = new Notification('New Message!', {
-                body: <span dangerouslySetInnerHTML={{__html: message.message}} />,
-                icon: favicon,
-                });
-            }
-            });
-        }
-
-        if (Notification.permission === "granted") {
-          const notification = new Notification("New Message Received", {
-            body: message, // Assuming message contains a text field
-            icon: favicon, // Optional: add an icon
-          });
-    
-          // Optionally, handle notification clicks
-          notification.onclick = () => {
-            window.focus(); // Bring the window into focus
-            notification.close(); // Close the notification
-          };
-        }
-    };*/
-
     const animatedComponents = makeAnimated();
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
@@ -296,6 +230,7 @@ const Chat = ({ socket }) => {
             setNewmsgSender([...isNewmsgSender,data.senderId])
             setNewmsgReceiver(data.receiverId)
             fetchinteractwithuserlist()
+            fetchinteractwithuserlistfavourite()
         })
     }, [socket, messages,loggedInUserName]);
 
@@ -312,27 +247,6 @@ const Chat = ({ socket }) => {
             console.log(isFound);
             console.log(`@${loggedInUserName}`); */
             setFoundTaggedUser(isFound);
-        
-            /* if(!isTabActivegroup && !notificationShown  && data.groupId != null)
-            {
-                if(notificationEnbleSts)
-                {
-                    //showNotification(data);
-                }
-                setNotificationShown(true); // Ensure notification shows only once
-            } */
-            
-            //console.log(document.visibilityState);
-            
-            /* const handleVisibilityChange = () => {
-                if (document.visibilityState === 'visible') {
-                    setIsTabActivegroup(true);
-                } else {
-                    setIsTabActivegroup(false);
-                }
-            };
-
-            document.addEventListener('visibilitychange', handleVisibilityChange); */
             
         })
     }, [socket, messagesgroup]);
@@ -373,10 +287,14 @@ const Chat = ({ socket }) => {
     //console.log(messages);
     
     const receiverId = dataFromChild.selectedUserId;
+    const favouriteStatus = dataFromChild.favouriteStatus
+
     const groupId = groupdataFromChild.selectedUserId;
     const createdBy = groupdataFromChild.createdBy;
     const loggedInuserId = userData.id;
+    const favouriteStatusGroup = groupdataFromChild.favouriteStatusGroup;
     //console.log(createdBy+''+loggedInuserId);
+    //console.log(dataFromChild.favouriteStatus);
     
     let userboard = false;
     let groupboard = false;
@@ -761,6 +679,7 @@ const Chat = ({ socket }) => {
             if(data!="")
             {
                 fetchinteractwithuserlist()
+                fetchinteractwithuserlistfavourite()
             }
         })
 
@@ -928,14 +847,48 @@ const Chat = ({ socket }) => {
                 }   
                 setInteractwithuserlist(response.data);
             }
+            else
+            {
+                setInteractwithuserlist([])
+            }
         } catch (error) {
         console.log(error.message);
+        setInteractwithuserlist([])
+        }    
+        
+    }
+
+    const [interactwithuserlistfavourite, setInteractwithuserlistfavourite] = useState([]);
+    
+    const fetchinteractwithuserlistfavourite = async () => {
+    try {
+   
+            const encodeSelectedUserId = btoa(chatboardUserid)
+            const response = await axiosConfig.get(`/chat/getinteractwithuserlistfavourite/${encodeSelectedUserId}`)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                }   
+                setInteractwithuserlistfavourite(response.data);
+            }
+            else
+            {
+                setInteractwithuserlistfavourite([])
+            }
+        } catch (error) {
+        console.log(error.message);
+        setInteractwithuserlistfavourite([])
         }    
         
     }
    
     useEffect(() => {
         fetchinteractwithuserlist()
+        fetchinteractwithuserlistfavourite()
         /* socket.on('messageResponse', (data) => { 
             fetchinteractwithuserlist()
         }) */
@@ -1127,8 +1080,8 @@ const Chat = ({ socket }) => {
 
     const messageRefs = useRef({}); // store refs in an object keyed by message id or index
     const [highlightId, setHighlightId] = useState(null); // id or index of the message to focus
-
-    const handleFocusMessage = (id) => {
+    
+    const handleFocusMessage = async (id) => {
         setHighlightId(id);
 
         const nodemsg = messageRefs.current[id];        
@@ -1219,6 +1172,78 @@ const Chat = ({ socket }) => {
         }
     };
 
+    const [favouriteUser, setFavouriteUser] = useState(false);
+    const handleFavourite = async (actType,receiverId,favouriteUser) => {
+        //console.log(actType+'---'+receiverId);
+        if (receiverId && localStorage.getItem('loggedInUserName'))
+        {
+            setFavouriteUser(!favouriteUser)
+            try {
+                const postData = {receiverId:receiverId,actType:actType}
+                
+                const response = await axiosConfig.post(`/chat/updatefavouritestatus`, postData)
+                if(response.status==200)
+                {
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                //console.log(response.data);
+                fetchinteractwithuserlist()
+                fetchinteractwithuserlistfavourite()
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+    
+    };
+    
+
+    const [favouriteGroup, setFavouriteGroup] = useState(false);
+    const handleFavouriteGroup = async (actType,groupId,favouriteGroup) => {
+        //console.log(actType+'---'+receiverId);
+        if (groupId && localStorage.getItem('loggedInUserName'))
+        {
+            setFavouriteGroup(!favouriteGroup)
+            try {
+                const postData = {groupId:groupId,actType:actType}
+                
+                const response = await axiosConfig.post(`/chat/updatefavouritestatusgroup`, postData)
+                if(response.status==200)
+                {
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                //console.log(response.data);
+                setreloadGrouplist(true)
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+    
+    };
+    
+    const inputpostmsgRef = useRef(null);
+    const inputpostmsgRefgroup = useRef(null);
+    useEffect(() => {
+        setFavouriteUser(favouriteStatus)
+        setFavouriteGroup(favouriteStatusGroup)
+        if(receiverId)
+        {
+            inputpostmsgRef.current?.focus();
+        }
+        if(groupId)
+        {
+            inputpostmsgRefgroup.current?.focus();
+        }
+    }, [receiverId,groupId,favouriteStatus,favouriteStatusGroup])
     return (
         <div>
             <section className="message-area">
@@ -1296,10 +1321,9 @@ const Chat = ({ socket }) => {
                             <div className="chat-area">
                             <div className='sidebarr'>
       {/* Sidebar */}
-      <nav className={`sidebarss ${sidebarClosed ? 'close' : ''}`}>
+      {/* <nav className={`sidebarss ${sidebarClosed ? 'close' : ''}`}>
         <header>
           <span className="image">
-            {/* FontAwesome Chevron Icon (for sidebar toggle) */}
             <FontAwesomeIcon 
               icon={faChevronRight} 
               size="sm"
@@ -1334,7 +1358,7 @@ const Chat = ({ socket }) => {
             </li>
           </ul>
         </div>
-      </nav>
+      </nav> */}
     </div>
 
     <div className='col-md-3 p-0'>
@@ -1355,7 +1379,6 @@ const Chat = ({ socket }) => {
                                 isNewmsgGroupSender={isNewmsgGroupSender}
                                 setTypingStatus={setTypingStatus}
                                 setTypingStatusgroup={setTypingStatusgroup}
-                                setNotificationShown={setNotificationShown}
                                 setnewChatDataFromChild={setnewChatDataFromChild}
                                 setnewgroupChatDataFromChild={setnewgroupChatDataFromChild}
                                 SetonetoOnecomponent={SetonetoOnecomponent}
@@ -1370,6 +1393,7 @@ const Chat = ({ socket }) => {
                                 setselectedFrmUrl={setselectedFrmUrl}
                                 reloadGrouplist={reloadGrouplist}
                                 setreloadGrouplist={setreloadGrouplist}
+                                interactwithuserlistfavourite={interactwithuserlistfavourite} 
                                 />}
                                 {(searchbox || searchboxGroup) && <Chatsearch socket={socket} searchTerm={searchTerm} receiverId={receiverId} onFocus={handleFocusMessage} searchTermGroup={searchTermGroup} groupId={groupId} onFocusGroup={handleFocusMessageGroup} />}
                                 </div>
@@ -1395,8 +1419,9 @@ const Chat = ({ socket }) => {
                                                                             {/* <p>&nbsp;</p> */}
                                                                         </div>
                                                                         <div className='ms-2'>
-                                                                        {/* <i class="fa fa-star"></i> */}
-                                                                            </div>
+                                                                            {favouriteUser && <a className="setFavourite" onClick={(e) => handleFavourite('DELETE',receiverId,favouriteUser)}><i class="fa fa-star"></i></a> }
+                                                                            {!favouriteUser && <a className="unsetFavourite" onClick={(e) => handleFavourite('POST',receiverId,favouriteUser)}><i class="fa fa-star-o"></i></a>}
+                                                                        </div>
                                                                     </div>
                                                                 ) : null
                                                                 }
@@ -1452,8 +1477,10 @@ const Chat = ({ socket }) => {
                                             onReplyMessage={handleReplyMessage}
                                             onQuotedMessage={handleQuotedMessage}
                                             messageRefs={messageRefs}
+                                            highlightId={highlightId}
+                                            receiverId={receiverId}
                                             />}
-                                            {!groupComponenet && !usersetting && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} quotedMessage={quotedMessage} />}
+                                            {!groupComponenet && !usersetting && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} quotedMessage={quotedMessage} inputpostmsgRef={inputpostmsgRef} />}
 
                                             {!groupComponenet && !usersetting && groupboard && <div className="msg-head">
                                                 <div className="row">
@@ -1469,6 +1496,10 @@ const Chat = ({ socket }) => {
                                                                 </div>
                                                                 <div className="flex-grow-1 ms-2">
                                                                     <h3>{groupdataFromChild.fullName} </h3>
+                                                                </div>
+                                                                <div className='ms-2'>
+                                                                    {favouriteGroup && <a className="setFavourite" onClick={(e) => handleFavouriteGroup('DELETE',groupId,favouriteGroup)}><i class="fa fa-star"></i></a> }
+                                                                    {!favouriteGroup && <a className="unsetFavourite" onClick={(e) => handleFavouriteGroup('POST',groupId,favouriteGroup)}><i class="fa fa-star-o"></i></a>}
                                                                 </div>
                                                             </div>
                                                         ) : null
@@ -1540,8 +1571,9 @@ const Chat = ({ socket }) => {
                                             onQuotedMessageGroup={handleQuotedMessageGroup}
                                             messageRefsGroup={messageRefsGroup}
                                             groupMemberdataFromChild={groupMemberdataFromChild}
+                                            highlightIdGroup={highlightIdGroup}
                                             />}
-                                            {!groupComponenet && !usersetting && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} groupMemberdataFromChild={groupMemberdataFromChild} quotedMessageGroup={quotedMessageGroup} />}
+                                            {!groupComponenet && !usersetting && groupboard && groupId && <Chatgrouppost socket={socket} groupId={groupId} senderUserData={userData} groupMemberdataFromChild={groupMemberdataFromChild} quotedMessageGroup={quotedMessageGroup} inputpostmsgRefgroup={inputpostmsgRefgroup} />}
                                             </div>
                                             </div>
                                             <div className="tab-pane" id="people" role="tabpanel" aria-labelledby="people-tab">

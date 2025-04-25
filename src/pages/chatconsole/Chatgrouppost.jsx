@@ -3,7 +3,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import InputEmoji from 'react-input-emoji'
 import Chatfileupload from './Chatfileupload';
 
-const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChild, quotedMessageGroup}) => {
+const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChild, quotedMessageGroup, inputpostmsgRefgroup}) => {
 
     const [message, setMessage] = useState('');
     const [files, setFiles] = useState([]);
@@ -241,6 +241,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
             onPaste={handlePaste}
             >
             <InputEmoji
+            ref={inputpostmsgRefgroup}
             value={message}
             onChange={setMessage}
             cleanOnEnter

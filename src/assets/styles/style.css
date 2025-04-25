@@ -2202,6 +2202,10 @@ body {
   border: none;
   box-shadow: none;
   margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .panel-tools {
@@ -4585,10 +4589,13 @@ label {
 }
 
 .form-control {
-  font-size: 12px !important;
-  height: 29px;
+  /* font-size: 12px !important;
+  height: 29px; */
 }
-
+input.form-control.chat-search {
+  all: unset;
+  box-sizing: border-box;
+}
 .pr0 {
   padding-right: 0;
 }
@@ -4662,12 +4669,18 @@ label {
   font-size: 26px;
   font-weight: 600;
 }
-
+/* Center heading text */
+.panel-heading {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
 .panel-heading h3 {
   font-size: 18px;
   /* color: #3022abe5; */
   color: #d7763d;
 }
+
+
 
 .table>thead {
   vertical-align: baseline !important;
@@ -4723,12 +4736,12 @@ border-radius: 4px;
 
 .form-horizontal .form-group{
 margin-right: auto;
-margin-left: auto;
+margin-left: -70px;
 margin-bottom: 15px;
 }
 
 .form-horizontal .control-label{
-  text-align: left;
+  text-align: center;
 }
 
 .colspec3{
@@ -4744,7 +4757,13 @@ margin-top: 5px;
 }
 
 .fa-chevron-right {
-  font-size: 6px;
+  font-size: 8px;
+  transform: translateY(-1.5px);
+  padding-left: 2px;
+}
+
+.fa-chevron-down {
+  font-size: 8px;
   transform: translateY(-1.5px);
   padding-left: 2px;
 }

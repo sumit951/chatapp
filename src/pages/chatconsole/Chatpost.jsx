@@ -3,7 +3,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import InputEmoji from 'react-input-emoji'
 import Chatfileupload from './Chatfileupload';
 
-const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
+const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage,inputpostmsgRef}) => {
     
     //console.log(quotedMessage);
     
@@ -203,6 +203,7 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage}) => {
             onPaste={handlePaste}
             >
             <InputEmoji
+            ref={inputpostmsgRef}
             value={message}
             onChange={setMessage}
             cleanOnEnter
