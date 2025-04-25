@@ -250,7 +250,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
             if (targetRef) {
             targetRef.click();
             // Delay the reset to let the component stay mounted briefly
-            setTimeout(() => setselectedFrmUrl(''), 100); 
+            setTimeout(() => setselectedFrmUrl(''), 500); 
             }
         }, timeCount);
 
@@ -537,8 +537,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             if ((currentTime2 <= expiryTime) && user.chatStatus === 'Busy') busyStatus = true;
 
                                             return (
-                                            <a key={`A-tabfav${user.userId}`}
-                                                ref={(el) => (userRefs.current[`A-tabfav${user.userId}`] = el)}
+                                            <a key={`A-tab${user.userId}`}
+                                                ref={(el) => (userRefs.current[`A-tab${user.userId}`] = el)}
                                                 onClick={(e) => handleSelectUser(user.userId,
                                                 setSelectedUser({
                                                     shortName: user.usershortName,
@@ -568,8 +568,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                         } else {
                                             const group = item.rawData;
                                             return (
-                                            <a key={`AG-tabfav${group.groupId}`}
-                                                ref={(el) => (userRefs.current[`AG-tabfav${group.groupId}`] = el)}
+                                            <a key={`AG-tab${group.groupId}`}
+                                                ref={(el) => (userRefs.current[`AG-tab${group.groupId}`] = el)}
                                                 onClick={(e) => handleSelectGroup(group.groupId,
                                                 setSelectedGroup({
                                                     shortName: group.groupshortName,
@@ -703,7 +703,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             busyStatus = true;
                                         }
                                         return (
-                                            <a key={`A-tab${user.userId}`} 
+                                            <a key={`B-tabfav${user.userId}`} 
                                             ref={(el) => (userRefs.current[`A-tab${user.userId}`] = el)}
                                             onClick={(e) => handleSelectUser(user.userId,
                                                 setSelectedUser({
@@ -808,7 +808,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                     <div class="collapse show" id="fav-tab-3">
                                         <div class="card card-body">
                                         {grouplistdatafavourite.map((group,i) => (
-                                        <a key={`AG-tabfav${group.groupId}`} 
+                                        <a key={`CG-tabfav${group.groupId}`} 
                                         ref={(el) => (userRefs.current[`AG-tabfav${group.groupId}`] = el)}
                                             onClick={(e) => handleSelectGroup(group.groupId,
                                                 setSelectedGroup({
@@ -844,7 +844,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                     <div class="collapse show" id="other-tab-3">
                                         <div class="card card-body">
                                         {grouplistdata.map((group,i) => (
-                                        <a key={`BG-tab${group.groupId}`} 
+                                        <a key={`CG-tab${group.groupId}`} 
                                         ref={(el) => (userRefs.current[`BG-tab${group.groupId}`] = el)} 
                                                 onClick={(e) => handleSelectGroup(group.groupId,
                                                     setSelectedGroup({

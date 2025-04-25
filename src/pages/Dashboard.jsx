@@ -20,6 +20,7 @@ const Dashboard = ({socket}) => {
     await localStorage.removeItem("loggedInUserName");
     await localStorage.removeItem("encryptdatatoken");
         navigate('/login')
+        window.location.reload();
         //window.location.href = "/login";
     };
 

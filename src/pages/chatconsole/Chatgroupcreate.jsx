@@ -5,12 +5,14 @@ import makeAnimated from 'react-select/animated';
 import axiosConfig,{ DefaultGroupMember } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
+import loaderImage from "../../assets/loader.gif";
 
 const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
     const token = localStorage.getItem('chat-token-info')
     const navigate = useNavigate();
     const [alluserdata, setAllUserdata] = useState([]);
     const [searchParam, setSearchuser] = useState();
+    const [loading, setLoading] = useState(false);  // For tracking loading state
     //console.log(searchParam);
     
     const fetchAllUser = async () => {
@@ -104,13 +106,15 @@ const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
         
         else
         {
-        //return false;
-        //console.log(values);
-        const fullData = {
-                ...values,
-                ...selOption,
-                selectedOptionsfrReq
+            setLoading(true)
+            //return false;
+            //console.log(values);
+            const fullData = {
+                    ...values,
+                    ...selOption,
+                    selectedOptionsfrReq
             };
+
         try {
             const response = await axiosConfig.post('/chat/creategroup', fullData)
             if(response.status==200 && response.data.status=='success')
@@ -233,7 +237,12 @@ const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
                     
                     <div className="form-group mb-1 mt-2">
                         <div className="col-sm-12 d-flex justify-content-end mt-1">
+                            {loading ? (
+                                <img src={loaderImage} class="loaderimage" />
+                            ) : (
+                            <>
                             <button className="btn succbtn" type="submit">Save changes <i className="fa fa-chevron-right"></i></button>
+                            </>)}
                         </div>
                     </div>
                     </form>
