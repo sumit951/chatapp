@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef} from 'react'
 import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import moment from 'moment'
 import InputEmoji from 'react-input-emoji'
+
 import Replies from './Replies';
 import Pinnedhistory from './Pinnedhistory';
 
@@ -26,20 +27,13 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
     const [chatdata, setchatdata] = useState([]);
     const [pinnedMessages, setPinnedMessages] = useState([]);
     
-    useEffect(() => {
-        chatdata.map(item => {
-        // You can perform any logic here before updating
-        item.pinSts == 'Yes' && !pinnedMessages.includes(item.messageId) ? pinnedMessages.push(item.messageId) :null
-        });
-        setchatdata(chatdataFromChild)
-        if(newArrchatdataFromChild.length>0)
-        {
-            setchatdata(newArrchatdataFromChild)
-        }
-        socket.on('reloadpinStatusUpdated', async (data) => {
+    /* useEffect(() => {
+        
+        socket.on('reloaddeleteMessage', async (data) => {
             //console.log(data);
+            
             try {
-                const encodeReceiverId = btoa(data.receiverId)
+                const encodeReceiverId = btoa(data.senderid)
                 const response = await axiosConfig.get(`/chat/getuserchat/${encodeReceiverId}`)
                 if(response.status==200)
                 {
@@ -56,22 +50,53 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
             } catch (error) {
                 console.log(error.message);
             }
-            /* if(data.pinSts=='Yes')
-            {
-                pinnedMessages.push(data.messageId)
-            }
-            if(data.pinSts=='No')
-            {
-                setPinnedMessages(prevItems => prevItems.filter(item => item.id !== data.messageId));
-            } */
-            chatdata.map(item => {
-            // You can perform any logic here before updating
-            item.pinSts == 'Yes' && !pinnedMessages.includes(item.messageId) ? pinnedMessages.push(item.messageId) :null
-            });
         })
         
-    }, [socket,chatdataFromChild,newArrchatdataFromChild,chatdata]);
+    }, [socket]); */
+
+
+    useEffect(() => {
+        chatdata.map(item => {
+        // You can perform any logic here before updating
+        item.pinSts == 'Yes' && !pinnedMessages.includes(item.messageId) ? pinnedMessages.push(item.messageId) :null
+        });
+        setchatdata(chatdataFromChild)
+        if(newArrchatdataFromChild.length>0)
+        {
+            setchatdata(newArrchatdataFromChild)
+        }
+                
+    }, [chatdataFromChild,newArrchatdataFromChild,chatdata,pinnedMessages]);
     
+    useEffect(() => {
+        const handlePinStatusUpdate = (data) => {
+            //let newSts = (data.pinSts === 'Yes') ? 'No' : 'Yes';
+            let newSts = data.pinSts
+
+            const updatedChatData = chatdata.map(item => {
+                if (item.messageId === data.messageId) {
+                    const updatedItem = { ...item, pinSts: newSts };
+    
+                    if (newSts === 'Yes' && !pinnedMessages.includes(item.messageId)) {
+                        pinnedMessages.push(item.messageId);
+                    }
+    
+                    return updatedItem;
+                }
+                return item;
+            });
+    
+            setchatdata(updatedChatData);
+        };
+    
+        socket.on('reloadpinStatusUpdated', handlePinStatusUpdate);
+    
+        return () => {
+            socket.off('reloadpinStatusUpdated', handlePinStatusUpdate);
+        };
+    }, [socket, chatdata, pinnedMessages]);
+    
+
     const handleMouseEnter = (messageId) => {
     setHoveredMessageId(messageId);
     };
@@ -167,7 +192,7 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
     //console.log(pinnedMessages);
     
     const togglePin = async (messageId,pinSts,receiverId) => {
-        console.log(pinSts);
+        //console.log(pinSts);
         
         try {
             //console.log(id);
@@ -178,6 +203,18 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                 ? prevPinned.filter((id) => id !== messageId)
                 : [...prevPinned, messageId]
             );
+
+            setPinnedMessages((prevPinned) => {
+                if (pinSts=='Yes') {
+                    // Add messageId if it's not already in the list
+                    return prevPinned.includes(messageId)
+                        ? prevPinned
+                        : [...prevPinned, messageId];
+                } else {
+                    // Remove messageId if it's in the list
+                    return prevPinned.filter((id) => id !== messageId);
+                }
+            });
 
             const encodeMessageId = btoa(messageId)
             const postData = {pinnedbyName:localStorage.getItem('loggedInUserName'),groupId:null,receiverId:receiverId}
@@ -229,14 +266,37 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
     loadMessages(receiverId);
     }, [receiverId]); */
     const handleScroll = async() => {
-        console.log(topRef.current.scrollTop);
+        //console.log(topRef.current.scrollTop);
         
     /* if (topRef.current.scrollTop === 0) {
         await loadMessages(receiverId);
         slice().reverse().
     } */
     };
+
+    const lastMsgRef = useRef(null);
+
+    useEffect(() => {
+        if (lastMsgRef.current) {
+        lastMsgRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
+
+    useEffect(() => {
+        let timeCount = 500;
+        const timer = setTimeout(() => {
+            if (lastMessageRef.current && highlightId===null) {
+                setTimeout(() => lastMessageRef.current.scrollIntoView({ block: "end" }), 500); 
+                
+            }
+        }, timeCount);
+
+        return () => clearTimeout(timer);
+        
+    }, [chatdataFromChild,highlightId]); // Trigger scroll when message changes
     
+    
+
   return (
     <>
         <div className="modal-body" ref={topRef}
@@ -316,13 +376,27 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     >
                         <i className='fa fa-trash'></i>
                     </a>
-                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                    </a> */}
+                    <a className="delete-button" 
+                      onClick={() => {
+                        if (pinnedMessages.includes(chatdata.messageId)) {
+                          // Call for unpin logic
+                          togglePin(chatdata.messageId, 'Yes', chatdata.receiverId);
+                        } else {
+                          // Call for pin logic
+                          togglePin(chatdata.messageId, 'No', chatdata.receiverId);
+                        }
+                      }}
+                    >
                     {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
                     </a>
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} onQuotedMessage={onQuotedMessage} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -337,7 +411,10 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
+                
+
                 </>
             )}
 
@@ -377,13 +454,27 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     >
                         <i className='fa fa-reply'></i>
                     </a>
-                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                    </a> */}
+                    <a className="delete-button" 
+                      onClick={() => {
+                        if (pinnedMessages.includes(chatdata.messageId)) {
+                          // Call for unpin logic
+                          togglePin(chatdata.messageId, 'Yes', chatdata.receiverId);
+                        } else {
+                          // Call for pin logic
+                          togglePin(chatdata.messageId, 'No', chatdata.receiverId);
+                        }
+                      }}
+                    >
                     {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
                     </a>
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} onQuotedMessage={onQuotedMessage} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -398,7 +489,8 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
                 </li>
             )) : ( <b></b> )
             )}
@@ -411,9 +503,10 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
                     message-container`}
                     key={chatdata.messageId}
-                    ref={(el) => {
+                    /* ref={(el) => {
                     if (el) messageRefs.current[chatdata.messageId] = el;
-                    }}
+                    }} */
+                    ref={chatdata.messageId === messages.length - 1 ? lastMsgRef : null}
                     id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
@@ -471,13 +564,27 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     >
                         <i className='fa fa-trash'></i>
                     </a>
-                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                    </a> */}
+                    <a className="delete-button" 
+                      onClick={() => {
+                        if (pinnedMessages.includes(chatdata.messageId)) {
+                          // Call for unpin logic
+                          togglePin(chatdata.messageId, 'Yes', chatdata.receiverId);
+                        } else {
+                          // Call for pin logic
+                          togglePin(chatdata.messageId, 'No', chatdata.receiverId);
+                        }
+                      }}
+                    >
                     {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
                     </a>
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId}  />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} onQuotedMessage={onQuotedMessage}  />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -492,7 +599,8 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
                 </>
                 )}
 
@@ -526,13 +634,27 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     >
                         <i className='fa fa-reply'></i>
                     </a>
-                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.receiverId)}>
+                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                    </a> */}
+                    <a className="delete-button" 
+                      onClick={() => {
+                        if (pinnedMessages.includes(chatdata.messageId)) {
+                          // Call for unpin logic
+                          togglePin(chatdata.messageId, 'Yes', chatdata.receiverId);
+                        } else {
+                          // Call for pin logic
+                          togglePin(chatdata.messageId, 'No', chatdata.receiverId);
+                        }
+                      }}
+                    >
                     {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
                     </a>
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefs={messageRefs} onDeleteMsg={onDeleteMsg} onEditMessage={onEditMessage} highlightId={highlightId} onQuotedMessage={onQuotedMessage} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -547,7 +669,8 @@ const Chatbody = ({socket, messages, lastMessageRef,typingStatus,chatdataFromChi
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
                 </li>
             )
             )}

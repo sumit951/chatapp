@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageRefs,onDeleteMsg, onEditMessage, highlightId}) => {
+const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageRefs,onDeleteMsg, onEditMessage, highlightId,onQuotedMessage}) => {
     //console.log(highlightId);
     
     const lastReplyMessageRef = useRef(null);
@@ -123,6 +123,10 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
             {
                 fetchrepliedmessages(parentMessageId)
             }
+            if(data.parentMessageId)
+            {
+                fetchrepliedmessages(data.parentMessageId)
+            }
         })
         socket.on('updatedMessage', (updatedMsg) => {
             //console.log(data);
@@ -133,7 +137,11 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
         })
     }, [socket,parentMessageId,userChatData]);
 
-    
+    const handleQuoteMessage = (id, content,sender) => {
+        const quotedMessageData = { messageId:id,quoteMessage:content,sender:sender };
+        onQuotedMessage(quotedMessageData);
+        //console.log(quotedMessageData);
+    };
     
     
   return (
@@ -191,9 +199,16 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
                     </a>  
                     <a
                         className="delete-button"
-                        onClick={() => onDeleteMsg(chatdata.messageId)}
+                        onClick={() => onDeleteMsg(chatdata.messageId,parentMessageId)}
                     >
                         <i className='fa fa-trash'></i>
+                    </a>
+                    <a
+                        className="quote-button"
+                        onClick={() => handleQuoteMessage(chatdata.messageId, chatdata.message, chatdata.senderName)}
+                        title="Quote Message"
+                    >
+                        <i className='fa fa-quote-right'></i>
                     </a>
                     </span>
                 )}
@@ -209,11 +224,25 @@ const Replies = ({socket, parentMessageId, boxtype,updateStateFromChild,messageR
                 if (el) messageRefs.current[chatdata.messageId] = el;
                 }}
                 id={chatdata.messageId}
+                onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
+                onClick={() => handleMouseEnter(chatdata.messageId)}
+                onMouseLeave={handleMouseLeave}
                 >
                 
                 {(chatdata.deleteSts=='No') ? <span className="replyBoxtime"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')} {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
                 <p>
                 {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : <span>{chatdata.senderName} deleted their own message. {moment(chatdata.timestamp).format('llll')}</span>  }
+                {((hoveredMessageId === chatdata.messageId) && chatdata.deleteSts=='No') && (
+                    <span className="message-actions float-end ms-3">
+                    <a
+                        className="quote-button"
+                        onClick={() => handleQuoteMessage(chatdata.messageId, chatdata.message, chatdata.senderName)}
+                        title="Quote Message"
+                    >
+                        <i className='fa fa-quote-right'></i>
+                    </a>
+                    </span>
+                )}
                 </p>
                 </li>
             )) : ( <b></b> )

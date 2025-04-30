@@ -56,7 +56,8 @@ const Adduser = () => {
         officeName:'',
         cityName:'',
         chatDeleteInDays:'',
-        allowedInGroups:''
+        allowedInGroups:'',
+        userPanel:''
     })
 
     const handleChanges = (e) => {
@@ -199,6 +200,20 @@ const Adduser = () => {
                                 [...Array(10)].map((_, i) => i + 1)
                                             .map(i => <option key={i} value={i}>{i}</option>)
                             }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-6">&nbsp;</div>
+                </div> 
+
+                <div className='row'>              
+                    <div class="form-group col-md-6">
+                        <label class="col-sm-3 control-label">User Panel </label>
+                        <div class="col-sm-9">
+                            <select className="form-control" name="userPanel" onChange={handleChanges} required>
+                            <option key={''} value={''}>Select Number</option>
+                            <option key={'AP'} value={'AP'}>Attendance Panel</option>
+                            <option key={'SP'} value={'SP'}>Service Provider Panel</option>
                             </select>
                         </div>
                     </div>

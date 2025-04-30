@@ -4,11 +4,11 @@ import makeAnimated from 'react-select/animated';
 
 import axiosConfig from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
-
+import loaderImage from "../../assets/loader.gif";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff} from '@fortawesome/free-solid-svg-icons';
 
-const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,groupMemberdataFromChild}) => {
+const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,groupMemberdataFromChild,handleCreatedGroupData}) => {
     const loggedInuserId = senderUserData.id;
     const token = localStorage.getItem('chat-token-info')
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -19,6 +19,7 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
     const animatedComponents = makeAnimated();
     const [alluserdata, setAllUserdata] = useState([]);
     const [searchParam, setSearchuser] = useState();
+    const [loading, setLoading] = useState(false);  // For tracking loading state
     //console.log(groupMemberdataFromChild.length +'=='+ allowedMember);
     
     const fetchAllUser = async () => {
@@ -120,6 +121,7 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
         }
         else
         {
+            setLoading(true);
             const fullData = {
                     groupId,
                     ...selOption
@@ -128,13 +130,14 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                 const response = await axiosConfig.post('/chat/addmembergroup', fullData)
                 if(response.status==200 && response.data.status=='success')
                 {
+                    handleCreatedGroupData(groupId)
                     toast.success(response.data.message, {
                         position: "bottom-right",
                         autoClose: 1000,
                         hideProgressBar: true
                     });
                         setTimeout(() => {
-                            //navigate('/manageuser');
+                            navigate('/chatconsole/spaces');
                             location.reload()
                         }, 
                         2000
@@ -177,7 +180,9 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
 
         if(valuesReq.requestNumber)
         {
+            setLoading(true)
             try {
+                
                 const response = await axiosConfig.post('/chat/sendaddmemberrequest', valuesReq)
                 if(response.status==200 && response.data.status=='success')
                 {
@@ -210,7 +215,9 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                     autoClose: 1000,
                     hideProgressBar: true
                 });
-            }
+            } finally {
+                setLoading(false);  // Set loading to false when the API call completes
+            } 
         }
     }
 
@@ -282,7 +289,13 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                     </div>                    
                     <div class="form-group mb-1 mt-2">
                         <div class="col-sm-12 d-flex justify-content-end mt-1">
-                            <button class="btn succbtn btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
+                        {loading ? (
+                            <img src={loaderImage} class="loaderimage" />
+                        ) : (
+                        <>
+                        <button class="btn succbtn btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
+                        </>)}
+                            
                         </div>
                     </div>
                     </form>
@@ -310,7 +323,13 @@ const Chatgrouppeople = ({ socket,groupId,senderUserData,groupdataFromChild,grou
                     </div>                    
                     <div class="form-group mb-1 mt-2">
                         <div class="col-sm-12 d-flex justify-content-end mt-1">
+                            {loading ? (
+                                <img src={loaderImage} class="loaderimage" />
+                            ) : (
+                            <>
                             <button class="btn succbtn btn-block" type="submit">Save changes <i class="fa fa-chevron-right"></i></button>
+                            </>)}
+                            
                         </div>
                     </div>
                     </form>

@@ -1,4 +1,4 @@
-import React, { useState,useEffect }  from 'react'
+import React, { useState, useEffect, useRef }  from 'react'
 import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import moment from 'moment'
 import InputEmoji from 'react-input-emoji'
@@ -24,7 +24,7 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
         {
             setgroupchatdata(newArrgroupchatdataFromChild)
         }
-        socket.on('reloadpinStatusUpdated', async (data) => {
+        /* socket.on('reloadpinStatusUpdated', async (data) => {
             //console.log(data);
             try {
                 const encodeGroupId = btoa(data.groupId)
@@ -49,9 +49,38 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
             // You can perform any logic here before updating
             item.pinSts == 'Yes' && !pinnedMessages.includes(item.messageId) ? pinnedMessages.push(item.messageId) :null
             });
-        })
+        }) */
         
     }, [socket,groupchatdataFromChild,newArrgroupchatdataFromChild,groupchatdata]);
+
+    useEffect(() => {
+        const handlePinStatusUpdate = (data) => {
+            //let newSts = (data.pinSts === 'Yes') ? 'No' : 'Yes';
+            let newSts = data.pinSts
+
+            const updatedChatData = groupchatdata.map(item => {
+                if (item.messageId === data.messageId) {
+                    const updatedItem = { ...item, pinSts: newSts };
+    
+                    if (newSts === 'Yes' && !pinnedMessages.includes(item.messageId)) {
+                        pinnedMessages.push(item.messageId);
+                    }
+    
+                    return updatedItem;
+                }
+                return item;
+            });
+    
+            setgroupchatdata(updatedChatData);
+        };
+    
+        socket.on('reloadpinStatusUpdated', handlePinStatusUpdate);
+    
+        return () => {
+            socket.off('reloadpinStatusUpdated', handlePinStatusUpdate);
+        };
+    }, [socket, groupchatdata, pinnedMessages]);
+
 
     const handleMouseEnter = (messageId) => {
         setHoveredMessageId(messageId);
@@ -192,6 +221,26 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
     };
     /* Convert Tag message */
     //console.log(messageRefsGroup);
+    const lastMsgRef = useRef(null);
+
+    useEffect(() => {
+        if (lastMsgRef.current) {
+        lastMsgRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
+
+    useEffect(() => {
+        let timeCount = 500;
+        const timer = setTimeout(() => {
+            if (lastMessageGroupRef.current && highlightIdGroup===null) {
+                setTimeout(() => lastMessageGroupRef.current.scrollIntoView({ block: "end" }), 500); 
+                
+            }
+        }, timeCount);
+
+        return () => clearTimeout(timer);
+        
+    }, [groupchatdataFromChild,highlightIdGroup]); // Trigger scroll when message changes    
 
     return (
     <>
@@ -266,13 +315,27 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         >
                             <i className='fa fa-trash'></i>
                         </a>
-                        <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                        {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                        {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                        </a> */}
+                        <a className="delete-button" 
+                        onClick={() => {
+                            if (pinnedMessages.includes(chatdata.messageId)) {
+                            // Call for unpin logic
+                            togglePin(chatdata.messageId, 'Yes', chatdata.groupId);
+                            } else {
+                            // Call for pin logic
+                            togglePin(chatdata.messageId, 'No', chatdata.groupId);
+                            }
+                        }}
+                        >
                         {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
                         </a>
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} onQuotedMessageGroup={onQuotedMessageGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -287,7 +350,8 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
                 </>
             )}
                 </li>
@@ -323,13 +387,27 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                         >
                             <i className='fa fa-reply'></i>
                         </a>
-                        <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                        {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                        {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                        </a> */}
+                        <a className="delete-button" 
+                        onClick={() => {
+                            if (pinnedMessages.includes(chatdata.messageId)) {
+                            // Call for unpin logic
+                            togglePin(chatdata.messageId, 'Yes', chatdata.groupId);
+                            } else {
+                            // Call for pin logic
+                            togglePin(chatdata.messageId, 'No', chatdata.groupId);
+                            }
+                        }}
+                        >
                         {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
                         </a>
                         </span>
                     )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} onQuotedMessageGroup={onQuotedMessageGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -344,7 +422,8 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
                 </li>
             )) : ( <b>TEST</b> )
             )}
@@ -357,9 +436,10 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     ${(selectedMessageId === chatdata.messageId) ? "replymsg" : ""}
                     message-container`}  
                     key={chatdata.messageId}
-                    ref={(el) => {
+                    /* ref={(el) => {
                     if (el) messageRefsGroup.current[chatdata.messageId] = el;
-                    }}
+                    }} */
+                    ref={chatdata.messageId === messages.length - 1 ? lastMsgRef : null}
                     id={chatdata.messageId}
                 onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
                 onClick={() => handleMouseEnter(chatdata.messageId)}
@@ -416,13 +496,27 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     >
                         <i className='fa fa-trash'></i>
                     </a>
-                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
-                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
-                    </a>
+                    {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                        {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                        </a> */}
+                        <a className="delete-button" 
+                        onClick={() => {
+                            if (pinnedMessages.includes(chatdata.messageId)) {
+                            // Call for unpin logic
+                            togglePin(chatdata.messageId, 'Yes', chatdata.groupId);
+                            } else {
+                            // Call for pin logic
+                            togglePin(chatdata.messageId, 'No', chatdata.groupId);
+                            }
+                        }}
+                        >
+                        {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                        </a>
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'senderReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} onQuotedMessageGroup={onQuotedMessageGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -437,7 +531,8 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
                 </>
                 )}
 
@@ -473,13 +568,27 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     >
                         <i className='fa fa-reply'></i>
                     </a>
-                    <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
-                    {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
-                    </a>
+                    {/* <a className="delete-button" onClick={() => togglePin(chatdata.messageId,chatdata.pinSts,chatdata.groupId)}>
+                        {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                        </a> */}
+                        <a className="delete-button" 
+                        onClick={() => {
+                            if (pinnedMessages.includes(chatdata.messageId)) {
+                            // Call for unpin logic
+                            togglePin(chatdata.messageId, 'Yes', chatdata.groupId);
+                            } else {
+                            // Call for pin logic
+                            togglePin(chatdata.messageId, 'No', chatdata.groupId);
+                            }
+                        }}
+                        >
+                        {(pinnedMessages.includes(chatdata.messageId)) ? 'Unpin' : 'Pin'}
+                        </a>
                     </span>
                 )}
                 </p>
-                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} />
+                {(chatdata.deleteSts=='No') ? <>
+                <Replies socket={socket} parentMessageId={chatdata.messageId} boxtype={'receiverReplybox'} updateStateFromChild={updateStateFromChild} messageRefsGroup={messageRefsGroup} onDeleteMsgGroup={onDeleteMsgGroup} onEditMessageGroup={onEditMessageGroup} groupMemberdataFromChild={groupMemberdataFromChild} highlightIdGroup={highlightIdGroup} onQuotedMessageGroup={onQuotedMessageGroup} />
                 {selectedMessageId === chatdata.messageId && (
                 <span>
                     <InputEmoji
@@ -494,7 +603,8 @@ const Chatgroupbody = ({socket, messages, lastMessageGroupRef,typingStatusgroup,
                     <button onClick={() => handleCancelReply(chatdata.messageId)}>Cancel</button>
                 </span>
                 )}
-                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} />
+                <Pinnedhistory socket={socket} parentMessageId={chatdata.messageId} /></>
+                : null }
                 </li>
             )
             )}

@@ -1,37 +1,51 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import axiosConfig,{ BASE_URL } from '../../../axiosConfig';
 
-import axiosConfig from '../../../axiosConfig';
+import moment from 'moment'
 import { ToastContainer, toast } from 'react-toastify';
+import Select from 'react-select'
+import makeAnimated from 'react-select/animated';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+
+
 
 import "../../../assets/vendor/fontawesome/css/font-awesome.css";
 import "../../../assets/chat/style.css";
+import "../../../assets/chat/astyle.css";
 import logo from '../../../assets/rc.png';
+import smallLogo from '../../../assets/Raipd_logo.png';
+import loaderImage from "../../../assets/loader.gif";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff, faGear, faMessage, faPhone, faChevronRight  } from '@fortawesome/free-solid-svg-icons';
 
+
+import userProfile from "../../../assets/chat/user-profile.png";
 import Chatnav from './Chatnav';
 import Chatbody from './Chatbody';
 import Chatgroupbody from './Chatgroupbody';
 import Chatgrouppeople from './Chatgrouppeople';
 
-const Chat = () => {
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Chatsearch from './Chatsearch';
 
-    const {id} = useParams()
-    //console.log(atob(id));
-    const chatboardUserid = atob(id);
-
+const Chat = ({ socket }) => { 
+    
+    const animatedComponents = makeAnimated();
     const navigate = useNavigate();
     const token = localStorage.getItem('chat-token-info')
+    const loggedInUserName = localStorage.getItem('loggedInUserName')
+    
     const logout = async () => {
         await localStorage.removeItem("chat-token-info");
         await localStorage.removeItem("loggedInUserName");
         await localStorage.removeItem("encryptdatatoken");
         navigate('/login')
+        window.location.reload();
         //window.location.href = "/login";
     };
 
+    
     const [userlogindataname, setUserlogindataname] = useState([]);
     const [userlogintypeData, setUserloginType] = useState([]);
     const [userloginData, setUserloginData] = useState([]);
@@ -100,26 +114,166 @@ const Chat = () => {
         fetchAdminInfo()
     }, [])
     //console.log((userData));
+
     
+    const [UserGroupInfo, setUserGroupInfo] = useState([]);
+    const [selectedFrmUrl, setselectedFrmUrl] = useState();
+    const {id} = useParams()
+    //console.log(atob(id));
+    const chatboardUserid = atob(id);
+    
+   
+
+    const fetchusergroupinfo = async () => {
+        try {
+            const response = await axiosConfig.get('/user/getusergroupinfo')
+            if (response.status == 200) {
+                if (response.status !== 200) {
+                    navigate('/login')
+                    window.location.reload();
+                    //window.location.href = "/login";
+                }
+                setUserGroupInfo(response.data[0]);
+            }
+        } catch (error) {
+            console.log(error.message);
+            logout()
+            navigate('/login')
+        }
+    }
+    
+    //return false;
+    const groupCount = UserGroupInfo.groupCount;
+
+    const [isNewmsgSender, setNewmsgSender] = useState([]);
+    const [isNewmsgReceiver, setNewmsgReceiver] = useState([]);
+    const [messages, setMessages] = useState([]);
+
+    const [isNewmsgGroup, setNewmsgGroup] = useState([]);
+    const [isNewmsgGroupSender, setNewmsgGroupSender] = useState([]);
+    const [messagesgroup, setMessagesgroup] = useState([]);
+
+    const [typingStatus, setTypingStatus] = useState('');
+    const [typingStatusgroup, setTypingStatusgroup] = useState('');
+
     const lastMessageRef = useRef(null);
     const lastMessageGroupRef = useRef(null);
+    const childLinkRef = useRef(null);
 
     const [dataFromChild, setDataFromChild] = useState("");
     const [chatdataFromChild, setChatDataFromChild] = useState([]);
+    const [newArrchatdataFromChild, setnewChatDataFromChild] = useState([]);
+    
 
     const [groupdataFromChild, setgroupDataFromChild] = useState("");
     const [groupchatdataFromChild, setGroupChatDataFromChild] = useState([]);
+    const [newArrgroupchatdataFromChild, setnewgroupChatDataFromChild] = useState([]);
 
     const [groupMemberdataFromChild, setGroupMemberDataFromChild] = useState([]);
 
     
+    const currentTime2 = new Date().getTime();
+    const expiryTime = new Date(userData.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
+    
+    let notificationEnbleSts = true;  
+    if ((currentTime2 <= expiryTime) && userData.chatStatus=='DND') {
+        //console.log(userData.chatStatus);
+        notificationEnbleSts = false;
+    }
+    else 
+    {
+        if(userData.chatStatus=='Busy' || userData.chatStatus=='DND')
+        {
+            try {
+                //console.log(id);
+    
+                const response = axiosConfig.put(`/user/updatesettingtoactive`)
+                console.log(response);
+                
+                
+            } catch (error) {
+                //console.log(error.message);
+                
+            }
+        }
+    }
+    
+    useEffect(() => {
+        //lastMessageRef.current?.scrollIntoView({ block: "end"});
+    }, [messages]);
     lastMessageRef.current?.scrollIntoView({ block: "end"});
+
+    useEffect(() => {
+        //lastMessageGroupRef.current?.scrollIntoView({ block: "end"});
+    }, [messages]);
     lastMessageGroupRef.current?.scrollIntoView({ block: "end"});
+    
+    const [foundTaggedUser, setFoundTaggedUser] = useState(false);
+
 
     
-    const receiverId = dataFromChild.selectedUserId;
-    const groupId = groupdataFromChild.selectedUserId;
+
+    useEffect(() => {
+        socket.on('messageResponse', (data) => { 
+            //console.log(data);
+            //console.log(isTabActive);
+            //console.log(notificationShown);            
+
+            /* if(!isTabActive && !notificationShown && data.receiverId == chatboardUserid)
+            { 
+                if(notificationEnbleSts)
+                {
+                    showNotification(data);
+                }
+                setNotificationShown(true); // Ensure notification shows only once
+                setIsTabActive(true);
+            } */
+            
+            //console.log(document.visibilityState);
+            
+            /* const handleVisibilityChange = () => {
+                if (document.visibilityState === 'visible') {
+                    setIsTabActive(true);
+                } else {
+                    setIsTabActive(false);
+                }
+            };
+
+            document.addEventListener('visibilitychange', handleVisibilityChange); */
+            setMessages([...messages, data])
+            setNewmsgSender([...isNewmsgSender,data.senderId])
+            setNewmsgReceiver(data.receiverId)
+            fetchinteractwithuserlist()
+        })
+    }, [socket, messages,loggedInUserName]);
+
+    useEffect(() => {
+        socket.on('messagegroupResponse', (data) => {
+            setMessagesgroup([...messagesgroup, data])
+            setNewmsgGroupSender([...isNewmsgGroupSender,data.groupId])
+            setNewmsgGroup(data.senderId)
+            //console.log(data.groupId+"---"+data.senderId);
+
+            
+            const isFound = data.message.includes(`@${loggedInUserName}`);
+            /* console.log(data.message);
+            console.log(isFound);
+            console.log(`@${loggedInUserName}`); */
+            setFoundTaggedUser(isFound);
+            
+        })
+    }, [socket, messagesgroup]);
+
     
+    //console.log(messages);
+    
+    const receiverId = dataFromChild.selectedUserId;
+    
+    const groupId = groupdataFromChild.selectedUserId;
+    const createdBy = groupdataFromChild.createdBy;
+    const loggedInuserId = userData.id;
+    
+    //console.log(createdBy+''+loggedInuserId);
     
     let userboard = false;
     let groupboard = false;
@@ -134,35 +288,574 @@ const Chat = () => {
     }
 
     //console.log(userboard+' '+groupboard);
+    
+    
+    const messageResponse = messages.filter(item => (((item.receiverId === userData.id) || (item.senderId === userData.id)) && ((item.receiverId === receiverId) || (item.senderId === receiverId))))
 
-    /*Group Component */
+
+    const messagegroupResponse = messagesgroup.filter(item => (item.groupId === groupId))
+
+
+    const handleEditMessage = async (updatedMessageDate) => {
+        //console.log(updatedMessageDate);
+        try {
+            //console.log(id);
+            if(!confirm('Please Conifrm')) return false;
+
+            const response = await axiosConfig.put(`/chat/updatesetaseditedmessage`,updatedMessageDate)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                } 
+                /* toast.success(response.data.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                }); */
+                setTimeout(() => {
+                    socket.emit('editMessage', updatedMessageDate);
+                    //const newchatdataFromChild = chatdataFromChild.filter((items) => items.messageId !== id)
+                    const newchatdataFromChild = chatdataFromChild.map((item) =>
+                        item.messageId === updatedMessageDate.messageId
+                          ? { ...item, editSts: 'Yes',message: updatedMessageDate.newMessage }
+                          : item
+                    );
+                    
+                    setnewChatDataFromChild(newchatdataFromChild)
+                    //console.log(newchatdataFromChild)
+                    setMessages([])
+                    }, 500
+                );
+            }
+        } catch (error) {
+            //console.log(error.message);
+            toast.error(error.message, {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true
+            });
+        }
+    };
+
+    
+    const deleteMessage = async (id) => {
+        try {
+            //console.log(id);
+            if(!confirm('Please Conifrm')) return false;
+
+            const encodeMessageId = btoa(id)
+
+            const response = await axiosConfig.put(`/chat/setasdeletemessage/${encodeMessageId}`)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                } 
+                /* toast.success(response.data.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                }); */
+                const postData = {messageId:id}
+                socket.emit('deleteMessage', postData);
+                setTimeout(() => {
+                    //const newchatdataFromChild = chatdataFromChild.filter((items) => items.messageId !== id)
+                    const newchatdataFromChild = chatdataFromChild.map((item) =>
+                        item.messageId === id
+                          ? { ...item, deleteSts: 'Yes' }
+                          : item
+                      );
+                    
+                    setnewChatDataFromChild(newchatdataFromChild)
+                    //console.log(newchatdataFromChild)
+                    setMessages([])
+                    }, 500
+                );
+            }
+        } catch (error) {
+            //console.log(error.message);
+            toast.error(error.message, {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true
+            });
+        }
+    };
+
+
+    const handleReplyMessage = async (replyMessageData) => {
+        /* console.log(replyMessageData.messageId);
+        return false */
+        const d = new Date();
+        const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+        if ((replyMessageData.newMessage.trim() || files.length) && localStorage.getItem('loggedInUserName'))
+        {
+            /* if(files!=null && files.length>0)
+            {
+                const formData = new FormData();
+                formData.append("frmmessage", replyMessageData.newMessage);
+                // Append files to form data
+                
+
+                // Append all files
+                Array.from(files).forEach((file) => {
+                    formData.append('files', file);
+                });
+                
+                try {
+                    const response = await axiosConfig.post(`/upload`,formData,{ headers: {
+                        'Content-Type': 'multipart/form-data', // Set the default header to multipart/form-data
+                      }})
+                    //console.log(response);
+                    //console.log(response.data['files']);
+                    let filesStr = ''
+                    response.data['files'].map((file) => {
+                        //console.log(file);
+                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
+                    });
+                    const messagewithfiles = `${replyMessageData.newMessage}</br>${filesStr}`;
+
+                    //console.log(messagewithfiles);
+
+                    await socket.emit('replyMessage', {
+                        message: messagewithfiles,
+                        senderName: localStorage.getItem('loggedInUserName'),
+                        senderId:userData.id,
+                        socketID: socket.id,
+                        receiverId: receiverId,
+                        messageType:'text',
+                        timestamp: formattedDate,
+                        replyTo:replyMessageData.messageId
+                    });
+
+                    setfilesblank(true)
+                    setFiles([]);
+                    
+                } catch (error) {
+                    console.log(error.message);
+                }
+
+            }
+            else
+            { */
+                await socket.emit('replyMessage', {
+                    message: replyMessageData.newMessage,
+                    senderName: localStorage.getItem('loggedInUserName'),
+                    senderId:userData.id,
+                    socketID: socket.id,
+                    receiverId: receiverId,
+                    messageType:'text',
+                    timestamp: formattedDate,
+                    replyTo:replyMessageData.messageId
+                });
+            /* } */    
+
+        }
+    };
+
+    const [quotedMessage, setQuotedMessage] = useState('');
+    const handleQuotedMessage = async (quotedMessageData) => {
+        //console.log(quotedMessageData);
+        setQuotedMessage(quotedMessageData)
+    };
+    
+    const [quotedMessageGroup, setQuotedMessageGroup] = useState('');
+    const handleQuotedMessageGroup = async (quotedMessageDataGroup) => {
+        //console.log(quotedMessageDataGroup);
+        setQuotedMessageGroup(quotedMessageDataGroup)
+    };
+
+    const handleReplyMessageGroup = async (replyMessageData) => {
+        /* console.log(replyMessageData.messageId);
+        return false */
+        const d = new Date();
+        const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+        if ((replyMessageData.newMessage.trim() || files.length) && localStorage.getItem('loggedInUserName'))
+        {
+            /* if(files.length>0)
+            {
+                const formData = new FormData();
+                formData.append("frmmessage", message);
+                
+
+                // Append all files
+                Array.from(files).forEach((file) => {
+                    formData.append('files', file);
+                });
+                
+                try {
+                    const response = await axiosConfig.post(`/upload`,formData,{ headers: {
+                        'Content-Type': 'multipart/form-data', // Set the default header to multipart/form-data
+                      }})
+                    //console.log(response);
+                    //console.log(response.data['files']);
+                    let filesStr = ''
+                    response.data['files'].map((file) => {
+                        //console.log(file);
+                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${file.originalname}</a></br>`
+                    });
+                    const messagewithfiles = `${message}</br>${filesStr}`;
+
+                    //console.log(messagewithfiles);
+
+                    await socket.emit('messagegroup', {
+                        message: messagewithfiles,
+                        senderName: localStorage.getItem('loggedInUserName'),
+                       
+                        senderId:senderUserData.id,
+                        groupId:groupId,
+                        socketID: socket.id,
+                        messageType:'text',
+                        timestamp: formattedDate
+                    });
+
+                    setfilesblank(true)
+                    setFiles([]);
+                    
+                } catch (error) {
+                    console.log(error.message);
+                }
+
+            }
+            else
+            { */
+                await socket.emit('replyMessageGroup', {
+                    message: replyMessageData.newMessage,
+                    senderName: localStorage.getItem('loggedInUserName'),
+                    /*id: `${socket.id}${Math.random()}`,*/
+                    senderId:userData.id,
+                    groupId:groupId,
+                    socketID: socket.id,
+                    messageType:'text',
+                    timestamp: formattedDate,
+                    replyTo:replyMessageData.messageId
+                });
+            /* } */    
+
+        }
+    };
+
+    const handleEditMessageGroup = async (updatedMessageDate) => {
+        //console.log(updatedMessageDate);
+        try {
+            //console.log(id);
+            if(!confirm('Please Conifrm')) return false;
+
+            const response = await axiosConfig.put(`/chat/updatesetaseditedmessage`,updatedMessageDate)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                } 
+                /* toast.success(response.data.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                }); */
+                setTimeout(() => {
+                    socket.emit('editMessageGroup', updatedMessageDate);
+                    //const newchatdataFromChild = chatdataFromChild.filter((items) => items.messageId !== id)
+                    const newgroupchatdataFromChild = groupchatdataFromChild.map((item) =>
+                        item.messageId === updatedMessageDate.messageId
+                          ? { ...item, editSts: 'Yes',message: updatedMessageDate.newMessage }
+                          : item
+                    );
+                    
+                    setnewgroupChatDataFromChild(newgroupchatdataFromChild)
+                    //console.log(newchatdataFromChild)
+                    setMessages([])
+                    }, 500
+                );
+            }
+        } catch (error) {
+            //console.log(error.message);
+            toast.error(error.message, {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true
+            });
+        }
+    };
+
+    
+    const deleteMessageMsgGroup = async (groupmsgid) => {
+        try {
+            //console.log(id);
+            if(!confirm('Please Conifrm')) return false;
+
+            const encodeMessageId = btoa(groupmsgid)
+
+            const response = await axiosConfig.put(`/chat/setasdeletemessage/${encodeMessageId}`)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                } 
+
+                /* toast.success(response.data.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                }); */
+
+                const postData = {messageId:groupmsgid}
+                socket.emit('deleteMessage', postData);
+
+                setTimeout(() => {
+                    //const newgroupchatdataFromChild = groupchatdataFromChild.filter((items) => items.messageId !== groupmsgid)
+                    const newgroupchatdataFromChild = groupchatdataFromChild.map((item) =>
+                        item.messageId === groupmsgid
+                          ? { ...item, deleteSts: 'Yes' }
+                          : item
+                      );
+                    setnewgroupChatDataFromChild(newgroupchatdataFromChild)
+                    //console.log(newchatdataFromChild)
+                    setMessagesgroup([])
+                    }, 500
+                );
+            }
+        } catch (error) {
+            //console.log(error.message);
+            toast.error(error.message, {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true
+            });
+        }
+    };
+
+    useEffect(() => {
+        socket.on('typingResponse', (data) => {
+            //console.log(data.groupId+'-'+groupId);
+            
+            if(receiverId === data.receiverId)
+            {
+                //setTypingStatus(data.typingmessge)
+                //setTypingStatusgroup('')
+            }
+            
+            if(groupId === data.groupId)
+            {
+                //setTypingStatusgroup(data.typingmessge)
+                //setTypingStatus('')
+            }
+        })
+        socket.on('reloadChatStatus', (data) => {
+            console.log(data);
+            if(data!="")
+            {
+                fetchinteractwithuserlist()
+            }
+        })
+
+        /* socket.on('reloadpinStatusUpdated', async (data) => {
+            console.log(data);
+            try {
+                const encodeGroupId = btoa(data.groupId)
+                const response = await axiosConfig.get(`/chat/getgroupchat/${encodeGroupId}`)
+                if(response.status==200)
+                {
+                    //const token = localStorage.getItem(token)
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                //console.log(response.data);
+                
+                setGroupChatDataFromChild(response.data);
+            } catch (error) {
+                console.log(error.message);
+                
+            }
+        }) */
+    }, [socket,receiverId,groupId]);
+
     const [groupComponenet, SetGroupcomponent] = useState(false)
-
     const handleCreateGroup = async () => {
         SetGroupcomponent(true)
+        SetonetoOnecomponent(false)
+        Setusersetting(false)
     }
+
+    const [onetoOneComponenet, SetonetoOnecomponent] = useState(false)
     const handleDirectGroup = async () => {
+        SetonetoOnecomponent(true)
         SetGroupcomponent(false)
+        Setusersetting(false)
+    }
+
+    const [usersetting, Setusersetting] = useState(false)
+    const handleUsersetting = async () => {
+        SetonetoOnecomponent(false)
+        SetGroupcomponent(false)
+        Setusersetting(true)
     }
     //console.log(groupComponenet);
-    /*Group Component */
+    
+    const [activefrParent, setActivefrParent] = useState(null);
     const handleDataFromChild = (data, userChatData, groupdata, groupChatData,groupMemberData) => {
-        setDataFromChild(data)
-        setChatDataFromChild(userChatData)
-
-        setgroupDataFromChild(groupdata)
-        setGroupChatDataFromChild(groupChatData)
-        setGroupMemberDataFromChild(groupMemberData)
-        //return setDataFromChild(data);
+        if(data)
+        {
+            setDataFromChild(data)
+        }
+        if(userChatData)
+        {
+            setChatDataFromChild(userChatData)
+        }
+        if(groupdata)
+        {
+            setgroupDataFromChild(groupdata)
+        }
+        if(groupChatData)
+        {
+            setGroupChatDataFromChild(groupChatData)
+        }
+        if(groupMemberData)
+        {
+            setGroupMemberDataFromChild(groupMemberData)
+        }        
+    }
+    
+    
+    const handleDeleteGroup = async(id) =>{
+        try {
+            //console.log(id);
+            if(!confirm('Please Conifrm')) return false;
+            const encodeGroupId = btoa(id)
+            const response = await axiosConfig.delete(`/chat/deletegroup/${encodeGroupId}`)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                } 
+                toast.success(response.data.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                });
+                setTimeout(() => {
+                    //navigate('/manageuser');
+                    location.reload()
+                    }, 2000
+                );
+            }
+        } catch (error) {
+            //console.log(error.message);
+            toast.error(error.message, {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true
+            });
+        }  
     }
 
+    const handleLeaveSpace = async(groupId,userId,totalMember) =>{
+        try {
+            //console.log(id);
+            if(!confirm('Please Conifrm')) return false;
+
+            const encodeGroupId = btoa(groupId)
+            const encodeUserId = btoa(userId)
+            const encodetotalMember = btoa(totalMember)
+
+            const response = await axiosConfig.delete(`/chat/leavegroupspace/${encodeUserId}/${encodeGroupId}/${encodetotalMember}`)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                } 
+                toast.success(response.data.message, {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                    hideProgressBar: true
+                });
+                setTimeout(() => {
+                    //navigate('/manageuser');
+                    location.reload()
+                    }, 2000
+                );
+            }
+        } catch (error) {
+            //console.log(error.message);
+            toast.error(error.message, {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true
+            });
+        }  
+    }
+
+
+    
+    const [interactwithuserlist, setInteractwithuserlist] = useState([]);
+    
+    const fetchinteractwithuserlist = async () => {
+    try {
+   
+            const encodeSelectedUserId = btoa(chatboardUserid)
+            const response = await axiosConfig.get(`/chat/getinteractwithuserlistchatboardadmin/${encodeSelectedUserId}`)
+            if(response.status==200)
+            {
+                //const token = localStorage.getItem(token)
+                if(response.status !== 200)
+                {
+                    navigate('/login')
+                    //window.location.href = "/login";
+                }   
+                setInteractwithuserlist(response.data);
+            }
+            else
+            {
+                setInteractwithuserlist([])
+            }
+        } catch (error) {
+        console.log(error.message);
+        setInteractwithuserlist([])
+        }    
+        
+    }
+
+    
+   
+    useEffect(() => {
+        fetchinteractwithuserlist()
+        /* socket.on('messageResponse', (data) => { 
+            fetchinteractwithuserlist()
+        }) */
+        
+    }, [socket])
 
     const [alluserdata, setAllUserdata] = useState([]);
 
+    const [searchParam, setSearchuser] = useState();
+    //console.log(searchParam);
+    
     const fetchAllUser = async () => {
     try {
-            const encodeSelectedUserId = btoa(chatboardUserid)
-            const response = await axiosConfig.get(`/chat/getinteractwithuserlist/${encodeSelectedUserId}`)
+        if(searchParam!=null)
+        {
+            const response = await axiosConfig.get(`/user/getactiveallusergroup/${searchParam}`)
             if(response.status==200)
             {
                 //const token = localStorage.getItem(token)
@@ -172,13 +865,16 @@ const Chat = () => {
                     //window.location.href = "/login";
                 }   
                 setAllUserdata(response.data);
+            
             }
+        }
         } catch (error) {
         console.log(error.message);
+        
         }    
         
     }
-   
+    //console.log(alluserdata);
     useEffect(() => {
         if(!token)
         {
@@ -186,10 +882,250 @@ const Chat = () => {
             //window.location.href = "/login";
         }
         fetchAllUser()
-    }, [])
+    }, [token])
+
+    const newUserslisting1 = alluserdata.filter(item => item.userId !== chatboardUserid);
     //console.log(alluserdata);
     
+    const options = newUserslisting1.map((datauser) => (
+        { value: datauser.userId, label: datauser.userName}
+    ))
 
+    const [selOption, setSelOption] = useState(['']);
+    const HandNewUserChat = (obj) => {
+        setSelOption(obj)    
+        
+        if(obj['selectUsers'].value!=null)
+        {
+            let selectedUserFrchatName = obj['selectUsers'].label.split(' ')
+            let selectedUserFrchatId   = obj['selectUsers'].value
+            const selectedUserFrchat = {"userId":obj['selectUsers'].value,"userName":selectedUserFrchatName[0],"usershortName":obj['selectUsers'].label[0]}
+            const containsObject = interactwithuserlist.some((item) => item.userId === selectedUserFrchatId);
+            
+            if (!containsObject && (selectedUserFrchatId != chatboardUserid)) {
+                //interactwithuserlist.push(selectedUserFrchat);
+                interactwithuserlist.unshift(selectedUserFrchat);
+
+                //let newselectedFrmUrl = btoa('A-tab')+'/'+btoa(selectedUserFrchat.userId);
+                let newselectedFrmUrl = 'A-tab'+selectedUserFrchat.userId;
+                setselectedFrmUrl(newselectedFrmUrl);
+                setActivefrParent(selectedUserFrchatName[0].trim())
+                if (childLinkRef.current) {
+                childLinkRef.current.click(); // Trigger click on the child <a> tag
+                //alert()
+                }
+                SetonetoOnecomponent(false)
+                //navigate(`/chatconsole/spaces/${newselectedFrmUrl}`)
+            }
+        }
+    };
+
+    const [pinnedMessagesData, setpinnedMessagesData] = useState([]);
+    const handlepinnedMessages = async (senderId,receiverId) => {
+        //console.log(senderId+'---'+receiverId);
+       
+        if (senderId && receiverId && localStorage.getItem('loggedInUserName'))
+        {
+            try {
+                const postData = {senderId:senderId,receiverId:receiverId}
+                //console.log(postData);
+                
+                const response = await axiosConfig.post(`/chat/pinnedmessagesdata`, postData)
+                if(response.status==200)
+                {
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                console.log(response.data);
+                setpinnedMessagesData(response.data);
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+
+        
+                
+
+        }
+    };
+    
+    useEffect(() => {
+        setTimeout(() => {
+            socket.on('reloadpinStatusUpdated', (data) => { 
+                handlepinnedMessages(chatboardUserid,receiverId)
+                //alert('hi');
+            })
+        }, 1000);
+        
+    }, [socket,chatboardUserid,receiverId]);
+
+
+    const [pinnedMessagesDataGroup, setpinnedMessagesDataGroup] = useState([]);
+    const handlepinnedMessagesGroup = async (senderId,groupId) => {
+        //console.log(senderId+'---'+receiverId);
+       
+        if (senderId && groupId && localStorage.getItem('loggedInUserName'))
+        {
+            try {
+                const postData = {senderId:senderId,groupId:groupId}
+                //console.log(postData);
+                
+                const response = await axiosConfig.post(`/chat/pinnedmessagesgroupdata`, postData)
+                if(response.status==200)
+                {
+                    if(response.status !== 200)
+                    {
+                        navigate('/login')
+                    }   
+                    
+                }
+                console.log(response.data);
+                setpinnedMessagesDataGroup(response.data);
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+    };
+    
+    useEffect(() => {
+        setTimeout(() => {
+            socket.on('reloadpinStatusUpdated', (data) => { 
+                handlepinnedMessagesGroup(chatboardUserid,groupId)
+            })
+        }, 1000);
+        
+    }, [socket,chatboardUserid,groupId]);
+
+    const [sidebarClosed, setSidebarClosed] = useState(false);
+
+    // Toggle sidebar function
+    const toggleSidebar = () => {
+      setSidebarClosed(!sidebarClosed);
+    };
+
+    const handleMessageTab = () => {
+        navigate('/chatconsole/spaces')
+        location.reload()
+    }
+    
+    /*One to one Message Search*/
+    const [searchbox, setsearchbox] = useState(false)
+    const [searchTerm, setSearchTerm] = useState(null);
+
+    const handlesearchbox = (e) => {
+        setsearchbox(true);
+    }
+    
+    const cancelsearchbox = (e) => {
+        setsearchbox(false);
+        setSearchTerm('')
+    }
+
+    const handleInputChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const messageRefs = useRef({}); // store refs in an object keyed by message id or index
+    const [highlightId, setHighlightId] = useState(null); // id or index of the message to focus
+    
+    const handleFocusMessage = async (id) => {
+        setHighlightId(id);
+
+        const nodemsg = messageRefs.current[id];        
+        if (nodemsg) {
+            nodemsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            nodemsg.classList.add('highlight'); // for styling
+            setTimeout(() => {
+                nodemsg.classList.remove('highlight');
+            }, 10000);
+        }
+    };
+
+    /*One to one Message Search*/
+
+    /*Group Message Search*/
+    const [searchboxGroup, setsearchboxGroup] = useState(false)
+    const [searchTermGroup, setSearchTermGroup] = useState(null);
+
+    const handlesearchboxGroup = (e) => {
+        setsearchboxGroup(true);
+    }
+    
+    const cancelsearchboxGroup = (e) => {
+        setsearchboxGroup(false);
+        setSearchTermGroup('')
+    }
+
+    const handleInputChangeGroup = (e) => {
+        setSearchTermGroup(e.target.value);
+    };
+
+    const messageRefsGroup = useRef({}); // store refs in an object keyed by message id or index
+    const [highlightIdGroup, setHighlightIdGroup] = useState(null); // id or index of the message to focus
+
+    const handleFocusMessageGroup = (id) => {
+        setHighlightIdGroup(id);
+
+        const nodemsgGroup = messageRefsGroup.current[id];        
+        if (nodemsgGroup) {
+            nodemsgGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            nodemsgGroup.classList.add('highlight'); // for styling
+            setTimeout(() => {
+                nodemsgGroup.classList.remove('highlight');
+            }, 10000);
+        }
+    };
+    /*Group Message Search*/
+    
+    const [reloadGrouplist, setreloadGrouplist] = useState(false); // id or index of the message to focus
+    const handleCreatedGroupData = (groupid) => {
+        console.log(groupid);
+        setreloadGrouplist(true)
+        let groupkeyId = 'AG-tab'+groupid;
+        setselectedFrmUrl(groupkeyId);
+    };
+
+    const handleSendRequestCreateGRP = async () => {
+        //console.log(senderId+'---'+receiverId);
+       
+        if (confirm('Please Confirm !'))
+        {
+            try {
+                const response = await axiosConfig.post(`/user/sendaddSingleuserreq`)
+                if(response.status==200)
+                {
+                    if(response.status==200 && response.data.status=='success')
+                    {
+                    socket.emit('sendaddmemberrequest', response.data);
+                    toast.success(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                }  
+                if(response.data.status=='fail')
+                {
+                    toast.error(response.data.message, {
+                        position: "bottom-right",
+                        autoClose: 1000,
+                        hideProgressBar: true
+                    });
+                }   
+                }
+                
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+    };
+
+    
+
+   
     return (
         <div>
             <section className="message-area">
@@ -198,8 +1134,8 @@ const Chat = () => {
                         <div className="col-12">
 
                             <div id="header">
-                                <div className="color-line">
-                                </div>
+                                {/* <div className="color-line">
+                                </div> */}
                                 <div className="row mx-2">
                                     <div className="col-2">
 
@@ -235,19 +1171,98 @@ const Chat = () => {
                                         </div>
                                     </div>
                                 </div>
+                                
                             </div>
                         </div>
                         <div className="col-12">
+
                             <div className="chat-area">
-                                <Chatnav sendDataToParent={handleDataFromChild} senderUserData={userData} alluserdata={alluserdata} />
+                            <div className='sidebarr'>
+      {/* Sidebar */}
+      {/* <nav className={`sidebarss ${sidebarClosed ? 'close' : ''}`}>
+        <header>
+          <span className="image">
+            <FontAwesomeIcon 
+              icon={faChevronRight} 
+              size="sm"
+              className={`toggle ${sidebarClosed ? 'rotate' : ''}`}
+              onClick={toggleSidebar}
+            />
+          </span>
+        </header>
+
+        <div className="menu-bar">
+          <ul className="menu-links">
+            <li className="nav-link">
+            <a href="javascript:void(0);" onClick={handleMessageTab}>
+              <FontAwesomeIcon icon={faMessage} />
+                <span className="text nav-text">Message</span>
+              </a>
+            </li>
+            <li className="nav-link">
+              <a href="javascript:void(0);">
+              <FontAwesomeIcon icon={faPhone} />
+                <span className="text nav-text">Calling</span>
+              </a>
+            </li>
+            <li className="nav-link">
+              <a href="javascript:void(0);" className="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <FontAwesomeIcon icon={faGear} />
+                <span className="text nav-text">Setting</span>
+              </a>
+              <ul className="dropdown-menu">
+                <li><a className="dropdown-item" href="javascript:void(0);" onClick={handleUsersetting}>Busy / DND </a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </nav> */}
+    </div>
+
+    <div className='col-md-3 p-0'>
+                                {!searchbox && !searchboxGroup && <Chatnav 
+                                socket={socket} 
+                                sendDataToParent={handleDataFromChild} 
+                                interactwithuserlist={interactwithuserlist} 
+                                SetGroupcomponent={SetGroupcomponent} 
+                                activefrParent={activefrParent} 
+                                myref={childLinkRef} 
+                                setMessages={setMessages} 
+                                setMessagesgroup={setMessagesgroup} 
+
+                                isNewmsgReceiver={isNewmsgReceiver} 
+                                isNewmsgSender={isNewmsgSender}
+
+                                isNewmsgGroup={isNewmsgGroup}
+                                isNewmsgGroupSender={isNewmsgGroupSender}
+                                setTypingStatus={setTypingStatus}
+                                setTypingStatusgroup={setTypingStatusgroup}
+                                setnewChatDataFromChild={setnewChatDataFromChild}
+                                setnewgroupChatDataFromChild={setnewgroupChatDataFromChild}
+                                SetonetoOnecomponent={SetonetoOnecomponent}
+                                Setusersetting={Setusersetting}
+                                loggedInuserdata={userData} 
+                                setsearchbox={setsearchbox}
+                                setSearchTerm={setSearchTerm}
+                                setsearchboxGroup={setsearchboxGroup}
+                                setSearchTermGroup={setSearchTermGroup}
+                                foundTaggedUser={foundTaggedUser}
+                                selectedFrmUrl={selectedFrmUrl}
+                                setselectedFrmUrl={setselectedFrmUrl}
+                                reloadGrouplist={reloadGrouplist}
+                                setreloadGrouplist={setreloadGrouplist}
+                                />}
+                                {(searchbox || searchboxGroup) && <Chatsearch socket={socket} searchTerm={searchTerm} receiverId={receiverId} onFocus={handleFocusMessage} searchTermGroup={searchTermGroup} groupId={groupId} onFocusGroup={handleFocusMessageGroup} />}
+                                </div>
 
                                 <div className="chatbox">
                                     <div className="modal-dialog-scrollable">
                                         <div className="modal-content">
-                                            
-                                            {!groupComponenet && userboard && <div className="msg-head">
+                                            {usersetting && <Setting socket={socket} loggedInuserdata={userData} />}
+                                            {groupComponenet && <Chatgroupcreate socket={socket} loggedInuserdata={userData} handleCreatedGroupData={handleCreatedGroupData} />}
+                                            {!groupComponenet && !usersetting && userboard && <div className="msg-head">
                                                 <div className="row">
-                                                    <div className="col-12">
+                                                    <div className="col-7">
                                                         <div className="d-flex align-items-center">
                                                             <div className="chat-list">
                                                                 {dataFromChild.shortName != null ? (
@@ -261,24 +1276,71 @@ const Chat = () => {
                                                                             {/* <p>&nbsp;</p> */}
                                                                         </div>
                                                                         <div className='ms-2'>
-                                                                        <i class="fa fa-star"></i>
-                                                                            </div>
+                                                                            &nbsp;
+                                                                        </div>
                                                                     </div>
                                                                 ) : null
                                                                 }
+                                                                
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    <div className='col-3'>
+                                                        {/* {!searchbox && <a href="#" role="button" title="Search Messages" onClick={handlesearchbox}> <i className="fa fa-search" aria-hidden="true"></i></a>}
+                                                        {searchbox && <div><input
+                                                            type="text"
+                                                            placeholder="Search messages..."
+                                                            value={searchTerm}
+                                                            onChange={handleInputChange}
+                                                            onKeyUp={handleInputChange}
+                                                            className='form-control'
+                                                        />
+                                                        <a href="#" role="button" title="Cancel Search" onClick={cancelsearchbox}> <i className="fa fa-close" aria-hidden="true"></i></a></div>
+                                                        } */}
+                                                    </div>
+                                                    <div className='col-2'>
+                                                        {/* <ul className="moreoption float-end">
+                                                            <li className="navbar nav-item dropdown">
+                                                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessages(chatboardUserid,receiverId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
+                                                                <ul className="dropdown-menu pinnedmessagesbox">
+                                                                {pinnedMessagesData.map((chatdata) =>
+                                                                 (chatdata.messageId!=null) ? (
+                                                                    <li className='pinnedmessagesRow'>
+                                                                        {(chatdata.deleteSts=='No') ? <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}   {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
+                                                                        <p>
+                                                                        {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : null  }
+                                                                        </p>
+                                                                    </li>
+                                                                    ) : ( <b></b> )
+                                                                )}
+                                                                </ul>
+                                                            </li>
+                                                        </ul> */}
                                                     </div>
                                                 </div>
                                             </div>}
                                             
 
-                                            {!groupComponenet && userboard && receiverId && <Chatbody lastMessageRef={lastMessageRef} chatdataFromChild={chatdataFromChild} senderUserData={userData}  />}
-                                           
+                                            {!groupComponenet && !usersetting && userboard && receiverId && <Chatbody 
+                                            socket={socket} 
+                                            messages={messageResponse} 
+                                            lastMessageRef={lastMessageRef} 
+                                            typingStatus={typingStatus} 
+                                            chatdataFromChild={chatdataFromChild}
+                                            onDeleteMsg={deleteMessage}
+                                            onEditMessage={handleEditMessage}
+                                            newArrchatdataFromChild={newArrchatdataFromChild}
+                                            onReplyMessage={handleReplyMessage}
+                                            onQuotedMessage={handleQuotedMessage}
+                                            messageRefs={messageRefs}
+                                            highlightId={highlightId}
+                                            receiverId={receiverId}
+                                            />}
+                                            
 
-                                            {!groupComponenet && groupboard && <div className="msg-head">
+                                            {!groupComponenet && !usersetting && groupboard && <div className="msg-head">
                                                 <div className="row">
-                                                <div className="col-9">
+                                                <div className="col-7">
                                                     <div className="d-flex align-items-center">
                                                         <div className="chat-list">
                                                         
@@ -291,12 +1353,15 @@ const Chat = () => {
                                                                 <div className="flex-grow-1 ms-2">
                                                                     <h3>{groupdataFromChild.fullName} </h3>
                                                                 </div>
+                                                                <div className='ms-2'>
+                                                                   &nbsp;
+                                                                </div>
                                                             </div>
                                                         ) : null
                                                         }
                                                         </div>
                                                         </div>
-                                                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                                        <ul className="nav nav-tabs border-0 p-0 mb-0" id="myTab" role="tablist">
                                                             <li className="nav-item" role="presentation">
                                                                 <button className="nav-link active" id="chatboard-tab" data-bs-toggle="tab" data-bs-target="#chatboard" type="button" role="tab" aria-controls="chatboard" aria-selected="true">
                                                                 Messages
@@ -307,25 +1372,73 @@ const Chat = () => {
                                                             </li>
                                                         </ul>
                                                     </div>
+                                                    <div className='col-3'>
+                                                        {/* {!searchboxGroup && <a href="#" role="button" title="Search Messages" onClick={handlesearchboxGroup}> <i className="fa fa-search" aria-hidden="true"></i></a>}
+                                                        {searchboxGroup && <div><input
+                                                            type="text"
+                                                            placeholder="Search messages..."
+                                                            value={searchTermGroup}
+                                                            onChange={handleInputChangeGroup}
+                                                            onKeyUp={handleInputChangeGroup}
+                                                            className='form-control'
+                                                        />
+                                                        <a href="#" role="button" title="Cancel Search" onClick={cancelsearchboxGroup}> <i className="fa fa-close" aria-hidden="true"></i></a></div>
+                                                        } */}
+                                                    </div>
+                                                    <div className="col-2 text-end">
+                                                        {/* <button className="btn warnbtn me-3" onClick={e=>handleLeaveSpace(groupId,loggedInuserId,groupdataFromChild.totalMember)}> Leave Space </button>
+
+                                                        {(createdBy===loggedInuserId) && <button className="btn danbtn me-1 " onClick={e=>handleDeleteGroup(groupId)}> Delete Group </button>}  */}
+
+                                                        {/* <ul className="moreoption float-end">
+                                                            <li className="navbar nav-item dropdown">
+                                                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessagesGroup(chatboardUserid,groupId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
+                                                                <ul className="dropdown-menu pinnedmessagesbox">
+                                                                {pinnedMessagesDataGroup.map((chatdata) =>
+                                                                (chatdata.messageId!=null) ? (
+                                                                    <li className='pinnedmessagesRow'>
+                                                                        {(chatdata.deleteSts=='No') ? <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}   {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
+                                                                        <p>
+                                                                        {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : null  }
+                                                                        </p>
+                                                                    </li>
+                                                                    ) : ( <b>Not tagged any message!</b> )
+                                                                )}
+                                                                </ul>
+                                                            </li>
+                                                        </ul> */}
+                                                    </div>
                                                 </div>
                                             </div>}
-                                            {!groupComponenet && groupboard && groupId && <div className="tab-content">
+                                            {!groupComponenet && !usersetting && groupboard && groupId && <div className="tab-content">
+                                            <div className="tab-pane show active" id="chatboard" role="tabpanel" aria-labelledby="chatboard-tab">
+                                            <div className="modal-content">                        
+                                            {!groupComponenet && !usersetting && groupboard && groupId && <Chatgroupbody 
+                                            socket={socket}
+                                            messages={messagegroupResponse} 
+                                            lastMessageGroupRef={lastMessageGroupRef} 
+                                            typingStatusgroup={typingStatusgroup} 
+                                            groupchatdataFromChild={groupchatdataFromChild}
+                                            onDeleteMsgGroup={deleteMessageMsgGroup}
+                                            onEditMessageGroup={handleEditMessageGroup}
+                                            newArrgroupchatdataFromChild={newArrgroupchatdataFromChild}
+                                            onReplyMessageGroup={handleReplyMessageGroup}
+                                            onQuotedMessageGroup={handleQuotedMessageGroup}
+                                            messageRefsGroup={messageRefsGroup}
+                                            groupMemberdataFromChild={groupMemberdataFromChild}
+                                            highlightIdGroup={highlightIdGroup}
+                                            />}
                                             
-                                            <div className="tab-pane show active" id="chatboard" role="tabpanel" aria-labelledby="chatboard-tab">                        
-                                            {!groupComponenet && groupboard && groupId && <Chatgroupbody lastMessageGroupRef={lastMessageGroupRef} groupchatdataFromChild={groupchatdataFromChild} senderUserData={userData} />}
                                             </div>
-
+                                            </div>
                                             <div className="tab-pane" id="people" role="tabpanel" aria-labelledby="people-tab">
-                                                <Chatgrouppeople groupId={groupId} senderUserData={userData} groupdataFromChild={groupdataFromChild} groupMemberdataFromChild={groupMemberdataFromChild} />
+                                                <Chatgrouppeople socket={socket} groupId={groupId} senderUserData={userData} groupdataFromChild={groupdataFromChild} groupMemberdataFromChild={groupMemberdataFromChild} handleCreatedGroupData={handleCreatedGroupData} />
                                             </div>
-
                                             </div>}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
                 {/* </div> */}

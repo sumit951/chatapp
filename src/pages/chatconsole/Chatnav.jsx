@@ -4,13 +4,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import userProfile from "../../assets/chat/user-profile.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff} from '@fortawesome/free-solid-svg-icons';
+import { PulseLoader } from "react-spinners";
 
-const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponent,activefrParent,myref,setMessages,setMessagesgroup,isNewmsgReceiver,isNewmsgSender,isNewmsgGroup,isNewmsgGroupSender,setTypingStatus,setTypingStatusgroup,setnewChatDataFromChild,setnewgroupChatDataFromChild,SetonetoOnecomponent,Setusersetting,loggedInuserdata,setsearchbox,setSearchTerm,setsearchboxGroup,setSearchTermGroup,foundTaggedUser,selectedFrmUrl,setselectedFrmUrl,reloadGrouplist,setreloadGrouplist,interactwithuserlistfavourite}) => {
+const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponent,activefrParent,myref,setMessages,setMessagesgroup,isNewmsgReceiver,isNewmsgSender,isNewmsgGroup,isNewmsgGroupSender,setTypingStatus,setTypingStatusgroup,setnewChatDataFromChild,setnewgroupChatDataFromChild,SetonetoOnecomponent,Setusersetting,loggedInuserdata,setsearchbox,setSearchTerm,setsearchboxGroup,setSearchTermGroup,foundALLTagged,foundTaggedUser,selectedFrmUrl,setselectedFrmUrl,reloadGrouplist,setreloadGrouplist,interactwithuserlistfavourite}) => {
     
     
     const token = localStorage.getItem('chat-token-info')
 
-    
+    const [leftNavLoader, setleftNavLoader] = useState(true);
 
     const [usersloggedin, setUsers] = useState([]);
 
@@ -92,7 +93,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
         }    
     }
     //console.log(userChatData);
-
+    
     const [groupChatData, setGroupChatData] = useState([]);
     const [groupMemberData, setGroupMemberData] = useState([]);
 
@@ -164,7 +165,19 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     }, [socket, usersloggedin]);
     
     
+    useEffect(() => {
+            
+        socket.on('reloaddeleteMessage', async (data) => {
+            console.log(data);
+            handleSelectUser(data.senderid)
+        })
 
+        socket.on('reloaddeleteMessagegroup', async (data) => {
+            console.log(data);
+            handleSelectGroup(data.groupId)
+        })
+        
+    }, [socket]);
 
     const [grouplistdata, setGrouplistdata] = useState([]);
     const fetchGrouplist = async () => {
@@ -256,7 +269,6 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
 
         return () => clearTimeout(timer);
         
-        
     }, [selectedFrmUrl,reloadGrouplist,setreloadGrouplist]);
     /* Auto Click */
 
@@ -271,6 +283,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
 
     
     newUserslisting.forEach(user => {
+
         const matchingUser = newUsersloggedin.find(item => item.userId === user.userId);
         if (matchingUser) {
             user.socketID = matchingUser.socketID;
@@ -280,6 +293,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     
     const newUserslistingfavourite = interactwithuserlistfavourite.filter(item => item.userName !== UserName);
     newUserslistingfavourite.forEach(user => {
+
         const matchingUser = newUsersloggedin.find(item => item.userId === user.userId);
         if (matchingUser) {
             user.socketID = matchingUser.socketID;
@@ -335,7 +349,15 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     // Sort descending by latestTimestampUpdate
     sortedListOther.sort((a, b) => Number(b.latestTimestampUpdate) - Number(a.latestTimestampUpdate));
     //console.log(sortedList);
-    
+    useEffect(() => {
+        let timeCount = 3000;
+        const timer = setTimeout(() => {
+            
+            setleftNavLoader(false)
+        }, timeCount);
+
+        return () => clearTimeout(timer);
+    }, [])
   return (
     <>
         <div className="chatlist">
@@ -364,8 +386,13 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                         
 
                                 <div className="chat-list">
-                                
-                                    <a data-bs-toggle="collapse" onClick={togglefavouritetab1} data-bs-target="#fav-tab-1" aria-expanded="false" aria-controls="collapseExample">
+                                    {leftNavLoader && <PulseLoader
+                                    color="#e87a36"
+                                    loading
+                                    size={10}
+                                    /> }
+
+                                    {!leftNavLoader && sortedListFavourite.length>0 && <><a data-bs-toggle="collapse" onClick={togglefavouritetab1} data-bs-target="#fav-tab-1" aria-expanded="false" aria-controls="collapseExample">
                                         <i class={`fa fa-solid fa-chevron-${favouritetab1 ? 'down' : 'right'}`}></i> Favourites
                                     </a>
 
@@ -405,7 +432,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                                     {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
                                                     </div>
                                                     <div className="flex-grow-1 ms-2">
-                                                    <h3>{user.userName}</h3>
+                                                    <h3 className={`${(user.loggedInsts == 'No') ? "absentUser" : ""}`} >{user.userName}</h3>
                                                     </div>
                                                     {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver == chatboardUserid)) && <span className='showmsgnotif'><i className="fa fa-solid fa-circle"></i></span>}
                                                 </a>
@@ -436,8 +463,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                                     <div className="flex-grow-1 ms-2">
                                                     <h3>{group.groupName}</h3>
                                                     </div>
-                                                    {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && <span className='showmsgnotif'><i className="fa fa-solid fa-circle"></i></span>}
-                                                    {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
+                                                    {!foundTaggedUser && !foundALLTagged && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && <span className='showmsgnotif'><i className="fa fa-solid fa-circle"></i></span>}
+                                                    {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && (foundALLTagged || foundTaggedUser) && <span className='showmsgnotif'>@</span>}
                                                 </a>
                                                 );
                                             }
@@ -523,8 +550,9 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                     <div className='clearfix'></div>
                                     <a data-bs-toggle="collapse" onClick={toggleothertab1} data-bs-target="#other-tab-1" aria-expanded="false" aria-controls="collapseExample">
                                         <i class={`fa fa-solid fa-chevron-${othertab1 ? 'down' : 'right'}`}></i> Others
-                                    </a>
-                                    <div class="collapse show" id="other-tab-1">
+                                    </a></> }
+
+                                    {!leftNavLoader && <div class="collapse show" id="other-tab-1">
                                         <div class="card card-body">
                                         {sortedListOther.map((item, i) => {
                                         if (item.type === 'user') {
@@ -554,13 +582,13 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                                 title={`${(user.officeName !== null) ? user.officeName + ' ' + user.cityName : ""}`}
                                             >
                                                 <div className="flex-shrink-0">
-                                                <span className="shortName">{user.usershortName}</span>
+                                                <span className="shortName">{user.usershortName} </span>
                                                 {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
                                                 {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Disturb)'></span>}
                                                 {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
                                                 </div>
                                                 <div className="flex-grow-1 ms-2">
-                                                <h3>{user.userName}</h3>
+                                                <h3 className={`${(user.loggedInsts == 'No') ? "absentUser" : ""}`} >{user.userName}</h3>
                                                 </div>
                                                 {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver == chatboardUserid)) && <span className='showmsgnotif'><i className="fa fa-solid fa-circle"></i></span>}
                                             </a>
@@ -591,8 +619,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                                 <div className="flex-grow-1 ms-2">
                                                 <h3>{group.groupName}</h3>
                                                 </div>
-                                                {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && <span className='showmsgnotif'><i className="fa fa-solid fa-circle"></i></span>}
-                                                {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
+                                                {!foundTaggedUser && !foundALLTagged && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && <span className='showmsgnotif'><i className="fa fa-solid fa-circle"></i></span>}
+                                                {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup != chatboardUserid)) && (foundTaggedUser || foundALLTagged) && <span className='showmsgnotif'>@</span>}
                                             </a>
                                             );
                                         }
@@ -674,7 +702,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             </a>
                                         ))*/}
                                         </div>   
-                                    </div>
+                                    </div>}
                                 </div>
                             </div>
 
@@ -682,118 +710,125 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
 
                             <div className="tab-pane" id="Open" role="tabpanel" aria-labelledby="Open-tab">
                                 <div className="chat-list">
-                                <a data-bs-toggle="collapse" onClick={togglefavouritetab2} data-bs-target="#fav-tab-2" aria-expanded="false" aria-controls="collapseExample">
-                                    <i class={`fa fa-solid fa-chevron-${favouritetab2 ? 'down' : 'right'}`}></i> Favourites
-                                </a>
-                                <div class="collapse show" id="fav-tab-2">
-                                <div class="card card-body">
-                                    {newUserslistingfavourite.map((user,i) =>
-                                    {
-                                        const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
-                                        let dndStatus = false;
-                                        let busyStatus = false;
-                                        if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
-                                        {
-                                            //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                            dndStatus = true;
-                                        }
-                                        if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
-                                        {
-                                            //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                            busyStatus = true;
-                                        }
-                                        return (
-                                            <a key={`B-tabfav${user.userId}`} 
-                                            ref={(el) => (userRefs.current[`A-tab${user.userId}`] = el)}
-                                            onClick={(e) => handleSelectUser(user.userId,
-                                                setSelectedUser({
-                                                shortName:user.usershortName,
-                                                fullName:user.userName,
-                                                selectedUserId:user.userId,
-                                                userboard:true,
-                                                favouriteStatus:true
-                                                }),
-                                                setSelectedGroup({}),
-                                                setActive(user.userName)
-                                            )} 
-                                                className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
-                                                /*ref={ref}*/
-                                                /*ref={(i===0) ? myref : null}*/
-                                                title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
-                                                >
-                                                <div className="flex-shrink-0">
-                                                    {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
-                                                    <span className="shortName">{user.usershortName}</span>
-                                                    {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
-                                                    {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
-                                                    {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
-                                                </div>
-                                                <div className="flex-grow-1 ms-2">
-                                                    <h3>{user.userName}</h3>
-                                                </div>
-                                                {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                            </a>
-                                        )
-                                    }
-                                    )}
-                                    </div>
-                                </div>
-                                <div className='clearfix'></div>
-                                <a data-bs-toggle="collapse" onClick={toggleothertab2} data-bs-target="#other-tab-2" aria-expanded="false" aria-controls="collapseExample">
-                                    <i class={`fa fa-solid fa-chevron-${othertab2 ? 'down' : 'right'}`}></i> Others
-                                </a>
-                                <div class="collapse show" id="other-tab-2">
+                                    {leftNavLoader && <PulseLoader
+                                    color="#e87a36"
+                                    loading
+                                    size={10}
+                                    /> }
+
+                                    {!leftNavLoader && sortedListFavourite.length>0 && <> <a data-bs-toggle="collapse" onClick={togglefavouritetab2} data-bs-target="#fav-tab-2" aria-expanded="false" aria-controls="collapseExample">
+                                        <i class={`fa fa-solid fa-chevron-${favouritetab2 ? 'down' : 'right'}`}></i> Favourites
+                                    </a>
+                                    <div class="collapse show" id="fav-tab-2">
                                     <div class="card card-body">
-                                    {newUserslisting.map((user,i) =>
-                                    {
-                                        const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
-                                        let dndStatus = false;
-                                        let busyStatus = false;
-                                        if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
+                                        {newUserslistingfavourite.map((user,i) =>
                                         {
-                                            //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                            dndStatus = true;
-                                        }
-                                        if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
-                                        {
-                                            //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                            busyStatus = true;
-                                        }
-                                        return (
-                                            <a key={`B-tab${user.userId}`} 
-                                                ref={(el) => (userRefs.current[`B-tab${user.userId}`] = el)}
+                                            const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
+                                            let dndStatus = false;
+                                            let busyStatus = false;
+                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
+                                            {
+                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                                dndStatus = true;
+                                            }
+                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
+                                            {
+                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                                busyStatus = true;
+                                            }
+                                            return (
+                                                <a key={`B-tabfav${user.userId}`} 
+                                                ref={(el) => (userRefs.current[`A-tab${user.userId}`] = el)}
                                                 onClick={(e) => handleSelectUser(user.userId,
-                                                setSelectedUser({
-                                                shortName:user.usershortName,
-                                                fullName:user.userName,
-                                                selectedUserId:user.userId,
-                                                userboard:true
-                                                }),
-                                                setSelectedGroup({}),
-                                                setActive(user.userName)
-                                            )} 
-                                                className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
-                                                /*ref={ref}*/
-                                                /*ref={(i===0) ? myref : null}*/
-                                                title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
-                                                >
-                                                <div className="flex-shrink-0">
-                                                    {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
-                                                    <span className="shortName">{user.usershortName}</span>
-                                                    {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
-                                                    {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
-                                                    {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
-                                                </div>
-                                                <div className="flex-grow-1 ms-2">
-                                                    <h3>{user.userName}</h3>
-                                                </div>
-                                                {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                            </a>
-                                        )
-                                    }
-                                    )}
+                                                    setSelectedUser({
+                                                    shortName:user.usershortName,
+                                                    fullName:user.userName,
+                                                    selectedUserId:user.userId,
+                                                    userboard:true,
+                                                    favouriteStatus:true
+                                                    }),
+                                                    setSelectedGroup({}),
+                                                    setActive(user.userName)
+                                                )} 
+                                                    className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
+                                                    /*ref={ref}*/
+                                                    /*ref={(i===0) ? myref : null}*/
+                                                    title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
+                                                    >
+                                                    <div className="flex-shrink-0">
+                                                        {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
+                                                        <span className="shortName">{user.usershortName}</span>
+                                                        {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
+                                                        {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
+                                                        {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
+                                                    </div>
+                                                    <div className="flex-grow-1 ms-2">
+                                                        <h3 className={`${(user.loggedInsts == 'No') ? "absentUser" : ""}`}>{user.userName}</h3>
+                                                    </div>
+                                                    {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                                </a>
+                                            )
+                                        }
+                                        )}
+                                        </div>
                                     </div>
-                                </div>
+                                    <div className='clearfix'></div>
+                                    <a data-bs-toggle="collapse" onClick={toggleothertab2} data-bs-target="#other-tab-2" aria-expanded="false" aria-controls="collapseExample">
+                                        <i class={`fa fa-solid fa-chevron-${othertab2 ? 'down' : 'right'}`}></i> Others
+                                    </a></> }
+                                    
+                                    {!leftNavLoader && <div class="collapse show" id="other-tab-2">
+                                        <div class="card card-body">
+                                        {newUserslisting.map((user,i) =>
+                                        {
+                                            const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
+                                            let dndStatus = false;
+                                            let busyStatus = false;
+                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
+                                            {
+                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                                dndStatus = true;
+                                            }
+                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
+                                            {
+                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
+                                                busyStatus = true;
+                                            }
+                                            return (
+                                                <a key={`B-tab${user.userId}`} 
+                                                    ref={(el) => (userRefs.current[`B-tab${user.userId}`] = el)}
+                                                    onClick={(e) => handleSelectUser(user.userId,
+                                                    setSelectedUser({
+                                                    shortName:user.usershortName,
+                                                    fullName:user.userName,
+                                                    selectedUserId:user.userId,
+                                                    userboard:true
+                                                    }),
+                                                    setSelectedGroup({}),
+                                                    setActive(user.userName)
+                                                )} 
+                                                    className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
+                                                    /*ref={ref}*/
+                                                    /*ref={(i===0) ? myref : null}*/
+                                                    title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
+                                                    >
+                                                    <div className="flex-shrink-0">
+                                                        {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
+                                                        <span className="shortName">{user.usershortName}</span>
+                                                        {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
+                                                        {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
+                                                        {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
+                                                    </div>
+                                                    <div className="flex-grow-1 ms-2">
+                                                        <h3 className={`${(user.loggedInsts == 'No') ? "absentUser" : ""}`}>{user.userName}</h3>
+                                                    </div>
+                                                    {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                                </a>
+                                            )
+                                        }
+                                        )}
+                                        </div>
+                                    </div>}
                                 </div>
                             </div>
 
@@ -802,7 +837,13 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                             <div className="tab-pane" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
 
                                 <div className="chat-list">
-                                    <a data-bs-toggle="collapse" onClick={togglefavouritetab3} data-bs-target="#fav-tab-3" aria-expanded="false" aria-controls="collapseExample">
+                                    {leftNavLoader && <PulseLoader
+                                    color="#e87a36"
+                                    loading
+                                    size={10}
+                                    /> }
+
+                                    {!leftNavLoader && grouplistdatafavourite.length>0 && <> <a data-bs-toggle="collapse" onClick={togglefavouritetab3} data-bs-target="#fav-tab-3" aria-expanded="false" aria-controls="collapseExample">
                                         <i class={`fa fa-solid fa-chevron-${favouritetab3 ? 'down' : 'right'}`}></i> Favourites
                                     </a>
                                     <div class="collapse show" id="fav-tab-3">
@@ -831,8 +872,8 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                                 <div className="flex-grow-1 ms-2">
                                                     <h3>{group.groupName}</h3>
                                                 </div>
-                                                {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                                {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
+                                                {!foundTaggedUser && !foundALLTagged && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                                {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && (foundTaggedUser || foundALLTagged) && <span className='showmsgnotif'>@</span>}
                                             </a>
                                         ))}
                                         </div>
@@ -840,8 +881,9 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                     <div className='clearfix'></div>
                                     <a data-bs-toggle="collapse" onClick={toggleothertab3} data-bs-target="#other-tab-3" aria-expanded="false" aria-controls="collapseExample">
                                         <i class={`fa fa-solid fa-chevron-${othertab3 ? 'down' : 'right'}`}></i> Others
-                                    </a>
-                                    <div class="collapse show" id="other-tab-3">
+                                    </a> </> }
+                                    
+                                    {!leftNavLoader && <div class="collapse show" id="other-tab-3">
                                         <div class="card card-body">
                                         {grouplistdata.map((group,i) => (
                                         <a key={`CG-tab${group.groupId}`} 
@@ -867,12 +909,12 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                                     <div className="flex-grow-1 ms-2">
                                                         <h3>{group.groupName}</h3>
                                                     </div>
-                                                    {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                                    {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
+                                                    {!foundTaggedUser && !foundALLTagged && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
+                                                    {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && (foundTaggedUser || foundALLTagged) && <span className='showmsgnotif'>@</span>}
                                                 </a>
                                         ))}
                                         </div>
-                                    </div>
+                                    </div>}
                                 </div>
                             </div>
                             

@@ -4,7 +4,7 @@ import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
-const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, messageRefsGroup,onDeleteMsgGroup,onEditMessageGroup,groupMemberdataFromChild,highlightIdGroup}) => {
+const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, messageRefsGroup,onDeleteMsgGroup,onEditMessageGroup,groupMemberdataFromChild,highlightIdGroup, onQuotedMessageGroup}) => {
 
     const lastReplyMessageRef = useRef(null);
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
@@ -124,11 +124,15 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
                 setUserChatData([...userChatData, data])
             }
         })
-        socket.on('reloaddeleteMessage', async (data) => {
+        socket.on('reloaddeleteMessagegroup', async (data) => {
             //console.log(data);
             if(parentMessageId)
             {
                 fetchrepliedmessages(parentMessageId)
+            }
+            if(data.parentMessageId)
+            {
+                fetchrepliedmessages(data.parentMessageId)
             }
         })
         socket.on('updatedMessageGroup', (updatedMsg) => {
@@ -169,6 +173,12 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
         );
         });
     }
+
+    const handleQuoteMessage = (id, content,sender) => {
+        const quotedMessageDataGroup = { messageId:id,quoteMessage:content,sender:sender };
+        onQuotedMessageGroup(quotedMessageDataGroup);
+        //console.log(quotedMessageDataGroup);
+    };
 
   return (
     <>
@@ -231,9 +241,16 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
                     </a>
                     <a
                         className="delete-button"
-                        onClick={() => onDeleteMsgGroup(chatdata.messageId)}
+                        onClick={() => onDeleteMsgGroup(chatdata.messageId,parentMessageId)}
                     >
                         <i className='fa fa-trash'></i>
+                    </a>
+                    <a
+                        className="quote-button"
+                        onClick={() => handleQuoteMessage(chatdata.messageId, chatdata.message, chatdata.senderName)}
+                        title="Quote Message"
+                    >
+                        <i className='fa fa-quote-right'></i>
                     </a>
                     </span>
                 )}
@@ -243,14 +260,31 @@ const Repliesgroup = ({socket, parentMessageId, boxtype, updateStateFromChild, m
 
                 </li>
             ) : (
-                <li className={`${(chatdata.deleteSts=='No') ? "repalyRply" : "deletedmsg"}`} key={chatdata.messageId}
+                <li className={`${(chatdata.deleteSts=='No') ? "repalyRply" : "deletedmsg"}`}
+                key={chatdata.messageId}
                 ref={(el) => {
                 if (el) messageRefsGroup.current[chatdata.messageId] = el;
-                }}>
+                }}
+                id={chatdata.messageId}
+                onMouseEnter={() => handleMouseEnter(chatdata.messageId)}
+                onClick={() => handleMouseEnter(chatdata.messageId)}
+                onMouseLeave={handleMouseLeave}
+                >
                 
                 {(chatdata.deleteSts=='No') ? <span className="replyBoxtime"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')} {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
                 <p>
                 {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : <span>{chatdata.senderName} deleted their own message. {moment(chatdata.timestamp).format('llll')}</span>  }
+                {((hoveredMessageId === chatdata.messageId) && chatdata.deleteSts=='No') && (
+                    <span className="message-actions float-end ms-3">
+                    <a
+                        className="quote-button"
+                        onClick={() => handleQuoteMessage(chatdata.messageId, chatdata.message, chatdata.senderName)}
+                        title="Quote Message"
+                    >
+                        <i className='fa fa-quote-right'></i>
+                    </a>
+                    </span>
+                )}
                 </p>
                 </li>
             )) : ( <b></b> )

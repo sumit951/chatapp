@@ -38,18 +38,18 @@ function App() {
       const permission = Notification.permission;
   
       if (permission === 'granted') {
-        console.log('Notification permission already granted.');
+        //console.log('Notification permission already granted.');
   
         if ('serviceWorker' in navigator) {
           // Register the service worker
           const registration = await navigator.serviceWorker
             .register('/chat-app/firebase-messaging-sw.js')
             .then((registration) => {
-              console.log('Service Worker registered with scope:', registration.scope);
+              //console.log('Service Worker registered with scope:', registration.scope);
               return registration;
             })
             .catch((error) => {
-              console.error('Service Worker registration failed:', error);
+              //console.error('Service Worker registration failed:', error);
               return null;
             });
   
@@ -62,7 +62,7 @@ function App() {
           });
   
           if (currentToken) {
-            console.log('FCM Token:', currentToken);
+            //console.log('FCM Token:', currentToken);
             const requestData = {
               userId: chatboardUserid,
               fcmtoken: currentToken,
@@ -71,7 +71,7 @@ function App() {
             try {
               const response = await axiosConfig.put('/user/updatefcmtoken', requestData);
               if (response.status === 200) {
-                console.log(response);
+                //console.log(response);
               }
             } catch (error) {
               console.error('Error saving FCM token:', error.message);
@@ -109,7 +109,7 @@ function App() {
 
   useEffect(() => {
     onMessage(messaging, (payload) => {
-      console.log('Message received. ', payload.notification.body);  // Check this log to see the incoming message
+      //console.log('Message received. ', payload.notification.body);  // Check this log to see the incoming message
       if (payload && payload.notification) {
         // Handle the notification payload data as needed
         //toast(payload.notification.body);
@@ -135,7 +135,7 @@ function App() {
         <Route path="/manageuser" element={<Manageuser />}></Route>
         <Route path="/adduser" element={<Adduser />}></Route>
         <Route path="/updateuser/:id/" element={<Updateuser />}></Route>
-        <Route path="/Chatboard/:id/" element={<Chatboard />}></Route>
+        <Route path="/Chatboard/:id/" element={<Chatboard  socket={socket} />}></Route>
 
         <Route path="/chatconsole/spaces" element={<Chat socket={socket} />}></Route>
         <Route path="/chatconsole/spaces/:boardtype/:boardid" element={<Chat socket={socket} />}></Route>

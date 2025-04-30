@@ -55,7 +55,8 @@ const Chat = ({ socket }) => {
     const [UserGroupInfo, setUserGroupInfo] = useState([]);
     const [selectedFrmUrl, setselectedFrmUrl] = useState();
     const chatboardUserid = atob(localStorage.getItem('encryptdatatoken'))
-    
+    const [loadingChatnav, setloadingChatnav] = useState(false);  // For tracking loading state
+
     /* const {boardid} = useParams()
     const {boardtype} = useParams()
     
@@ -194,6 +195,7 @@ const Chat = ({ socket }) => {
     }, [messages]);
     lastMessageGroupRef.current?.scrollIntoView({ block: "end"});
     
+    const [foundALLTagged, setFoundALLTagged] = useState(false);
     const [foundTaggedUser, setFoundTaggedUser] = useState(false);
 
 
@@ -241,11 +243,13 @@ const Chat = ({ socket }) => {
             setNewmsgGroup(data.senderId)
             //console.log(data.groupId+"---"+data.senderId);
 
-            
+            const isALLFound = data.message.includes(`@ALL`);
             const isFound = data.message.includes(`@${loggedInUserName}`);
+            
             /* console.log(data.message);
             console.log(isFound);
             console.log(`@${loggedInUserName}`); */
+            setFoundALLTagged(isALLFound);
             setFoundTaggedUser(isFound);
             
         })
@@ -363,7 +367,7 @@ const Chat = ({ socket }) => {
     };
 
     
-    const deleteMessage = async (id) => {
+    const deleteMessage = async (id,parentMessageId=null) => {
         try {
             //console.log(id);
             if(!confirm('Please Conifrm')) return false;
@@ -384,7 +388,7 @@ const Chat = ({ socket }) => {
                     autoClose: 1000,
                     hideProgressBar: true
                 }); */
-                const postData = {messageId:id}
+                const postData = {messageId:id, senderid: chatboardUserid,parentMessageId:parentMessageId}
                 socket.emit('deleteMessage', postData);
                 setTimeout(() => {
                     //const newchatdataFromChild = chatdataFromChild.filter((items) => items.messageId !== id)
@@ -608,8 +612,8 @@ const Chat = ({ socket }) => {
         }
     };
 
-    
-    const deleteMessageMsgGroup = async (groupmsgid) => {
+     
+    const deleteMessageMsgGroup = async (groupmsgid,parentMessageId=null) => {
         try {
             //console.log(id);
             if(!confirm('Please Conifrm')) return false;
@@ -632,8 +636,8 @@ const Chat = ({ socket }) => {
                     hideProgressBar: true
                 }); */
 
-                const postData = {messageId:groupmsgid}
-                socket.emit('deleteMessage', postData);
+                const postData = {messageId:groupmsgid,groupId:groupId,parentMessageId:parentMessageId} 
+                socket.emit('deleteMessagegroup', postData);
 
                 setTimeout(() => {
                     //const newgroupchatdataFromChild = groupchatdataFromChild.filter((items) => items.messageId !== groupmsgid)
@@ -833,30 +837,52 @@ const Chat = ({ socket }) => {
     const [interactwithuserlist, setInteractwithuserlist] = useState([]);
     
     const fetchinteractwithuserlist = async () => {
-    try {
-   
-            const encodeSelectedUserId = btoa(chatboardUserid)
-            const response = await axiosConfig.get(`/chat/getinteractwithuserlist/${encodeSelectedUserId}`)
-            if(response.status==200)
-            {
-                //const token = localStorage.getItem(token)
-                if(response.status !== 200)
-                {
-                    navigate('/login')
-                    //window.location.href = "/login";
-                }   
-                setInteractwithuserlist(response.data);
-            }
-            else
-            {
-                setInteractwithuserlist([])
+        try {
+            const encodeSelectedUserId = btoa(chatboardUserid);
+            const response = await axiosConfig.get(`/chat/getinteractwithuserlist/${encodeSelectedUserId}`);
+            setloadingChatnav(true)
+            if (response.status === 200) {
+                let newUserslisting = response.data;
+                for (const user of newUserslisting) { 
+                    if (user.userEmail != null && user.userPanel == 'AP') {
+                        try {
+                            const postData = { email: user.userEmail };
+                            const response2 = await axiosConfig.post('https://www.thehrbulb.com/team-member-panel/api/checkLoggedInorNot', postData);
+                            if ((response2.data.status === 'true' && response2.data.message == 'Loggedin') || user.userType == 'ADMIN') {
+                                user.loggedInsts = 'Yes';
+                            } else {
+                                user.loggedInsts = 'No';
+                            }
+                        } catch (error) {
+                            console.log(error.message);
+                        }
+                    }
+                    if (user.userEmail != null && user.userPanel == 'SP') {
+                        try {
+                            const postData = { email: user.userEmail };
+                            const response2 = await axiosConfig.post('https://elementk.in/spbackend/api/login-history/check-login-status', postData);
+                            if ((response2.data.status === 'true' && response2.data.message == 'Loggedin') || user.userType == 'ADMIN') {
+                                user.loggedInsts = 'Yes';
+                            } else {
+                                user.loggedInsts = 'No';
+                            }
+                        } catch (error) {
+                            console.log(error.message);
+                        }
+                    }
+                }
+                setInteractwithuserlist(newUserslisting);
+                setloadingChatnav(false)
+            } else {
+                setInteractwithuserlist([]);
+                setloadingChatnav(false)
             }
         } catch (error) {
-        console.log(error.message);
-        setInteractwithuserlist([])
-        }    
-        
-    }
+            console.log(error.message);
+            setInteractwithuserlist([]);
+            setloadingChatnav(false)
+        }
+    };
 
     const [interactwithuserlistfavourite, setInteractwithuserlistfavourite] = useState([]);
     
@@ -872,8 +898,37 @@ const Chat = ({ socket }) => {
                 {
                     navigate('/login')
                     //window.location.href = "/login";
-                }   
-                setInteractwithuserlistfavourite(response.data);
+                } 
+                let newUserslistingfavourite = response.data;
+                for (const user of newUserslistingfavourite) { 
+                    if (user.userEmail != null && user.userPanel == 'AP') {
+                        try {
+                            const postData = { email: user.userEmail };
+                            const response2 = await axiosConfig.post('https://www.thehrbulb.com/team-member-panel/api/checkLoggedInorNot', postData);
+                            if ((response2.data.status === 'true' && response2.data.message == 'Loggedin') || user.userType == 'ADMIN') {
+                                user.loggedInsts = 'Yes';
+                            } else {
+                                user.loggedInsts = 'No';
+                            }
+                        } catch (error) {
+                            console.log(error.message);
+                        }
+                    }
+                    if (user.userEmail != null && user.userPanel == 'SP') {
+                        try {
+                            const postData = { email: user.userEmail };
+                            const response2 = await axiosConfig.post('https://elementk.in/spbackend/api/login-history/check-login-status', postData);
+                            if ((response2.data.status === 'true' && response2.data.message == 'Loggedin') || user.userType == 'ADMIN') {
+                                user.loggedInsts = 'Yes';
+                            } else {
+                                user.loggedInsts = 'No';
+                            }
+                        } catch (error) {
+                            console.log(error.message);
+                        }
+                    }
+                }
+                setInteractwithuserlistfavourite(newUserslistingfavourite);
             }
             else
             {
@@ -1307,6 +1362,7 @@ const Chat = ({ socket }) => {
                                                             null
                                                         )
                                                         }
+                                                        <li><a className="dropdown-item" href="javascript:void(0);" onClick={handleUsersetting}><FontAwesomeIcon icon={faGear} /> Setting </a></li>
                                                         <li> <a className="dropdown-item" onClick={logout}><FontAwesomeIcon icon={faPowerOff} size="1x" /> LEAVE CHAT</a></li>
                                                     </ul>
                                                 </li>
@@ -1362,6 +1418,8 @@ const Chat = ({ socket }) => {
     </div>
 
     <div className='col-md-3 p-0'>
+                                
+                                
                                 {!searchbox && !searchboxGroup && <Chatnav 
                                 socket={socket} 
                                 sendDataToParent={handleDataFromChild} 
@@ -1388,6 +1446,7 @@ const Chat = ({ socket }) => {
                                 setSearchTerm={setSearchTerm}
                                 setsearchboxGroup={setsearchboxGroup}
                                 setSearchTermGroup={setSearchTermGroup}
+                                foundALLTagged={foundALLTagged}
                                 foundTaggedUser={foundTaggedUser}
                                 selectedFrmUrl={selectedFrmUrl}
                                 setselectedFrmUrl={setselectedFrmUrl}
@@ -1395,11 +1454,14 @@ const Chat = ({ socket }) => {
                                 setreloadGrouplist={setreloadGrouplist}
                                 interactwithuserlistfavourite={interactwithuserlistfavourite} 
                                 />}
+                                
+
                                 {(searchbox || searchboxGroup) && <Chatsearch socket={socket} searchTerm={searchTerm} receiverId={receiverId} onFocus={handleFocusMessage} searchTermGroup={searchTermGroup} groupId={groupId} onFocusGroup={handleFocusMessageGroup} />}
                                 </div>
-
+                                
                                 <div className="chatbox">
                                     <div className="modal-dialog-scrollable">
+                                        
                                         <div className="modal-content">
                                             {usersetting && <Setting socket={socket} loggedInuserdata={userData} />}
                                             {groupComponenet && <Chatgroupcreate socket={socket} loggedInuserdata={userData} handleCreatedGroupData={handleCreatedGroupData} />}
@@ -1577,12 +1639,13 @@ const Chat = ({ socket }) => {
                                             </div>
                                             </div>
                                             <div className="tab-pane" id="people" role="tabpanel" aria-labelledby="people-tab">
-                                                <Chatgrouppeople socket={socket} groupId={groupId} senderUserData={userData} groupdataFromChild={groupdataFromChild} groupMemberdataFromChild={groupMemberdataFromChild} />
+                                                <Chatgrouppeople socket={socket} groupId={groupId} senderUserData={userData} groupdataFromChild={groupdataFromChild} groupMemberdataFromChild={groupMemberdataFromChild} handleCreatedGroupData={handleCreatedGroupData} />
                                             </div>
                                             </div>}
                                         </div>
                                     </div>
                                 </div>
+                                                    
                             </div>
                         </div>
                     </div>

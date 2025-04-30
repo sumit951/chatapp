@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useRef } from 'react'
 import moment from 'moment'
-import axiosConfig,{ BASE_URL } from '../../axiosConfig';
+import axiosConfig,{ BASE_URL } from '../../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import InputEmoji from 'react-input-emoji'
 
@@ -50,17 +50,14 @@ const Replies = ({socket, parentMessageId}) => {
 
     useEffect(() => {
         socket.on('reloadpinStatusUpdated', (data) => { 
-            console.log(data);
+            /* console.log(data);
             
-            /* if(parentMessageId === data.messageId)
+            if(parentMessageId === data.messageId)
             {
                 console.log(data);
                 setUserPinnedData([...userPinnedData, data])
             } */
-           
-            if (data.messageId === parentMessageId) {
-                fetchpinnedmessagehistory(parentMessageId)
-            }
+            fetchpinnedmessagehistory(parentMessageId)
         })
     }, [socket,parentMessageId,userPinnedData]);
     

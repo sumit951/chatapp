@@ -2,6 +2,7 @@ import React, { useState, useEffect} from 'react'
 import axiosConfig,{ BASE_URL } from '../../axiosConfig';
 import InputEmoji from 'react-input-emoji'
 import Chatfileupload from './Chatfileupload';
+import { PulseLoader } from "react-spinners";
 
 const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChild, quotedMessageGroup, inputpostmsgRefgroup}) => {
 
@@ -11,6 +12,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
     const [image, setImage] = useState(null);
     const [quotedMessagePost, setQuotedMessagePost] = useState('');
     const [strPagequotedMessagePost, setStrPagequotedMessagePost] = useState('');
+    const [postMsgLoader, setpostMsgLoader] = useState(false);
     
     const transformMessage = (message) => {
         // Regular expression to match mentions in the format @name(userId:number)
@@ -62,6 +64,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
             //console.log(message);
             if(files.length>0)
             {
+                setpostMsgLoader(true)
                 const formData = new FormData();
                 formData.append("frmmessage", strquotedMessagePost+transformMessage(message));
                 
@@ -85,7 +88,14 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
                         {
                             originalnameFilename = `Screenshot_${file.filename}`;
                         }
-                        filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${originalnameFilename}</a></br>`
+                        if(file.mimetype =="image/png" || file.mimetype =="image/jpg" || file.mimetype =="image/jpeg" || file.mimetype =="image/gif" || file.mimetype =="image/PNG" || file.mimetype =="image/JPG" || file.mimetype =="image/JPEG" || file.mimetype =="image/GIF")
+                        {
+                            filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" rel="noopener noreferrer" target="_blank"><img src="${BASE_URL}/uploads/${file.filename}" style=" width: 150px" /> </br> ${originalnameFilename}</a></br>`
+                        }
+                        else
+                        {
+                            filesStr += `<a key={${BASE_URL}/uploads/${file.filename}} href="${BASE_URL}/uploads/${file.filename}" target="_blank" rel="noopener noreferrer">${originalnameFilename}</a></br>`
+                        }
                     });
                     const messagewithfiles = `${strquotedMessagePost} ${message}</br>${filesStr}`;
 
@@ -105,7 +115,7 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
                     setfilesblank(true)
                     setFiles([]);
                     setImage(null)
-                    
+                    setpostMsgLoader(false)
                 } catch (error) {
                     console.log(error.message);
                 }
@@ -132,14 +142,27 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
     //console.log(senderUserData);
     
     const userforTag = groupMemberdataFromChild.filter(item => item.userId !== senderUserData.id);
-    const mockUsers = 
+    /* const mockUsers = 
         userforTag.map((user,i) => (
         {
         id: user.userId,
         name: user.userName,
         shortName: user.usershortName
         }
-    ));
+    )); */
+
+    const mockUsers = [
+    {
+        id: "0",
+        name: "ALL",
+        image: ""
+    },
+    ...userforTag.map((user, i) => ({
+        id: user.userId,
+        name: user.userName,
+        shortName: user.usershortName
+    }))
+    ];
     
     
     /*const mockUsers = [
@@ -217,14 +240,35 @@ const Chatgrouppost = ({ socket, groupId,senderUserData, groupMemberdataFromChil
           }
         }
     };
+
+    const handleRemoveFile = () => {
+        setfilesblank(true)
+        setFiles([]);
+        setImage(null)
+    };
     
   return (
     <>
         <div className="send-box">
+            {postMsgLoader && <PulseLoader
+            color="#e87a36"
+            loading
+            size={10}
+            /> }
             <Chatfileupload onFileSelect={setFiles} parentselectedFiles={filesblank} setfilesblank={setfilesblank} />
             <div className="float-end scutkey"><code>Shift + Enter</code> or <code>Ctrl + Enter</code> keyboard shortcut to create a new line.</div>
             <div className="clearfix"></div>
-            {image && <img src={image} className="printscreen" alt="Pasted content" />}
+            {image && 
+            <div className="row file-preview">
+       
+                    <div className="file-preview-item">
+                    <div className="col-md-11 chip-info"><img src={image} className="printscreen" alt="Pasted content" /></div>
+                    <div>
+                        <button type="button" className="btn xcross" onClick={handleRemoveFile}><i class="fa fa-close ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+            }
             <div className="clearfix"></div>
             {quotedMessagePost && <span dangerouslySetInnerHTML={{__html: strPagequotedMessagePost}} />}
             {quotedMessagePost && <a className='badge badge-danger'><i class="fa fa-trash" onClick={handleRemoveQuote}></i></a> }

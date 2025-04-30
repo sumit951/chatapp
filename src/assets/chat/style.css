@@ -239,7 +239,7 @@ message-area
   width: -webkit-fill-available;
   overflow: hidden;
   height: 100%;
-  padding-bottom: 2px;
+  padding-bottom: 33px;
   /* border-left: 1px solid #ccc; */
 }
 
@@ -291,10 +291,17 @@ message-area
   outline: none;
 }
 .chat-search {
-  position: relative;
-  z-index: 10;
+  max-width: 200px;
+  height: 35px;
+  font-size: 14px;
+  padding: 5px 10px;
+  /* position: relative;
+  z-index: 10; */
 }
-
+.search-container {
+  position: relative;
+  z-index: 1;
+}
 .chat-area .form-control:focus {
   outline: 0;
   box-shadow: inherit;
@@ -304,13 +311,18 @@ a.add img {
   height: 36px;
 }
 
-.chat-area .nav-tabs {
+#myTab-left {
   /* border-bottom: 1px solid #dee2e6; */
   align-items: center;
-  /* justify-content: space-between; */
+  justify-content:flex-start; 
   flex-wrap: inherit;
   padding-bottom: 8px;
+  padding-top: 10px;
+  /* margin-left: -30px; */
+  border: none;
+  background-color: transparent !important;
 }
+
 
 .chat-area .nav-tabs .nav-item {
   /* width: 100%; */
@@ -331,6 +343,10 @@ a.add img {
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
 }
+#myTab-left{
+  justify-content: start;
+  margin-left: 20px;
+}
 
 .chat-area .nav-tabs .nav-item.show .nav-link,
 .chat-area .nav-tabs .nav-link.active {
@@ -341,13 +357,19 @@ a.add img {
   /* border-top-left-radius: 8px;
   border-top-right-radius: 8px; */
   font-size: 13px;
-  border-radius: 50px;
+  border-radius: 8%;
 }
+
+
 
 .chat-area .nav-tabs .nav-link:focus,
 .chat-area .nav-tabs .nav-link:hover {
   /* border-color: transparent transparent #000; */
   isolation: isolate;
+}
+
+#myTab .nav-link.active{
+  width: fit-content;
 }
 
 .chat-list h3 {
@@ -418,7 +440,7 @@ a.add img {
 
 .msg-head h3 {
   color: #222;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.5;
   margin-bottom: 0;
@@ -426,7 +448,7 @@ a.add img {
 
 .msg-head p {
   color: #343434;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.5;
   text-transform: capitalize;
@@ -461,11 +483,13 @@ a.add img {
 }
 
 .moreoption .dropdown-menu[data-bs-popper] {
-  top: 90%;
+  top: 95%;
   left: auto;
-  right: -27px;
+  right: -200px;
   margin-top: 0.125rem;
-  border-radius: 10px;
+  /* border-radius: 10px; */
+  text-align: center;
+   padding: 20px;
 }
 
 .msg-body ul {
@@ -506,14 +530,79 @@ a.add img {
 } */
 
 
+ /* pinned msg style*/
+ .senderName {
+  color: #333;
+  display: block;
+  margin-left: -108px;
+  font-weight: 600;
+ margin-bottom: 4px;
+ font-size: 12px;
+}
+.pinnedmessagesRow p span{
+  /* background-color: red; */
+  /* margin-left: -70px; */
+}
+/* .pinnedTime {
+  background: transparent !important;
+  display: inline-block;
+  padding: 0; 
+  margin: 0;
+  color: #666; 
+  font-size: 12px; 
+}
+.timeAndPin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  color: gray;
+  font-size: 12px;
+ 
+} */
+
+.pinIcon {
+  /* color: orange; */
+}
+
+/* Center align pinned messages */
+.message-container.pinned {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Ensure p and timestamp are centered */
+.message-container.pinned,
+.message-container.pinned .time {
+  text-align: left;
+}
+/* Apply hover only to non-pinned sender messages */
+.sender:not(.pinned) p:hover {
+ background:  #c0392b14;
+}
+
+/* Ensure pinned message has no hover background */
+.sender.pinned p:hover {
+  /* background: transparent; */
+}
+.msg-body ul li.sender.pinned:hover,
+.msg-body ul li.replay.pinned:hover {
+  background-color: transparent !important;
+  cursor: default;
+}
 .msg-body ul li.sender p {
   color: #09090a;
   font-size: 12px;
   line-height: 1.5;
   font-weight: 400;
   padding: 7px 10px;
-   background: #e8e8e8;  
-  display: inline-block;
+  /* background: #e8e8e8;   */
+  display: block;
+  width: fit-content;
+  text-align: left;
   border-bottom-left-radius: 10px;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
@@ -534,13 +623,13 @@ a.add img {
 /* Hover effect on entire li */
 .msg-body ul li.sender:hover,
 .msg-body ul li.repaly:hover {
-  background-color: #efefef;
+   background-color: #efefef;
   cursor: pointer;
 }
 
 .msg-body ul li.sender p,
 .msg-body ul li.repaly p {
-  background: transparent;
+  background: #c0392b14;
 }
 
 
@@ -663,7 +752,7 @@ li.sender .time {
 }
 
 .send-box {
-  padding: 15px;
+  /* padding: 15px; */
   border-top: 1px solid #ccc;
 }
 
@@ -1551,7 +1640,8 @@ fieldset[disabled] .btn-link.active {
 
 .file-upload {
   position: relative;
-  display: inline-block;
+  display: block;
+  left: 90%;
 }
 
 .attachment-icon {
@@ -1689,7 +1779,7 @@ a.d-flex.align-items-center.p-2:hover {
 }
 
 .sharparrow ul.dropdown-menu:before {
-  display: block;
+  display: none;
   clear: both;
   content: '';
   position: absolute;
@@ -1716,7 +1806,7 @@ a.d-flex.align-items-center.p-2:hover {
 
 .chatarea {
   overflow-y: auto;
-  height: 30rem !important;
+  height: 22rem !important;
 }
 
 .abt h6 {
@@ -1819,6 +1909,8 @@ li.replymsg.message-container button{
   font-size: 12px;
   color: #666;
 }
+
+
 
 li.replymsg.message-container button:hover{
   cursor: pointer;
@@ -1978,8 +2070,8 @@ li.senderRply .replyBoxtime {
 }
 
 .quotedText {
-  border-left: 4px solid #ccc000;
-  padding-left: 7px;
+  /* border-left: 4px solid #ccc000; */
+  /* padding-left: 7px; */
  }
 
 .badge{
@@ -1992,16 +2084,197 @@ li.senderRply .replyBoxtime {
   scrollbar-color: #bbbbbb #fff;
 }
 
-.pinnedmessagesbox{
+
+
+.pinnedmessagesbox {
+  width: 100%;
+  max-height: 500px;
+   overflow-y: auto;  
+  background: #fff;
+  border-radius: 6px;
+  padding: 0;
+  list-style: none;
   right: 0 !important;
-  width: 50% !important;
-  height: 350px !important;
-  overflow-y: scroll;
 }
 
-.pinnedmessagesRow{
-  border-bottom:1px solid #c0c0c0 ;
+.pinnedHeader {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 15px;
+  background-color: #f7f7f7;
 }
+
+.pin-heading {
+  font-size: 16px;
+  margin: 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.pinnedmessagesRow {
+  /* border-bottom: 1px solid #e0e0e0; */
+  padding: 10px 15px;
+}
+
+.pinnedmessagesRow .hoverWrapper {
+  width: 100%;
+}
+
+.pinnedmessagesRow:hover {
+  background: #efefef;
+}
+.pinnedMsgContainer {
+  display: flex;
+  flex-direction: column;
+  align-items:baseline;
+  /* margin-left: 20px; */
+  width: 100%;
+}
+
+.senderName {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #2a2a2a;
+}
+
+.timeAndPin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.pinIcon {
+  font-size: 12px;
+  color: #888;
+  display: none;
+}
+
+.pinnedText {
+  font-size: 14px;
+  margin: 0;
+  color: #333;
+}
+
+.quotedText {
+  /* background: #f0f0f0;
+  padding: 6px 10px;
+  border-left: 3px solid #999; */
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+
+/* .pinnedmessagesbox{
+  right: 0 !important;
+  max-width: 400px !important;
+  overflow-y: scroll;
+} */
+/* 
+.pinnedmessagesRow{
+     display: flex;
+    flex-direction: column;
+    align-items: center; 
+    text-align: left;
+    padding: 8px;
+    position: relative;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+.timeAndPin {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: #888;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+.pinnedmessagesRow p {
+  margin-top: 0;
+  margin-bottom: 0;
+} */
 .printscreen{
   width: 130px;
 }
+.absentUser
+{
+  color: #f00 ! important;
+}
+
+.cus-icon{
+  /* padding-left: 2px !important; */
+}
+/* .line{
+  border-bottom:1px solid #c0c0c0;
+  margin-top: 5px;
+} */
+
+/* 
+.pin-heading {
+  font-size: 18px;
+  font-weight: 600;
+  width: 100%;
+  margin: 0;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ccc;
+}
+
+.pinnedmessagesbox {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+.pinnedmessagesbox {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  background: #fff;
+  border-top: 1px solid #c0c0c0; 
+  border-bottom: 1px solid #c0c0c0; 
+  border-radius: 0;
+  box-shadow: none;
+} */
+/* .pinnedmessagesbox li:hover{
+  background:#efefef
+  } */
+
+
+  .card-header{
+    /* background: linear-gradient(to right, #3b82f6, #06b6d4); */
+    background: linear-gradient(to left, #d97b44, #e6ad58);
+    color: #f1f1f1 !important;
+    text-align: left;
+    padding: 20px;
+  }
+  .grd-tittle h2{
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .custom-tab-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .custom-tab-nav .nav-item {
+    flex: 1;
+    text-align: center;
+    padding: 5px 10px;
+  }
+  
+  .custom-tab-nav .start-tab {
+    text-align: left;
+  }
+  
+  .custom-tab-nav .center-tab {
+    text-align: center;
+  }
+  
+  .custom-tab-nav .end-tab {
+    text-align: right;
+    padding: 5px 10px;
+  }
