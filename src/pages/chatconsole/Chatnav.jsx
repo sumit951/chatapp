@@ -232,11 +232,19 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
     useEffect(() => {
         fetchGrouplist()
         fetchGrouplistfavourite()
+    }, [])
+
+    useEffect(() => {
         socket.on('messagegroupResponse', (data) => {
             fetchGrouplist()
             fetchGrouplistfavourite()
         })
         socket.on('reloadgrouplist', (data) => {
+            fetchGrouplist()
+            fetchGrouplistfavourite()
+        })
+        socket.on('reloadaddmemberrequest', (data) => {
+            console.log()
             fetchGrouplist()
             fetchGrouplistfavourite()
         })
