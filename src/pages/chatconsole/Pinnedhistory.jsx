@@ -69,7 +69,7 @@ const Replies = ({socket, parentMessageId}) => {
         
         {userPinnedData.length>0 && <div className="modal-body">
             
-            <ul>
+            <ul className='pinned-messsages-ul'>
             {userPinnedData.map((PinnedData) =>
             (PinnedData.pinId!=null) ? (
             PinnedData.username === localStorage.getItem('loggedInUserName') ? (

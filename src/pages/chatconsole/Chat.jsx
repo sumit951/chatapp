@@ -8,7 +8,6 @@ import makeAnimated from 'react-select/animated';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 
-
 import "../../assets/vendor/fontawesome/css/font-awesome.css";
 import "../../assets/chat/style.css";
 import "../../assets/chat/astyle.css";
@@ -17,7 +16,7 @@ import smallLogo from '../../assets/Raipd_logo.png';
 import loaderImage from "../../assets/loader.gif";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComment, faChartBar, faSignOutAlt, faUsers, faUser, faPowerOff, faGear, faMessage, faPhone, faChevronRight  } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faChartBar,faHome, faSignOutAlt, faUsers, faUser, faPowerOff, faGear, faMessage, faPhone, faChevronRight  } from '@fortawesome/free-solid-svg-icons';
 
 
 import userProfile from "../../assets/chat/user-profile.png";
@@ -1357,13 +1356,16 @@ const Chat = ({ socket }) => {
                                                     <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span> <FontAwesomeIcon icon={faUser} size="1x" /> Welcome | {userdataname} </span> <i className="fa fa-ellipsis-v" aria-hidden="true"></i></a>
                                                     <ul className="dropdown-menu lc">
                                                         {usertypeData != 'EMPLOYEE' ? (
-                                                            <li><Link to="/"></Link></li>
+                                                            <li><Link to="/">
+                                                                 <FontAwesomeIcon icon={faHome} size="1x" className='me-1' />
+                                                                 Home
+                                                                </Link></li>
                                                         ) : (
                                                             null
                                                         )
                                                         }
                                                         <li><a className="dropdown-item" href="javascript:void(0);" onClick={handleUsersetting}><FontAwesomeIcon icon={faGear} /> Setting </a></li>
-                                                        <li> <a className="dropdown-item" onClick={logout}><FontAwesomeIcon icon={faPowerOff} size="1x" /> LEAVE CHAT</a></li>
+                                                        <li> <a className="dropdown-item" onClick={logout}><FontAwesomeIcon icon={faPowerOff} size="1x" /> Leave Chat</a></li>
                                                     </ul>
                                                 </li>
                                             </ul>
@@ -1466,63 +1468,120 @@ const Chat = ({ socket }) => {
                                             {usersetting && <Setting socket={socket} loggedInuserdata={userData} />}
                                             {groupComponenet && <Chatgroupcreate socket={socket} loggedInuserdata={userData} handleCreatedGroupData={handleCreatedGroupData} />}
                                             {!groupComponenet && !usersetting && userboard && <div className="msg-head">
-                                                <div className="row">
+                                                <div className="row align-items-center">
+
                                                     <div className="col-7">
                                                         <div className="d-flex align-items-center">
                                                             <div className="chat-list">
                                                                 {dataFromChild.shortName != null ? (
                                                                     <div className="d-flex align-items-center pb-2">
-                                                                        {/* <div className="flex-shrink-0"> */}
-                                                                            {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
-                                                                            {/* <span class="shortName">{dataFromChild.shortName}</span> */}
-                                                                        {/* </div> */}
+                                                                        {/* User Name Section */}
                                                                         <div className="flex-grow-1 ms-2">
                                                                             <h3>{dataFromChild.fullName}</h3>
-                                                                            {/* <p>&nbsp;</p> */}
                                                                         </div>
-                                                                        <div className='ms-2'>
+                                                                        <div className="ms-2">
                                                                             {favouriteUser && <a className="setFavourite" onClick={(e) => handleFavourite('DELETE',receiverId,favouriteUser)}><i class="fa fa-star"></i></a> }
                                                                             {!favouriteUser && <a className="unsetFavourite" onClick={(e) => handleFavourite('POST',receiverId,favouriteUser)}><i class="fa fa-star-o"></i></a>}
                                                                         </div>
                                                                     </div>
-                                                                ) : null
-                                                                }
-                                                                
+                                                                ) : null}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className='col-3'>
-                                                        {!searchbox && <a href="#" role="button" title="Search Messages" onClick={handlesearchbox}> <i className="fa fa-search" aria-hidden="true"></i></a>}
-                                                        {searchbox && <div><input
-                                                            type="text"
-                                                            placeholder="Search messages..."
-                                                            value={searchTerm}
-                                                            onChange={handleInputChange}
-                                                            onKeyUp={handleInputChange}
-                                                            className='form-control'
-                                                        />
-                                                        <a href="#" role="button" title="Cancel Search" onClick={cancelsearchbox}> <i className="fa fa-close" aria-hidden="true"></i></a></div>
-                                                        }
+
+                                                    {/* Search and Pinned Messages Area */}
+                                                    <div className="col d-flex align-items-center justify-content-end gap-3 position-relative">
+
+                                                        {/* Search Icon */}
+                                                        {!searchbox && (
+                                                            <a href="#" role="button" title="Search Messages" onClick={handlesearchbox}>
+                                                                <i className="fa fa-search" aria-hidden="true"></i>
+                                                            </a>
+                                                        )}
+
+                                                        {/* Search Input Box */}
+                                                        {searchbox && (
+                                                            <div className="d-flex align-items-center gap-2 search-container">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Search messages..."
+                                                                    value={searchTerm}
+                                                                    onChange={handleInputChange}
+                                                                    onKeyUp={handleInputChange}
+                                                                    className="form-control chat-search"
+                                                                />
+                                                                <a href="#" role="button" title="Cancel Search" onClick={cancelsearchbox}>
+                                                                    <i className="fa fa-close" aria-hidden="true"></i>
+                                                                </a>
+                                                            </div>
+                                                        )}
+
+                                                        {/* More Options Menu */}
+                                                        <div>
+                                                            <ul className="moreoption float-end">
+                                                                <li className="navbar nav-item dropdown">
+                                                                    <a
+                                                                        className="nav-link dropdown-toggle"
+                                                                        href="#"
+                                                                        role="button"
+                                                                        data-bs-toggle="dropdown"
+                                                                        aria-expanded="false"
+                                                                        title="View Pinned Messages"
+                                                                        onClick={() => handlepinnedMessages(chatboardUserid, receiverId)}
+                                                                    >
+                                                                        <i className="fa fa-thumb-tack" aria-hidden="true"></i>
+                                                                    </a>
+
+                                                                    {/* Pinned Messages Dropdown */}
+                                                                    <ul className="dropdown-menu pinnedmessagesbox">
+                                                                        <li className="pinnedHeader">
+                                                                            <h3 className='pin-heading'>Pinned Messages</h3>
+                                                                        </li>
+                                                                        {pinnedMessagesData.map((chatdata) =>
+                                                                            chatdata.messageId != null ? (
+
+                                                                                <li className="pinnedmessagesRow" key={chatdata.messageId}>
+
+                                                                                    <div className='pinnedMsgContainer'>
+
+                                                                                        {/* Sender Name */}
+                                                                                        {chatdata.deleteSts === 'No' && (
+                                                                                            <span className="senderName">
+                                                                                                <strong>{chatdata.senderName}</strong>
+                                                                                            </span>
+                                                                                        )}
+
+                                                                                        {/* Time and Pin */}
+                                                                                        {chatdata.deleteSts === 'No' && (
+                                                                                            <div className="timeAndPin">
+                                                                                                <span className="pinnedTime">{moment(chatdata.timestamp).format('llll')}</span>
+                                                                                                {chatdata.editSts === 'Yes' && (
+                                                                                                    <span className="editedMsg"> | Edited</span>
+                                                                                                )}
+                                                                                                <i className="fa fa-thumb-tack pinIcon" aria-hidden="true"></i>
+                                                                                            </div>
+                                                                                        )}
+
+                                                                                        {/* Message Content */}
+                                                                                        <p>
+                                                                                            {chatdata.deleteSts === 'No' && (
+                                                                                                <span dangerouslySetInnerHTML={{ __html: chatdata.message }} />
+                                                                                            )}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </li>
+                                                                            ) : (
+                                                                                <b key={Math.random()}></b>
+                                                                            )
+                                                                        )}
+                                                                    </ul>
+
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+
                                                     </div>
-                                                    <div className='col-2'>
-                                                        <ul className="moreoption float-end">
-                                                            <li className="navbar nav-item dropdown">
-                                                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessages(chatboardUserid,receiverId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
-                                                                <ul className="dropdown-menu pinnedmessagesbox">
-                                                                {pinnedMessagesData.map((chatdata) =>
-                                                                 (chatdata.messageId!=null) ? (
-                                                                    <li className='pinnedmessagesRow'>
-                                                                        {(chatdata.deleteSts=='No') ? <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}   {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
-                                                                        <p>
-                                                                        {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : null  }
-                                                                        </p>
-                                                                    </li>
-                                                                    ) : ( <b></b> )
-                                                                )}
-                                                                </ul>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+
                                                 </div>
                                             </div>}
                                             
@@ -1544,79 +1603,144 @@ const Chat = ({ socket }) => {
                                             />}
                                             {!groupComponenet && !usersetting && userboard && receiverId && <Chatpost socket={socket} receiverId={receiverId} senderUserData={userData} quotedMessage={quotedMessage} inputpostmsgRef={inputpostmsgRef} />}
 
-                                            {!groupComponenet && !usersetting && groupboard && <div className="msg-head">
-                                                <div className="row">
-                                                <div className="col-7">
-                                                    <div className="d-flex align-items-center">
-                                                        <div className="chat-list">
-                                                        
-                                                        {groupdataFromChild.shortName != null ? (
-                                                            <div className="d-flex align-items-center">
-                                                                <div className="flex-shrink-0">
-                                                                    {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
-                                                                    {/* <span class="shortName">{groupdataFromChild.shortName}</span> */}
-                                                                </div>
-                                                                <div className="flex-grow-1 ms-2">
-                                                                    <h3>{groupdataFromChild.fullName} </h3>
-                                                                </div>
-                                                                <div className='ms-2'>
+                                            {!groupComponenet && !usersetting && groupboard && 
+                                           <div className="msg-head">
+                                           <div className="row">
+                                               <div className="col-7 ">
+                                                   <div className="d-flex align-items-center">
+                                                       <div className="chat-list">
+
+                                                           {groupdataFromChild.shortName != null ? (
+                                                               <div className="d-flex align-items-center">
+                                                                   <div className="flex-shrink-0">
+                                                                       {/*<img className="img-fluid chat_img" src={userProfile} alt="user img" />*/}
+                                                                       {/* <span class="shortName">{groupdataFromChild.shortName}</span> */}
+                                                                   </div>
+                                                                   <div className="flex-grow-1 ms-2">
+                                                                       <h3>{groupdataFromChild.fullName} </h3>
+                                                                   </div>
+                                                                   <div className='ms-2'>
                                                                     {favouriteGroup && <a className="setFavourite" onClick={(e) => handleFavouriteGroup('DELETE',groupId,favouriteGroup)}><i class="fa fa-star"></i></a> }
                                                                     {!favouriteGroup && <a className="unsetFavourite" onClick={(e) => handleFavouriteGroup('POST',groupId,favouriteGroup)}><i class="fa fa-star-o"></i></a>}
                                                                 </div>
-                                                            </div>
-                                                        ) : null
-                                                        }
-                                                        </div>
-                                                        </div>
-                                                        <ul className="nav nav-tabs border-0 p-0 mb-0" id="myTab" role="tablist">
-                                                            <li className="nav-item" role="presentation">
-                                                                <button className="nav-link active" id="chatboard-tab" data-bs-toggle="tab" data-bs-target="#chatboard" type="button" role="tab" aria-controls="chatboard" aria-selected="true">
-                                                                Messages
-                                                                </button>
-                                                            </li>
-                                                            <li className="nav-item" role="presentation">
-                                                                <button className="nav-link" id="people-tab" data-bs-toggle="tab" data-bs-target="#people" type="button" role="tab" aria-controls="people" aria-selected="false">People ({groupdataFromChild.totalMember})</button>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <div className='col-3'>
-                                                        {!searchboxGroup && <a href="#" role="button" title="Search Messages" onClick={handlesearchboxGroup}> <i className="fa fa-search" aria-hidden="true"></i></a>}
-                                                        {searchboxGroup && <div><input
-                                                            type="text"
-                                                            placeholder="Search messages..."
-                                                            value={searchTermGroup}
-                                                            onChange={handleInputChangeGroup}
-                                                            onKeyUp={handleInputChangeGroup}
-                                                            className='form-control'
-                                                        />
-                                                        <a href="#" role="button" title="Cancel Search" onClick={cancelsearchboxGroup}> <i className="fa fa-close" aria-hidden="true"></i></a></div>
-                                                        }
-                                                    </div>
-                                                    <div className="col-2 text-end">
-                                                        <button className="btn warnbtn me-3" onClick={e=>handleLeaveSpace(groupId,loggedInuserId,groupdataFromChild.totalMember)}> Leave Space </button>
+                                                               </div>
+                                                           ) : null
+                                                           }
+                                                       </div>
+                                                   </div>
+                                                   <ul className="nav nav-tabs border-0 p-0 mb-0" id="myTab" role="tablist">
+                                                       <li className="nav-item" role="presentation">
+                                                           <button className="nav-link active" id="chatboard-tab" data-bs-toggle="tab" data-bs-target="#chatboard" type="button" role="tab" aria-controls="chatboard" aria-selected="true">
+                                                               Messages
+                                                           </button>
+                                                       </li>
+                                                       <li className="nav-item" role="presentation">
+                                                           <button className="nav-link" id="people-tab" data-bs-toggle="tab" data-bs-target="#people" type="button" role="tab" aria-controls="people" aria-selected="false">People ({groupdataFromChild.totalMember})</button>
+                                                       </li>
+                                                   </ul>
+                                               </div>
+                                               <div className='col-5 d-flex align-items-center justify-content-end gap-3 '>
+                                                   <div >
+                                                       {!searchboxGroup && <a href="#" role="button" title="Search Messages" onClick={handlesearchboxGroup}> <i className="fa fa-search" aria-hidden="true"></i></a>}
+                                                       {searchboxGroup && 
+                                                       <div className='d-flex align-items-center gap-2'><input
+                                                           type="text"
+                                                           placeholder="Search messages..."
+                                                           value={searchTermGroup}
+                                                           onChange={handleInputChangeGroup}
+                                                           onKeyUp={handleInputChangeGroup}
+                                                           className='form-control chat-search'
+                                                       />
+                                                           <a href="#" role="button" title="Cancel Search" onClick={cancelsearchboxGroup}> <i className="fa fa-close" aria-hidden="true"></i></a></div>
+                                                       }
+                                                   </div>
+                                                  
+                                                   <div className="text-end">
+                                                       <ul className="moreoption float-end">
+                                                           <li className="navbar nav-item dropdown">
+                                                               <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessagesGroup(chatboardUserid, groupId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
+                                                               <ul className="dropdown-menu pinnedmessagesbox custom-scrollbar" data-bs-popper="static">
+                                                                   <li className="pinnedHeader">
+                                                                       <h3 className="pin-heading">Pinned Messages</h3>
+                                                                   </li>
 
-                                                        {(createdBy===loggedInuserId) && <button className="btn danbtn me-1 " onClick={e=>handleDeleteGroup(groupId)}> Delete Group </button>} 
+                                                                   {pinnedMessagesDataGroup.length > 0 ? (
+                                                                       pinnedMessagesDataGroup.map((chatdata) =>
+                                                                           chatdata.messageId != null ? (
+                                                                               <li className="pinnedmessagesRow" key={chatdata.messageId}>
+                                                                                   <div className='hoverWrapper'>
+                                                                                   <div className="pinnedMsgContainer">
+                                                                                       {chatdata.deleteSts === 'No' ? (
+                                                                                           <>
+                                                                                               <span className="senderName">{chatdata.senderName}</span>
+                                                                                                 {chatdata.deleteSts === 'No' && (
+                                                                                               <p className="pinnedText">
+                                                                                                   <span dangerouslySetInnerHTML={{ __html: chatdata.message }} />
+                                                                                               </p>
+                                                                                               )}
+                                                                                               {chatdata.quotedMsg && (
+                                                                                                   <div className="quotedText">
+                                                                                                       <p>
+                                                                                                           <b>{chatdata.quotedMsgSender}</b>
+                                                                                                       </p>
+                                                                                                       <p>{chatdata.quotedMsg}</p>
+                                                                                                   </div>
+                                                                                               )}
 
-                                                        <ul className="moreoption float-end">
-                                                            <li className="navbar nav-item dropdown">
-                                                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Pinned Messages" onClick={() => handlepinnedMessagesGroup(chatboardUserid,groupId)}> <i className="fa fa-thumb-tack" aria-hidden="true"></i></a>
-                                                                <ul className="dropdown-menu pinnedmessagesbox">
-                                                                {pinnedMessagesDataGroup.map((chatdata) =>
-                                                                (chatdata.messageId!=null) ? (
-                                                                    <li className='pinnedmessagesRow'>
-                                                                        {(chatdata.deleteSts=='No') ? <span className="time"><strong>{chatdata.senderName}</strong> : {moment(chatdata.timestamp).format('llll')}   {(chatdata.editSts=='Yes') && <span className='editedMsg'> | Edited</span>}</span> : null}
-                                                                        <p>
-                                                                        {(chatdata.deleteSts=='No') ? <span dangerouslySetInnerHTML={{__html: chatdata.message}} /> : null  }
-                                                                        </p>
-                                                                    </li>
-                                                                    ) : ( <b>Not tagged any message!</b> )
-                                                                )}
-                                                                </ul>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>}
+
+                                                                                               <div className="timeAndPin">
+                                                                                                   <span className="pinnedTime">
+                                                                                                       {moment(chatdata.timestamp).format('llll')}
+                                                                                                   </span>
+                                                                                                   {chatdata.editSts === 'Yes' && (
+                                                                                                       <span className="editedMsg"> | Edited</span>
+                                                                                                   )}
+                                                                                                   <i className="fa fa-thumb-tack pinIcon" aria-hidden="true"></i>
+                                                                                               </div>
+                                                                                           </>
+                                                                                       ) : null}
+                                                                                   </div>
+                                                                                   </div>
+                                                                               </li>
+                                                                           ) : null
+                                                                       )
+                                                                   ) : (
+                                                                       <li className="pinnedmessagesRow">
+                                                                           <div className="pinnedMsgContainer">
+                                                                               <p className="pinnedText">No pinned messages found!</p>
+                                                                           </div>
+                                                                       </li>
+                                                                   )}
+                                                               </ul>
+                                                           </li>
+                                                       </ul>
+                                                   </div>
+                                                   </div>
+
+                                           </div>
+
+
+                                           <div className='row mt-2 '>
+                                               <div className='col-12 me-0 d-flex justify-content-end'>
+                                                   <button className="btn warnbtn  me-2" onClick={e => handleLeaveSpace(groupId, loggedInuserId, groupdataFromChild.totalMember)}> Leave
+
+                                                       <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="power-off" class="svg-inline--fa cus-icon fa-power-off fa-1x " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 224c0 17.7 14.3 32 32 32s32-14.3 32-32l0-224zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.5 81 63.5 135.4c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.4 24.7-103.1 63.5-135.4z"></path></svg>
+
+                                                   </button>
+
+
+                                                   {(createdBy === loggedInuserId) && <button className="btn danbtn cus-icon me-1 " onClick={e => handleDeleteGroup(groupId)}> Delete
+
+                                                       <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="trash" class="svg-inline--fa cus-icon fa-trash fa-1x" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                                           <path fill="currentColor" d="M160 400c0 13.3 10.7 24 24 24s24-10.7 24-24V192c0-13.3-10.7-24-24-24s-24 10.7-24 24v208zm80 0c0 13.3 10.7 24 24 24s24-10.7 24-24V192c0-13.3-10.7-24-24-24s-24 10.7-24 24v208zM432 80h-82.4l-34-56.7C309.8 10.7 295.2 0 279.3 0H168.7c-15.9 0-30.5 10.7-36.2 23.3L98.4 80H16C7.2 80 0 87.2 0 96v32c0 8.8 7.2 16 16 16h16l21.2 339c1.6 25.4 22.6 45 48 45h242.6c25.4 0 46.4-19.6 48-45L416 144h16c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16zM171.8 48h104.4l24 32H147.8l24-32z"></path>
+                                                       </svg>
+
+                                                   </button>}
+
+                                               </div>
+                                           </div>
+                                       </div>
+                                            }
                                             {!groupComponenet && !usersetting && groupboard && groupId && <div className="tab-content">
                                             <div className="tab-pane show active" id="chatboard" role="tabpanel" aria-labelledby="chatboard-tab">
                                             <div className="modal-content">                        

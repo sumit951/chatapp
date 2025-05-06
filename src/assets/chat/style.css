@@ -239,7 +239,7 @@ message-area
   width: -webkit-fill-available;
   overflow: hidden;
   height: 100%;
-  padding-bottom: 33px;
+  padding-bottom: 37px;
   /* border-left: 1px solid #ccc; */
 }
 
@@ -485,13 +485,23 @@ a.add img {
 .moreoption .dropdown-menu[data-bs-popper] {
   top: 95%;
   left: auto;
-  right: -200px;
+  right: -73px;
   margin-top: 0.125rem;
   /* border-radius: 10px; */
-  text-align: center;
-   padding: 20px;
+  text-align: left;
+   padding: 5px;
+   min-width: unset;
+   width: 150px;
 }
 
+.chat-nav .dropdown-menu[data-bs-popper],
+.pinnedmessagesbox[data-bs-popper] {
+  top: 95%;
+  right: 0;
+  width: 300px;
+  padding: 20px;
+  text-align: left;
+}
 .msg-body ul {
   overflow: hidden;
 }
@@ -2087,7 +2097,7 @@ li.senderRply .replyBoxtime {
 
 
 .pinnedmessagesbox {
-  width: 100%;
+  width: 250px !important;
   max-height: 500px;
    overflow-y: auto;  
   background: #fff;
@@ -2096,6 +2106,33 @@ li.senderRply .replyBoxtime {
   list-style: none;
   right: 0 !important;
 }
+/* Apply styles for Firefox */
+.pinnedmessagesbox {
+  scrollbar-width: 2px;
+
+}
+
+.pinnedmessagesbox::-webkit-scrollbar {
+  width: 2px;
+}
+
+.pinnedmessagesbox::-webkit-scrollbar-track {
+  background: #ace5ff;
+}
+/* Apply styles for Firefox */
+.custom-scrollbar {
+  scrollbar-width: 2px;
+
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #257180;
+}
+
 
 .pinnedHeader {
   border-bottom: 1px solid #ccc;
@@ -2278,3 +2315,23 @@ li.senderRply .replyBoxtime {
     text-align: right;
     padding: 5px 10px;
   }
+
+  a{
+    font-size: 12px !important;
+  }
+  .react-input-emoji--mention--list {
+    background-color: #fafafa;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+    position: absolute;
+    bottom: 0;
+    width: 50% !important;
+    left: 0;
+}
+

@@ -1106,9 +1106,9 @@ a:focus {
   text-decoration: underline;
 }
 a:focus {
-  outline: thin dotted;
+  /* outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
+  outline-offset: -2px; */
 }
 figure {
   margin: 0;
@@ -3040,9 +3040,9 @@ select[multiple].input-lg {
 .btn.focus,
 .btn:active.focus,
 .btn.active.focus {
-  outline: thin dotted;
-  outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
+  /* outline: thin dotted; */
+  /* outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px; */
 }
 .btn:hover,
 .btn:focus,
@@ -3576,7 +3576,7 @@ tbody.collapse.in {
   border-radius: 6px; 
 }
 .dropdown-menu > li > a:hover {
-  transform: scale(1.02);
+  /* transform: scale(1.02); */
 }
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
@@ -4864,7 +4864,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 }
 .label {
   display: inline;
-  padding: .2em .6em .3em;
+  /* padding: .2em .6em .3em; */
   font-size: 75%;
   font-weight: bold;
   line-height: 1;

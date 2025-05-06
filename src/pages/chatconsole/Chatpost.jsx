@@ -228,7 +228,6 @@ const Chatpost = ({ socket,receiverId,senderUserData, quotedMessage,inputpostmsg
             border: '1px solid #ccc',
             padding: '10px',
             width: '100%',
-            overflow: 'auto',
             position: 'relative',
             }}
             onPaste={handlePaste}

@@ -5,14 +5,13 @@ import makeAnimated from 'react-select/animated';
 import axiosConfig,{ DefaultGroupMember } from '../../axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
-import loaderImage from "../../assets/loader.gif";
 
 const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
     const token = localStorage.getItem('chat-token-info')
     const navigate = useNavigate();
     const [alluserdata, setAllUserdata] = useState([]);
     const [searchParam, setSearchuser] = useState();
-    const [loading, setLoading] = useState(false);  // For tracking loading state
+
     //console.log(searchParam);
     
     const fetchAllUser = async () => {
@@ -53,6 +52,11 @@ const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
     const [showLimit, setShowLimit] = useState(false);
     const HandelChange = (obj) => {
         setSelOption(obj)    
+
+
+        const handlchange =(e)=>{
+            setSelectedOptions(e.target.value);
+        }
         
         //console.log(selectedOptions.length);
         if(selectedOptions.length>=parseInt(DefaultGroupMember-1))
@@ -106,15 +110,13 @@ const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
         
         else
         {
-            setLoading(true)
-            //return false;
-            //console.log(values);
-            const fullData = {
-                    ...values,
-                    ...selOption,
-                    selectedOptionsfrReq
+        //return false;
+        //console.log(values);
+        const fullData = {
+                ...values,
+                ...selOption,
+                selectedOptionsfrReq
             };
-
         try {
             const response = await axiosConfig.post('/chat/creategroup', fullData)
             if(response.status==200 && response.data.status=='success')
@@ -200,23 +202,25 @@ const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
     return (
         <>
         <div className="modal-body overflown">
-                <div className="msg-body">
+         <div className="msg-body">
             <div className="content animate-panel">
             <div className="row d-flex justify-content-center">
             <div className="col-lg-10 mt-5">
                 <div className="hpanel">
-                    <div className="panel-heading text-center">
+                    <div className="panel-heading d-flex flex-column align-items-center text-center me-5">
                         <h3>Create Group</h3>
+                        <p className="mb-0">Start a group conversation with others.</p>
                     </div>
                     <div className="panel-body">
-                    <form onSubmit={handleSubmit} className="form-horizontal p-3">
-                    <div className="form-group"><label className="col-sm-3 control-label">Group Name</label>
-                        <div className="col-sm-9"><input type="text" className="form-control" name="groupName" onChange={handleChanges} placeholder="Enter Group Name" /></div>
+                    <form onSubmit={handleSubmit} className="form-horizontal ">
+                    <div className="form-group row"><label className="col-sm-3 control-label"></label>
+                        <div className="col-sm-8 col-md-5"><input type="text" className="form-control" name="groupName" onChange={handleChanges} placeholder="Enter Group Name" /></div>
                     </div>
-                    <div className="form-group mb-0">
-                        <label className="col-sm-3 control-label">Group Users</label>
-                        <div className="col-sm-9">
+                    <div className="form-group row  mb-0">
+                        <label className="col-sm-3 control-label"></label>
+                        <div className="col-sm-8 col-md-5">
                             <Select 
+
                             isClearable
                             isSearchable
                             onChange={(option) => HandelChange({selectUsers:option},setSelectedOptions(option))}
@@ -235,14 +239,16 @@ const Chatgroupcreate = ({socket,loggedInuserdata,handleCreatedGroupData}) => {
                         </div>
                     </div>
                     
-                    <div className="form-group mb-1 mt-2">
-                        <div className="col-sm-12 d-flex justify-content-end mt-1">
-                            {loading ? (
-                                <img src={loaderImage} class="loaderimage" />
-                            ) : (
-                            <>
-                            <button className="btn succbtn" type="submit">Save changes <i className="fa fa-chevron-right"></i></button>
-                            </>)}
+                    <div className="form-group row mt-3">
+                        <div className="col-sm-12 d-flex justify-content-center mt-5  position-relative">
+                            {selectedOptions && (
+                            <button className="btn succbtn position-relative overflow-hidden me-5" type="submit" style={{display:selectedOptions?"block":"none"}} > 
+                            <span className="transition"></span>
+                            <span className="gradient"></span>
+                            <span className="label">Save changes</span>
+                            <i className="fa fa-chevron-right"></i></button>
+                            )}
+                            <span class="ripple"></span>
                         </div>
                     </div>
                     </form>

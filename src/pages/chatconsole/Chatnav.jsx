@@ -375,7 +375,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                         <div className="msg-search">
                             {/*<input type="text" className="form-control" id="inlineFormInputGroup" placeholder="Search" aria-label="search" />*/}
                         </div>
-                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                        <ul className="nav nav-tabs" id="myTab-left" role="tablist">
                             <li className="nav-item" role="presentation">
                                 <button className="nav-link active" id="Alldata-tab" data-bs-toggle="tab" data-bs-target="#Alldata" type="button" role="tab" aria-controls="Alldata" aria-selected="true"> All</button>
                             </li>
@@ -477,82 +477,6 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                                 );
                                             }
                                             })}
-                                        {/*newUserslistingfavourite.map((user,i) =>
-                                        {
-                                            const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
-                                            let dndStatus = false;
-                                            let busyStatus = false;
-                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
-                                            {
-                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                                dndStatus = true;
-                                            }
-                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
-                                            {
-                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                                busyStatus = true;
-                                            }
-                                            return (
-                                                <a key={`A-tabfav${user.userId}`} 
-                                                ref={(el) => (userRefs.current[`A-tabfav${user.userId}`] = el)}
-                                                onClick={(e) => handleSelectUser(user.userId,
-                                                    setSelectedUser({
-                                                    shortName:user.usershortName,
-                                                    fullName:user.userName,
-                                                    selectedUserId:user.userId,
-                                                    userboard:true,
-                                                    favouriteStatus:true
-                                                    }),
-                                                    setSelectedGroup({}),
-                                                    setActive(user.userName)
-                                                )} 
-                                                    className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
-                                                    
-                                                    title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
-                                                    >
-                                                    <div className="flex-shrink-0">
-                                                       
-                                                        <span className="shortName">{user.usershortName}</span>
-                                                        {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
-                                                        {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
-                                                        {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
-                                                    </div>
-                                                    <div className="flex-grow-1 ms-2">
-                                                        <h3>{user.userName} {user.latestTimestampUpdate}</h3>
-                                                    </div>
-                                                    {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                                </a>
-                                            )
-                                        }
-                                        )}
-                                        {grouplistdatafavourite.map((group,i) => (
-                                        <a key={`AG-tabfav${group.groupId}`} 
-                                        ref={(el) => (userRefs.current[`AG-tabfav${group.groupId}`] = el)}
-                                            onClick={(e) => handleSelectGroup(group.groupId,
-                                                setSelectedGroup({
-                                                shortName:group.groupshortName,
-                                                fullName:group.groupName,
-                                                selectedUserId:group.groupId,
-                                                totalMember:group.totalMember,
-                                                allowedMember:group.allowedMember,
-                                                createdBy:group.createdBy,
-                                                groupboard:true,
-                                                favouriteStatusGroup:true
-                                                }),
-                                                setSelectedUser({}),
-                                                setActive(group.groupName)
-                                            )} 
-                                                className={`d-flex align-items-center p-2 ${(active===group.groupName) ? "selecteduserbg" : ""}`}>
-                                                <div className="flex-shrink-0">
-                                                    <span className="shortName">{group.groupshortName}</span>
-                                                </div>
-                                                <div className="flex-grow-1 ms-2">
-                                                    <h3>{group.groupName} {group.latestTimestampUpdate}</h3>
-                                                </div>
-                                                {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                                {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
-                                            </a>
-                                        ))*/}
                                         </div>
                                     </div>
                                     <div className='clearfix'></div>
@@ -633,82 +557,6 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                             );
                                         }
                                         })}
-                                        {/*newUserslisting.map((user,i) =>
-                                        {
-                                            const expiryTime = new Date(user.chatBusyDndExpiredon).getTime() + 60000; // expiry time in milliseconds (60 seconds)
-                                            let dndStatus = false;
-                                            let busyStatus = false;
-                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='DND')
-                                            {
-                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                                dndStatus = true;
-                                            }
-                                            if ((currentTime2 <= expiryTime) && user.chatStatus=='Busy')
-                                            {
-                                                //console.log(user.chatStatus+'timeexpired'+user.userName);
-                                                busyStatus = true;
-                                            }
-                                            return (
-                                                <a key={`A-tab${user.userId}`} 
-                                                ref={(el) => (userRefs.current[`A-tab${user.userId}`] = el)}
-                                                onClick={(e) => handleSelectUser(user.userId,
-                                                    setSelectedUser({
-                                                    shortName:user.usershortName,
-                                                    fullName:user.userName,
-                                                    selectedUserId:user.userId,
-                                                    userboard:true,
-                                                    favouriteStatus:false
-                                                    }),
-                                                    setSelectedGroup({}),
-                                                    setActive(user.userName)
-                                                )} 
-                                                    className={`d-flex align-items-center p-2 ${(activefrParent===user.userName) ? "selecteduseronetoOne" : ""} ${(active===user.userName) ? "selecteduserbg" : ""}`}
-                                                    
-                                                    title={`${(user.officeName!==null) ? user.officeName +' '+ user.cityName : ""}`}
-                                                    >
-                                                    <div className="flex-shrink-0">
-                                                        
-                                                        <span className="shortName">{user.usershortName}</span>
-                                                        {!dndStatus && !busyStatus && user.socketID && <span className="active" title='Active'></span>}
-                                                        {!busyStatus && dndStatus && <span className="dnd" title='DND (Do not Distrub)'></span>}
-                                                        {!dndStatus && busyStatus && <span className="busy" title='Busy'></span>}
-                                                    </div>
-                                                    <div className="flex-grow-1 ms-2">
-                                                        <h3>{user.userName}</h3>
-                                                    </div>
-                                                    {((isNewmsgSender.some(item => item === user.userId)) && (isNewmsgReceiver==chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                                </a>
-                                            )
-                                        }
-                                        )}
-                                        {grouplistdata.map((group,i) => (
-                                        <a key={`AG-tab${group.groupId}`} 
-                                        ref={(el) => (userRefs.current[`AG-tab${group.groupId}`] = el)}
-                                            onClick={(e) => handleSelectGroup(group.groupId,
-                                                setSelectedGroup({
-                                                shortName:group.groupshortName,
-                                                fullName:group.groupName,
-                                                selectedUserId:group.groupId,
-                                                totalMember:group.totalMember,
-                                                allowedMember:group.allowedMember,
-                                                createdBy:group.createdBy,
-                                                groupboard:true,
-                                                favouriteStatusGroup:false
-                                                }),
-                                                setSelectedUser({}),
-                                                setActive(group.groupName)
-                                            )} 
-                                                className={`d-flex align-items-center p-2 ${(active===group.groupName) ? "selecteduserbg" : ""}`}>
-                                                <div className="flex-shrink-0">
-                                                    <span className="shortName">{group.groupshortName}</span>
-                                                </div>
-                                                <div className="flex-grow-1 ms-2">
-                                                    <h3>{group.groupName}</h3>
-                                                </div>
-                                                {!foundTaggedUser && ((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && <span className='showmsgnotif'><i class="fa fa-solid fa-circle"></i></span>}
-                                                {((isNewmsgGroupSender.some(item => item === group.groupId)) && (isNewmsgGroup!=chatboardUserid)) && foundTaggedUser && <span className='showmsgnotif'>@</span>}
-                                            </a>
-                                        ))*/}
                                         </div>   
                                     </div>}
                                 </div>
@@ -724,7 +572,7 @@ const Chatnav = ({ socket,sendDataToParent,interactwithuserlist,SetGroupcomponen
                                     size={10}
                                     /> }
 
-                                    {!leftNavLoader && sortedListFavourite.length>0 && <> <a data-bs-toggle="collapse" onClick={togglefavouritetab2} data-bs-target="#fav-tab-2" aria-expanded="false" aria-controls="collapseExample">
+                                    {!leftNavLoader && newUserslistingfavourite.length>0 && <> <a data-bs-toggle="collapse" onClick={togglefavouritetab2} data-bs-target="#fav-tab-2" aria-expanded="false" aria-controls="collapseExample">
                                         <i class={`fa fa-solid fa-chevron-${favouritetab2 ? 'down' : 'right'}`}></i> Favourites
                                     </a>
                                     <div class="collapse show" id="fav-tab-2">
